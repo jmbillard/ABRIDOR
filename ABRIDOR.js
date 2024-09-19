@@ -1,5 +1,5 @@
 var scriptName = 'ABRIDOR';
-var scriptVersion = '0.1b';
+var scriptVersion = '0.2b';
 
 var lClick = '◖  →  ';
 var rClick = ' ◗  →  ';
@@ -30,6 +30,15 @@ function readFileContent(file) {
 	file.close();
 
 	return fileContent.toString();
+}
+
+function sortPages(pagesArray) {
+	return pagesArray.sort(function (a, b) {
+		if (parseInt(a.name.match(/\d+/g)) < parseInt(b.name.match(/\d+/g))) return -1;
+		if (parseInt(a.name.match(/\d+/g)) > parseInt(b.name.match(/\d+/g))) return 1;
+
+		return 0;
+	});
 }
 
 // Converte um array RGB normalizado [0-1] para uma string hexadecimal (ex: '#FF0000').
@@ -154,6 +163,13 @@ function drawThemeButton(button, hover) {
 	};
 }
 
+// Altera a cor de um texto estático.
+function setFgColor(sTxt, hex) {
+	var color = hexToRGB(hex); // Converte a cor hexadecimal em RGB.
+	var pType = sTxt.graphics.PenType.SOLID_COLOR; // Define o tipo da caneta como cor sólida.
+	sTxt.graphics.foregroundColor = sTxt.graphics.newPen(pType, color, 1); // Cria uma nova caneta com a cor e a aplica ao texto.
+}
+
 function drawRoundedRect(g, brush, width, height, cornerRadius) {
 	g.newPath();
 	g.ellipsePath(0, 0, cornerRadius, cornerRadius);
@@ -232,130 +248,15 @@ function openURL(url) {
 	}
 }
 
-function buildComp(structureObj) {
-
-	var imagesArray = app.project.importFileWithDialog();
-
-	if (imagesArray == null) {
-		imagesArray = [];
-
-		alert('a comp \'LAYOUT ABERTURA\' será criada sem imagens de referência');
-	}
-
-	var pageCount = structureObj.extended_metadata.page_count;
-	var textArray = [];
-
-	var compDuration = 60; // em segundos
-	var compW = 1920;
-	var compH = 1080;
-	var compAspect = 1;
-	var compFPS = 29.97;
-	var comp = app.project.items.addComp('LAYOUT ABERTURA', compW, compH, compAspect, compDuration, compFPS);
-	var f = 1;
-
-	var layerDuration = compDuration / pageCount;
-	var layerInPoint;
-	var layerOutPoint;
-
-	for (var i = 0; i < structureObj.elements.length; i++) {
-
-		var element = structureObj.elements[i];
-
-		if (!element.Text) continue;
-		if (element.Path.match(/Figure/i)) continue;
-
-		// alert (element.Text);
-		var page = element.Page;
-		var bounds = element.Bounds;
-		var pageW = structureObj.pages[page].width;
-		var pageH = structureObj.pages[page].height;
-		var fW = compW / pageW;
-		var fH = compH / pageH;
-		f = Math.min(fW, fH);
-
-		var currentText = comp.layers.addBoxText([(bounds[2] - bounds[0]) * fW, (bounds[3] - bounds[1]) * fH]);
-
-		var textProp = currentText.property("ADBE Text Properties").property("ADBE Text Document");
-		var textDoc = textProp.value;
-		textDoc.resetCharStyle();
-
-		var txtProp = {
-			text: element.Text,
-			fontSize: element.TextSize * f,
-			justification: 7413,
-			tracking: 0
-		};
-		if (element.attributes.TextAlign == 'Center') txtProp.justification = 7415;
-		if (element.attributes.TextAlign == 'End') txtProp.justification = 7414;
-		if (element.attributes.LineHeight != undefined) txtProp.leading = element.attributes.LineHeight * fH;
-
-		for (var p in txtProp) {
-
-			textDoc[p] = txtProp[p];
-			textProp.setValue(textDoc);
-		}
-
-		try {
-			textDoc.font = element.Font.name.replace(/^.+\+/, '');
-			textProp.setValue(textDoc);
-		} catch (err) {
-			textDoc.font = 'ArialMT';
-			textProp.setValue(textDoc);
-			textDoc.fontSize *= 0.8;
-			textProp.setValue(textDoc);
-		}
-
-		// transformations...
-		var transform = currentText.property('ADBE Transform Group');
-
-		var posX = (bounds[0] + (bounds[2] - bounds[0]) / 2) * fW;
-		var posY = (pageH - bounds[1] - (bounds[3] - bounds[1]) / 2) * fH;
-		transform.property('ADBE Position').setValue([posX, posY, 0]);
-
-		currentText.moveToEnd();
-
-		layerInPoint = page * layerDuration;
-		layerOutPoint = layerInPoint + layerDuration;
-		currentText.inPoint = layerInPoint;
-		currentText.outPoint = layerOutPoint;
-		textArray.push(currentText);
-	}
-
-	var refFolder = app.project.items.addFolder('ABERTURA REF'); // Cria uma pasta no projeto.
-
-	for (var l = 0; l < imagesArray.length; l++) {
-
-		imagesArray[l].parentFolder = refFolder; // Move o novo logo para a pasta criada anteriormente.
-		var refImage = comp.layers.add(imagesArray[l]);
-		refImage.moveToEnd();
-		f = compW / refImage.width * 100;
-
-		var transform = refImage.property('ADBE Transform Group');
-		transform.property('ADBE Scale').setValue([f, f, f]);
-		layerInPoint = l * layerDuration;
-		layerOutPoint = layerInPoint + layerDuration;
-
-		refImage.inPoint = layerInPoint;
-		refImage.outPoint = layerOutPoint;
-		refImage.guideLayer = true;
-		refImage.locked = true;
-	}
-	comp.openInViewer();
-}
-
 function ABRIDOR_UI() {
 
 	// window...
 	var ABRIDOR_w = new Window('palette', scriptName + ' - ' + scriptVersion, undefined);
-	ABRIDOR_w.orientation = 'column';
-	ABRIDOR_w.alignChildren = ['center', 'top'];
 	ABRIDOR_w.spacing = 12;
 	ABRIDOR_w.margins = 16;
 
 	var mainGrp = ABRIDOR_w.add('group');
-	mainGrp.orientation = 'row';
-	mainGrp.alignChildren = ['left', 'top'];
-	mainGrp.spacing = 12;
+	// mainGrp.spacing = 60;
 
 	var siteBtn = new themeButton(mainGrp, {
 		width: 120,
@@ -363,9 +264,6 @@ function ABRIDOR_UI() {
 		labelTxt: 'abrir site',
 		tips: [lClick + 'abrir o site para extrair a estrutura do pdf']
 	});
-
-	var newDiv = new themeDivider(mainGrp);
-	newDiv.alignment = ['center', 'fill'];
 
 	var structureBtn = new themeButton(mainGrp, {
 		width: 120,
@@ -376,8 +274,158 @@ function ABRIDOR_UI() {
 		tips: [lClick + 'cria uma comp \'LAYOUT ABERTURA\' com a estrutura do pdf salva em um arquivo .json']
 	});
 
+	var progressGrp = ABRIDOR_w.add('group');
+	progressGrp.orientation = 'column';
+	mainGrp.spacing = 4;
+
+	var progressBar = progressGrp.add(
+		'progressbar',
+		[0, 0, 240, 1],
+		0
+	);
+
+	var progressLab = progressGrp.add(
+		'statictext',
+		[0, 0, 240, 18],
+		'',
+		{ truncate: 'end' }
+	);
+	setFgColor(progressLab, normalColor1);
+
 	setBgColor(ABRIDOR_w, bgColor1); // Cor de fundo da janela
 
+	function buildComp(structureObj) {
+
+		var imagesArray = app.project.importFileWithDialog();
+	
+		if (imagesArray == null) {
+			imagesArray = [];
+	
+			alert('a comp \'LAYOUT ABERTURA\' será criada sem imagens de referência');
+		}
+	
+		imagesArray = sortPages(imagesArray);
+	
+		var pageCount = structureObj.extended_metadata.page_count;
+		var textArray = [];
+	
+		progressBar.maxvalue = pageCount;
+		progressBar.value = 0;
+		ABRIDOR_w.update();
+	
+		var compDuration = 60; // em segundos
+		var compW = 1920;
+		var compH = 1080;
+		var compAspect = 1;
+		var compFPS = 29.97;
+		var comp = app.project.items.addComp('LAYOUT ABERTURA', compW, compH, compAspect, compDuration, compFPS);
+		var f = 1;
+	
+		var layerDuration = compDuration / pageCount;
+		var layerInPoint;
+		var layerOutPoint;
+	
+		comp.openInViewer();
+
+		for (var i = 0; i < structureObj.elements.length; i++) {
+	
+			var element = structureObj.elements[i];
+	
+			if (!element.Text) continue;
+			if (element.Path.match(/Figure/i)) continue;
+	
+			var page = element.Page;
+			var bounds = element.Bounds;
+			var pageW = structureObj.pages[page].width;
+			var pageH = structureObj.pages[page].height;
+			var fW = compW / pageW;
+			var fH = compH / pageH;
+			f = Math.min(fW, fH);
+	
+			var currentText = comp.layers.addBoxText([(bounds[2] - bounds[0]) * fW, ((bounds[3] - bounds[1]) * fH) + 5]);
+	
+			var textProp = currentText.property("ADBE Text Properties").property("ADBE Text Document");
+			var textDoc = textProp.value;
+			textDoc.resetCharStyle();
+	
+			var txtProp = {
+				text: element.Text,
+				fontSize: element.TextSize * f,
+				justification: 7413,
+				tracking: 0
+			};
+			if (element.attributes.TextAlign == 'Center') txtProp.justification = 7415;
+			if (element.attributes.TextAlign == 'End') txtProp.justification = 7414;
+			if (element.attributes.LineHeight != undefined) txtProp.leading = element.attributes.LineHeight * fH;
+	
+			for (var p in txtProp) {
+	
+				textDoc[p] = txtProp[p];
+				textProp.setValue(textDoc);
+			}
+	
+			try {
+				textDoc.font = element.Font.name.replace(/^.+\+/, '');
+				textProp.setValue(textDoc);
+			} catch (err) {
+				textDoc.font = 'ArialMT';
+				textProp.setValue(textDoc);
+				textDoc.fontSize *= 0.8;
+				textProp.setValue(textDoc);
+			}
+	
+			// transformations...
+			var transform = currentText.property('ADBE Transform Group');
+	
+			var posX = (bounds[0] + (bounds[2] - bounds[0]) / 2) * fW;
+			var posY = (pageH - bounds[1] - (bounds[3] - bounds[1]) / 2) * fH;
+			transform.property('ADBE Position').setValue([posX, posY, 0]);
+	
+			currentText.moveToEnd();
+	
+			layerInPoint = page * layerDuration;
+			layerOutPoint = layerInPoint + layerDuration;
+			currentText.inPoint = layerInPoint;
+			currentText.outPoint = layerOutPoint;
+			textArray.push(currentText);
+	
+			progressBar.value ++;
+			progressLab.text = 'pág. ' + progressBar.value + ',   texto: ' + element.Text;
+			comp.time = layerInPoint;
+			ABRIDOR_w.update();
+		}
+	
+		var refFolder = app.project.items.addFolder('ABERTURA REF'); // Cria uma pasta no projeto.
+	
+		progressBar.maxvalue = imagesArray.length;
+		progressBar.value = 0;
+		ABRIDOR_w.update();
+
+		for (var l = 0; l < imagesArray.length; l++) {
+	
+			imagesArray[l].parentFolder = refFolder; // Move o novo logo para a pasta criada anteriormente.
+			var refImage = comp.layers.add(imagesArray[l]);
+			refImage.moveToEnd();
+			f = compW / refImage.width * 100;
+	
+			var transform = refImage.property('ADBE Transform Group');
+			transform.property('ADBE Scale').setValue([f, f, f]);
+			layerInPoint = l * layerDuration;
+			layerOutPoint = layerInPoint + layerDuration;
+	
+			refImage.inPoint = layerInPoint;
+			refImage.outPoint = layerOutPoint;
+			refImage.guideLayer = true;
+			refImage.locked = true;
+	
+			progressLab.text = imagesArray[l].name;
+			progressBar.value ++;
+			comp.time = layerInPoint;
+			ABRIDOR_w.update();
+		}
+		progressLab.text = 'layout criado!';
+	}
+	
 	structureBtn.leftClick.onClick = function () {
 
 		var structureFile = File.openDialog('selecione o arquivo de estrutura', '*.json', false);
