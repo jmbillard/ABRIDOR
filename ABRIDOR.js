@@ -324,7 +324,8 @@ function ABRIDOR_UI() {
 		var layerDuration = compDuration / pageCount;
 		var layerInPoint;
 		var layerOutPoint;
-	
+		var lastPage;
+
 		comp.openInViewer();
 
 		for (var i = 0; i < structureObj.elements.length; i++) {
@@ -356,9 +357,12 @@ function ABRIDOR_UI() {
 					justification: 7413,
 					tracking: 0
 				};
-				if (element.attributes.TextAlign == 'Center') txtProp.justification = 7415;
-				if (element.attributes.TextAlign == 'End') txtProp.justification = 7414;
-				if (element.attributes.LineHeight != undefined) txtProp.leading = element.attributes.LineHeight * fH;
+				if (element.attributes != undefined) {
+
+					if (element.attributes.TextAlign == 'Center') txtProp.justification = 7415;
+					if (element.attributes.TextAlign == 'End') txtProp.justification = 7414;
+					if (element.attributes.LineHeight != undefined) txtProp.leading = element.attributes.LineHeight * fH;
+				}
 		
 				for (var p in txtProp) {
 		
@@ -391,10 +395,12 @@ function ABRIDOR_UI() {
 				currentText.outPoint = layerOutPoint;
 				textArray.push(currentText);
 		
-				progressBar.value ++;
-				progressLab.text = 'pág. ' + progressBar.value + ',   texto: ' + element.Text;
+				if (page > lastPage) progressBar.value ++;
+				progressLab.text = 'pág. ' + page + ',   texto: ' + element.Text;
 				comp.time = layerInPoint;
 				ABRIDOR_w.update();
+
+				lastPage = page;
 			} catch (err) {
 
 				alert('erro ao criar o texto: ' + element.Text + '\n' + err.message);
