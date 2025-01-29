@@ -41,11 +41,11 @@ essa versão da interface contem apenas 2 botões.
 botões em ordem:
 
 - **abrir site**:\
-`◖ clique esquerdo` → abre o site para extrair a estrutura do pdf.
+`◖ clique esquerdo` → abre o site para extrair a estrutura do pdf em .JSON.
   >
 
 - **criar abertura**:\
-`◖ clique esquerdo` → seleciona a pasta da produção atual.
+`◖ clique esquerdo` → importa o arquivo .JSON, as imagens de referência (opcional) e inicia a criação do layout.
   >
 
 <br>
