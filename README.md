@@ -5,8 +5,9 @@
 O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente, sem conversões nem sites externos, e recria cada página/slide como uma comp do After Effects, com os textos o mais fiéis possível ao original: posição, alinhamento, tamanho, entrelinha, cor, rotação e fontes.
 
 > 📂 **arquivos:**\
+> • **INSTALAR O ABRIDOR.jsx** → instalador (roda dentro do After Effects).\
 > • **abridor-cep/** → a extensão (painel CEP).\
-> • **instalar_windows.bat** / **instalar_mac.command** → instaladores.\
+> • **instalar_windows.bat** / **instalar_mac.command** → instaladores alternativos, sem abrir o After Effects.\
 > • **ABRIDOR 0.2b.jsxbin** → versão anterior (script que dependia do JSON do site da Adobe).
 
 <br>
@@ -17,14 +18,22 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente, sem conversões nem s
 
 ## 📍 instalação
 
-1. feche o After Effects.
-2. execute o instalador do seu sistema:
-   - **Windows** → `instalar_windows.bat` (duplo clique).
-   - **macOS** → `instalar_mac.command` (duplo clique; se o macOS bloquear, clique com o botão direito → *Abrir*).
-3. abra o After Effects e acesse `Janela` > `Extensões` > `ABRIDOR`.
+no After Effects: `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx**, direto da pasta do ABRIDOR (a que tem a pasta `abridor-cep`).
+
+o instalador segue o passo a passo:
+
+1. **boas-vindas**;
+2. **checagem** → versão do After Effects, permissão de escrita de arquivos (com atalho para `Preferences > Scripting & Expressions`) e a pasta `abridor-cep` ao lado do instalador;
+3. **ação** → *instalar*, *atualizar* / *reinstalar* ou *remover*;
+4. **andamento e conclusão**.
+
+a extensão é **sempre instalada localmente**: a pasta `abridor-cep` inteira é copiada para a pasta de extensões CEP do usuário. depois disso o ABRIDOR não depende mais da pasta de origem (rede, pendrive ou download). para atualizar, rode o instalador da versão nova.
+
+depois de instalar, reinicie o After Effects e abra `Window` > `Extensions` > `ABRIDOR`.
 
 > 🚩 *obs:*\
 > • a extensão não é assinada, por isso o instalador habilita o `PlayerDebugMode` do CEP.\
+> • no macOS, se o painel não aparecer depois de reiniciar o After Effects, reinicie o computador.\
 > • requer **After Effects 2020 (17.0)** ou superior.\
 > • a lista de fontes instaladas e o preview delas usam a API `app.fonts`, disponível no **After Effects 2024 (24.0)** ou superior. em versões anteriores digite o nome PostScript da fonte.\
 > • textos com estilos misturados (ex. função em uma fonte e nome em outra na mesma caixa) usam `characterRange`, do **After Effects 2024 (24.3)** ou superior. em versões anteriores a camada recebe o estilo predominante.
@@ -135,6 +144,8 @@ abridor-cep/
   - `node tests/run_panel.js <arquivo.pptx|pdf> <saída>` → abre o painel no Chromium com o AE simulado, extrai e gera o job.
   - `node tests/host_mock.js <saída>/job.json <saída>/host` → executa o `host.jsx` contra um mock do After Effects e desenha as camadas sobre a referência.
   - `python3 tests/make_test_pptx.py <arquivo.pptx>` → gera um PPTX com casos variados.
+  - `node tests/installer_mock.js <pasta temporária>` → executa o instalador com File/Folder/ScriptUI simulados (instala e remove).
+  - `python3 tests/make_banner.py` → gera o banner do instalador como string ExtendScript.
 - `js/lib/pdf.js` e `pdf.worker.js` têm uma alteração: `isNodeJS = false`, porque o CEP expõe `process` e o pdf.js tentaria usar APIs do Node.
 
 <br>
