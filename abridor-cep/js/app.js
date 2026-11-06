@@ -204,6 +204,10 @@
 			p.classList.toggle('active', idx === to);
 		});
 		if (from !== to) placeTabInk();
+		if (name === 'fonts' && state.fontsDirty) {
+			state.fontsDirty = false;
+			setTimeout(function () { arrangeFonts(true); }, 280);
+		}
 		setTimeout(UI.relayout, 30);
 	}
 
@@ -354,6 +358,9 @@
 		$('btnBuild').disabled = state.busy || !n;
 		updateCompsInfo();
 		updateFontCounts();
+		// fora da aba fontes, reorganiza quando ela for aberta (para a animação ser vista)
+		if (state.tab === 'fonts') arrangeFonts(true);
+		else state.fontsDirty = true;
 	}
 
 	function renderGrid() {
@@ -540,7 +547,6 @@
 			var n = fontUseCount(f);
 			row.querySelector('.uses').textContent = n + '×';
 			row.querySelector('.uses').title = f.type === 'project' ? 'camadas no projeto' : 'usos nas páginas selecionadas';
-			row.style.opacity = n || f.type === 'project' ? 1 : 0.45;
 		});
 		for (var k in state.fonts) {
 			if (fontState(k) === 'missing' && fontUseCount(state.fonts[k])) missing++;
@@ -590,14 +596,102 @@
 			updateFontCounts();
 			return;
 		}
-		list.innerHTML = '';
-		keys.forEach(function (k, i) { list.appendChild(fontRow(state.fonts[k], i)); });
+		list.innerHTML =
+			'<div class="font-group used"></div>' +
+			'<div class="collapse unused-wrap" id="unusedWrap">' +
+			'<button class="unused-head' + (state.unusedOpen ? ' open' : '') + '" id="unusedHead" title="não usadas nas páginas selecionadas\nsó aparecem em páginas desmarcadas; as associações ficam guardadas">' +
+			icon('chevron', 'chev') + '<span>não usadas nas páginas selecionadas</span><b class="pill" id="unusedCount">0</b></button>' +
+			'<div class="collapse" id="unusedBox"><div class="font-group unused"></div></div>' +
+			'</div>';
+		state.fontRows = {};
+		keys.forEach(function (k, i) { state.fontRows[k] = fontRow(state.fonts[k], i); });
+		$('unusedHead').onclick = function () {
+			state.unusedOpen = !state.unusedOpen;
+			this.classList.toggle('open', state.unusedOpen);
+			UI.collapse($('unusedBox'), state.unusedOpen);
+		};
+		UI.collapse($('unusedBox'), !!state.unusedOpen, true);
+		state.fontsDirty = false;
+		arrangeFonts(false);
 		updateFontCounts();
+	}
+
+	function isUsed(f) { return f.type === 'project' || fontUseCount(f) > 0; }
+
+	// distribui as linhas entre "usadas" e "não usadas" e anima a troca de lugar (FLIP)
+	function arrangeFonts(animate) {
+		var list = $('fontList');
+		var usedG = list.querySelector('.font-group.used');
+		var unusedG = list.querySelector('.font-group.unused');
+		var rows = state.fontRows;
+		if (!usedG || !rows) return;
+		var box = $('unusedBox');
+		var keys = Object.keys(rows).sort(function (a, b) {
+			var ma = fontState(a) === 'missing' ? 1 : 0, mb = fontState(b) === 'missing' ? 1 : 0;
+			return mb - ma || fontUseCount(state.fonts[b]) - fontUseCount(state.fonts[a]) || a.localeCompare(b);
+		});
+		var hidden = function (el) { return !!el.closest('#unusedBox') && !box.classList.contains('open'); };
+		var before = {}, wasHidden = {}, rects = {};
+		if (animate) keys.forEach(function (k) {
+			rects[k] = rows[k].getBoundingClientRect();
+			before[k] = rects[k].top;
+			wasHidden[k] = hidden(rows[k]);
+		});
+
+		var unused = 0;
+		keys.forEach(function (k) {
+			var used = isUsed(state.fonts[k]);
+			var el = rows[k];
+			if (!used) unused++;
+			el.classList.toggle('unused', !used);
+			(used ? usedG : unusedG).appendChild(el);
+		});
+
+		var count = $('unusedCount');
+		if (count.textContent !== String(unused)) {
+			count.textContent = unused;
+			if (animate) UI.replay(count, 'bump');
+		}
+		UI.collapse($('unusedWrap'), unused > 0, !animate);
+		if (!unused && state.unusedOpen) { state.unusedOpen = false; $('unusedHead').classList.remove('open'); UI.collapse(box, false, true); }
+		if (!animate || UI.reduced()) return;
+
+		var head = $('unusedHead').getBoundingClientRect();
+		keys.forEach(function (k) {
+			var el = rows[k];
+			var nowHidden = hidden(el);
+			// a linha foi para o grupo recolhido: um "fantasma" desce até o cabeçalho e some dentro dele
+			if (nowHidden && !wasHidden[k] && rects[k].height) {
+				var r0 = rects[k];
+				var ghost = el.cloneNode(true);
+				ghost.classList.add('font-ghost');
+				ghost.style.cssText = 'position:fixed;left:' + r0.left + 'px;top:' + r0.top + 'px;width:' + r0.width + 'px;margin:0;animation:none;z-index:5;transition:none;';
+				document.body.appendChild(ghost);
+				void ghost.offsetHeight;
+				var ty = (head.top || r0.top + 40) - r0.top - r0.height * 0.3;
+				ghost.style.transition = 'transform .55s var(--ease), opacity .5s ease';
+				ghost.style.transform = 'translateY(' + ty + 'px) scale(.82)';
+				ghost.style.opacity = '0';
+				setTimeout(function () { if (ghost.parentNode) ghost.parentNode.removeChild(ghost); }, 600);
+				return;
+			}
+			if (nowHidden) return;
+			if (wasHidden[k]) { UI.replay(el, 'enter'); return; }
+			var dy = before[k] - el.getBoundingClientRect().top;
+			if (Math.abs(dy) < 1) return;
+			el.style.transition = 'none';
+			el.style.transform = 'translateY(' + dy + 'px)';
+			void el.offsetHeight;
+			el.style.transition = 'transform .5s var(--spring), background .2s, box-shadow .25s, opacity .3s';
+			el.style.transform = '';
+			setTimeout(function () { el.style.transition = ''; }, 520);
+		});
 	}
 
 	function fontRow(src, i) {
 		var row = document.createElement('div');
 		row.dataset.key = src.key;
+		row.addEventListener('animationend', function () { row.style.animation = 'none'; row.classList.remove('enter'); });
 		row.style.setProperty('--i', Math.min(i, 12));
 		var supported = ABR.fonts.supported;
 		row.innerHTML =

@@ -312,6 +312,8 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
   <img src="docs/img/32-preview.png" width="380">
 </p>
 
+**6.4** a lista acompanha as **páginas selecionadas**. uma fonte que só aparece em páginas desmarcadas desce para o grupo recolhido **não usadas nas páginas selecionadas**, no fim da lista. ela não entra no aviso vermelho da aba e a associação dela fica guardada. marque a página de novo e a fonte volta para o lugar dela. clique no grupo para ver as fontes que estão lá.
+
 > 💡 *dicas:*\
 > • as escolhas manuais ficam **memorizadas**: no próximo documento com a mesma fonte, a associação já vem pronta.\
 > • <img src="docs/img/icons/refresh.svg" width="14"> recarrega a lista de fontes instaladas (útil depois de ativar uma fonte no Adobe Fonts).\

@@ -1339,3 +1339,39 @@ footer {
 .tip.up .tip-arrow { bottom: -4px; }
 
 .tip.down .tip-arrow { top: -4px; }
+
+/* fontes não usadas nas páginas selecionadas: grupo recolhido no fim da lista */
+.font.unused { opacity: .55; }
+
+.font.unused:hover, .font.unused.open { opacity: 1; }
+
+.font.enter { animation: rise .45s var(--ease) both !important; }
+
+.unused-wrap { margin-top: 4px; }
+
+.unused-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	border: 0;
+	border-top: 1px solid var(--line);
+	background: none;
+	color: var(--muted);
+	padding: 12px 4px 10px;
+	font-size: 11px;
+	text-align: left;
+	transition: color .2s;
+}
+
+.unused-head span { flex: 1; }
+
+.unused-head:hover { color: var(--txt); }
+
+.unused-head .chev { width: 14px; height: 14px; transform: rotate(-90deg); transition: transform .35s var(--spring); }
+
+.unused-head.open .chev { transform: none; }
+
+.unused-head .pill { background: var(--surface-2); color: var(--muted); }
+
+.font-ghost { pointer-events: none; box-shadow: 0 10px 26px rgba(0, 0, 0, .35); }
