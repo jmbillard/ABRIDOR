@@ -625,6 +625,8 @@
 		var unusedG = list.querySelector('.font-group.unused');
 		var rows = state.fontRows;
 		if (!usedG || !rows) return;
+		// lista desatualizada (documento novo ainda sendo montado): o renderFonts reorganiza depois
+		for (var rk in rows) if (!state.fonts[rk]) return;
 		var box = $('unusedBox');
 		var keys = Object.keys(rows).sort(function (a, b) {
 			var ma = fontState(a) === 'missing' ? 1 : 0, mb = fontState(b) === 'missing' ? 1 : 0;
