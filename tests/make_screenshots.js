@@ -29,7 +29,8 @@ b64[PPTX] = fs.readFileSync(PPTX).toString('base64');
 async function annotate(page, marks) {
 	await page.evaluate((marks) => {
 		marks.forEach((m) => {
-			const el = typeof m.sel === 'string' ? document.querySelectorAll(m.sel)[m.i || 0] : null;
+			let el = typeof m.sel === 'string' ? document.querySelectorAll(m.sel)[m.i || 0] : null;
+			if (el && m.target) el = el.closest(m.target);
 			if (!el) { console.warn('sem alvo: ' + m.sel); return; }
 			const r = el.getBoundingClientRect();
 			const pad = m.pad === undefined ? 3 : m.pad;
@@ -63,7 +64,9 @@ async function annotate(page, marks) {
 }
 
 async function shot(page, name, marks, opts) {
-	await page.mouse.move(1, 700);
+	opts = opts || {};
+	if (!opts.noMouse) await page.mouse.move(1, 700);
+	delete opts.noMouse;
 	if (marks && marks.length) await annotate(page, marks);
 	await page.waitForTimeout(150);
 	await page.screenshot(Object.assign({ path: path.join(OUT, name) }, opts || {}));
@@ -73,14 +76,15 @@ async function shot(page, name, marks, opts) {
 
 async function openDoc(page, file) {
 	await page.evaluate((f) => { window.__nextFile = f; }, file);
-	await page.click('#btnOpen');
+	await page.evaluate(() => { document.getElementById('status').textContent = ''; });
+	await page.evaluate(() => { if (document.body.classList.contains('is-empty')) document.getElementById('dropZone').click(); else document.getElementById('docChip').click(); });
 	await page.waitForFunction(() => /carregado|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
-	await page.waitForTimeout(400);
+	await page.waitForTimeout(900);
 }
 
 async function tab(page, t) {
 	await page.click('.tab[data-tab=' + t + ']');
-	await page.waitForTimeout(200);
+	await page.waitForTimeout(500);
 }
 
 (async () => {
@@ -110,8 +114,8 @@ async function tab(page, t) {
 					const log = n === 1 ? ['estilos mistos simplificados (AE sem characterRange): "direção ANA BEATRIZ LIMA"'] : [];
 					return delay(window.__buildDelay || 300, JSON.stringify({ ok: true, texts: 2, log }));
 				}
-				if (fn === 'abridor_finish') return delay(200, JSON.stringify({ ok: true, comps: window.__nComps || 5, master: window.__master || 'O SOM DO MAR MASTER' }));
-				if (fn === 'abridor_applyFonts') return delay(400, JSON.stringify({ ok: true, layers: 14, comps: 6, failed: [] }));
+				if (fn === 'abridor_finish') return delay(200, JSON.stringify({ ok: true, comps: 5, master: 'O SOM DO MAR MASTER' }));
+				if (fn === 'abridor_applyFonts') return delay(500, JSON.stringify({ ok: true, layers: 14, comps: 6, failed: [] }));
 				if (fn === 'abridor_scanProject') {
 					return delay(300, JSON.stringify({
 						ok: true,
@@ -130,13 +134,18 @@ async function tab(page, t) {
 		try { localStorage.clear(); } catch (e) { }
 	}, { b64, FONTS });
 
+	const hideToast = () => page.evaluate(() => ABR.ui.hideToast());
+	const settle = (ms) => page.waitForTimeout(ms || 500);
+
 	await page.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
 	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+	await settle(700);
 
 	// 10 · painel vazio
-	await page.setViewportSize({ width: 460, height: 520 });
+	await page.setViewportSize({ width: 460, height: 560 });
+	await settle(200);
 	await shot(page, '10-painel.png', [
-		{ sel: '#btnOpen', n: 1, side: 'left' },
+		{ sel: '#dropZone', n: 1, side: 'right', pad: 2 },
 		{ sel: '.tabs', n: 2, side: 'left', pad: 1 },
 		{ sel: '#btnBuild', n: 3, side: 'left' }
 	]);
@@ -144,136 +153,177 @@ async function tab(page, t) {
 
 	// 11 · PDF
 	await openDoc(page, PDF);
-	await page.click('#grid .card:nth-child(1) .thumb');
+	await page.click('.page:nth-child(1) .thumb');
+	await hideToast(); await settle(600);
 	await shot(page, '11-paginas-pdf.png', [
-		{ sel: '#docInfo', n: 1, side: 'right' },
-		{ sel: '#tab-pages .check', n: 2, side: 'right', pad: 2 },
-		{ sel: '#selCount', n: 3, side: 'right', pad: 1 },
-		{ sel: '#grid .card', i: 0, n: 4, side: 'right' },
-		{ sel: '#grid .card:nth-child(3) .thumb', n: 5, side: 'right', box: false }
+		{ sel: '#docChip', n: 1, side: 'left', pad: 2 },
+		{ sel: '.sel-count', n: 2, side: 'left', pad: 3 },
+		{ sel: '#showBoxes', n: 3, side: 'left', pad: 1 },
+		{ sel: '.page:nth-child(1) .thumb', n: 4, side: 'right', pad: 2 }
 	]);
 
-	// 12 · PPTX (slide oculto já desmarcado, duração individual)
+	// 12 · PPTX (oculto, duração individual, hover)
 	await openDoc(page, PPTX);
-	await page.fill('#grid .card:nth-child(1) .meta input[type=number]', '8');
-	await page.dispatchEvent('#grid .card:nth-child(1) .meta input[type=number]', 'change');
+	await page.click('.page:nth-child(1) .dur');
+	await page.fill('.page:nth-child(1) .dur input', '8');
+	await page.press('.page:nth-child(1) .dur input', 'Enter');
+	await hideToast(); await settle(500);
+	await page.hover('.page:nth-child(3) .thumb');
+	await settle(350);
 	await shot(page, '12-paginas-pptx.png', [
-		{ sel: '#grid .card:nth-child(4) .tag', n: 1, side: 'left', pad: 2 },
-		{ sel: '#grid .card:nth-child(1) .meta input[type=number]', n: 2, side: 'right', pad: 2 },
-		{ sel: '#btnExtImages', n: 3, side: 'left' }
-	]);
+		{ sel: '.page:nth-child(4) .chip.flag', n: 1, side: 'left', pad: 2 },
+		{ sel: '.page:nth-child(1) .dur', n: 2, side: 'top', pad: 2 },
+		{ sel: '.page:nth-child(3) .chip.texts', n: 3, side: 'top', pad: 2 },
+		{ sel: '.page:nth-child(3) .dur', n: 4, side: 'top', pad: 2 },
+		{ sel: '.iconbar', n: 5, side: 'top', pad: 2 },
+		{ sel: '#btnExtImages', n: 6, side: 'top', pad: 1 }
+	], { noMouse: true });
 
 	// 13 · intervalo
+	await page.click('#rangeBtn');
+	await settle(400);
 	await page.fill('#selRange', '1-3, 5');
-	await page.click('#selRangeApply');
+	await page.press('#selRange', 'Enter');
+	await settle(600);
 	await shot(page, '13-intervalo.png', [
-		{ sel: '#selRange', n: 1, side: 'left' },
-		{ sel: '#selRangeApply', n: 2, side: 'right' },
-		{ sel: '#selCount', n: 3, side: 'right', pad: 1 }
-	], { clip: { x: 0, y: 0, width: 460, height: 560 } });
-	await page.click('#selAll');
-	await page.click('#grid .card:nth-child(4) .thumb');
+		{ sel: '#rangeBox', n: 1, side: 'top', pad: 2 },
+		{ sel: '.sel-count', n: 2, side: 'left', pad: 3 }
+	], { clip: { x: 0, y: 0, width: 460, height: 420 } });
 
-	// 14 · detalhe da miniatura (textos detectados)
-	await page.hover('#grid .card:nth-child(3) .thumb');
-	const card = await page.$('#grid .card:nth-child(3)');
-	await card.screenshot({ path: path.join(OUT, '14-miniatura.png') });
-	console.log('✓ 14-miniatura.png');
+	// 14 · edição da duração (detalhe)
+	await page.click('.page:nth-child(2) .dur');
+	await page.fill('.page:nth-child(2) .dur input', '6,5');
+	await settle(400);
+	const card = await page.$('.page:nth-child(2)');
+	await card.screenshot({ path: path.join(OUT, '14-duracao.png') });
+	console.log('✓ 14-duracao.png');
+	await page.press('.page:nth-child(2) .dur input', 'Escape');
+	await page.click('#selAll');
+	await page.click('.page:nth-child(4) .thumb');
+	await settle(300);
 
 	// 20 · comps
 	await tab(page, 'comps');
-	await page.selectOption('#preset', '3840x2160');
-	await page.dispatchEvent('#preset', 'change');
+	await page.click('#resSeg button[data-value="3840x2160"]');
 	await page.fill('#prefix', 'O SOM DO MAR');
 	await page.dispatchEvent('#prefix', 'input');
+	await hideToast(); await settle(500);
 	await shot(page, '20-comps.png', [
-		{ sel: '#preset', n: 1, side: 'left', pad: 2 },
-		{ sel: '#fps', n: 2, side: 'left', pad: 2 },
-		{ sel: '#duration', n: 3, side: 'right', pad: 2 },
-		{ sel: '#totalTC', n: 4, side: 'right', pad: 2 },
-		{ sel: '#prefix', n: 5, side: 'left', pad: 2 },
-		{ sel: '#master', n: 6, side: 'left', pad: 3 },
-		{ sel: '#refImages', n: 7, side: 'left', pad: 3 }
+		{ sel: '#resSeg', n: 1, side: 'right', pad: 2 },
+		{ sel: '#fpsSeg', n: 2, side: 'right', pad: 2 },
+		{ sel: '.stepper', n: 3, side: 'right', pad: 3 },
+		{ sel: '.name-field', n: 4, side: 'right', pad: 2 },
+		{ sel: '#master', n: 5, side: 'right', pad: 3, target: '.switch-row' },
+		{ sel: '#advBtn', n: 6, side: 'right', pad: 1 }
 	]);
-	await page.selectOption('#preset', '1920x1080');
-	await page.dispatchEvent('#preset', 'change');
 
-	// 30 · fontes (antes)
+	// 21 · ajustes finos abertos
+	await page.click('#resSeg button[data-value="1920x1080"]');
+	await page.click('#advBtn');
+	await settle(600);
+	await page.evaluate(() => { document.getElementById('tab-comps').scrollTop = 9999; });
+	await settle(300);
+	await shot(page, '21-ajustes.png', [
+		{ sel: '#advBtn', n: 1, side: 'right', pad: 1 },
+		{ sel: '#fitSeg', n: 2, side: 'right', pad: 2 },
+		{ sel: '#keepAutofit', n: 3, side: 'right', pad: 3, target: '.switch-row' },
+		{ sel: '#fallbackFont', n: 4, side: 'right', pad: 2 }
+	]);
+	await page.click('#advBtn');
+
+	// 30 · fontes
 	await tab(page, 'fonts');
+	await settle(500);
 	await shot(page, '30-fontes.png', [
-		{ sel: '.tab[data-tab=fonts] .badge', n: 1, side: 'right', pad: 2 },
-		{ sel: '.font-row.missing', n: 2, side: 'left', pad: 1 },
-		{ sel: '.font-row.ok', n: 3, side: 'left', pad: 1 }
+		{ sel: '#fontBadge', n: 1, side: 'right', pad: 2 },
+		{ sel: '.font.missing .dot', n: 2, side: 'left', pad: 4 },
+		{ sel: '.font.ok .dot', n: 3, side: 'left', pad: 4 },
+		{ sel: '.font.ok .font-preview', n: 4, side: 'right', pad: 0 },
+		{ sel: '#btnAuto', n: 5, side: 'top', pad: 1 },
+		{ sel: '#btnScan', n: 6, side: 'top', pad: 1 }
 	]);
 
-	// 31 · fontes (depois: troca manual + escala)
-	async function pick(key, family, ps, scale) {
-		const row = `.font-row[data-key="${key}"]`;
+	// 31 · editando uma fonte
+	async function pick(key, family, ps, scaleClicks) {
+		const row = `.font[data-key="${key}"]`;
+		if (!(await page.$(row + '.open'))) { await page.click(row + ' .font-head'); await settle(450); }
 		await page.selectOption(row + ' select.family', family);
 		if (ps) await page.selectOption(row + ' select.style', ps);
-		if (scale) { await page.fill(row + ' input.scale', String(scale)); await page.dispatchEvent(row + ' input.scale', 'change'); }
-		await page.waitForTimeout(150);
+		for (let i = 0; i < (scaleClicks || 0); i++) await page.click(row + ' .s-minus');
+		await settle(300);
 	}
-	await pick('Gotham Black', 'Inter', 'Inter-Black', 95);
 	await pick('Calibri', 'Carlito', 'Carlito');
 	await pick('Calibri Bold', 'Carlito', 'Carlito-Bold');
-	await page.evaluate(() => document.querySelector('.font-row[data-key="Gotham Black"]').scrollIntoView({ block: 'center' }));
-	await shot(page, '31-fontes-trocadas.png', [
-		{ sel: '.font-row[data-key="Gotham Black"] select.family', n: 1, side: 'left', pad: 2 },
-		{ sel: '.font-row[data-key="Gotham Black"] select.style', n: 2, side: 'top', pad: 2 },
-		{ sel: '.font-row[data-key="Gotham Black"] input.scale', n: 3, side: 'top', pad: 2 },
-		{ sel: '.font-row[data-key="Gotham Black"] .preview.target', n: 4, side: 'left', pad: 1 },
-		{ sel: '.font-row[data-key="Gotham Black"] .preview.orig', n: 5, side: 'left', pad: 1 }
+	await pick('Gotham Black', 'Inter', 'Inter-Black', 1);
+	await page.evaluate(() => document.querySelector('.font[data-key="Gotham Black"]').scrollIntoView({ block: 'center' }));
+	await settle(600);
+	await shot(page, '31-fontes-editar.png', [
+		{ sel: '.font[data-key="Gotham Black"] .font-head', n: 1, side: 'right', pad: 2 },
+		{ sel: '.font[data-key="Gotham Black"] select.family', n: 2, side: 'left', pad: 2 },
+		{ sel: '.font[data-key="Gotham Black"] select.style', n: 3, side: 'top', pad: 2 },
+		{ sel: '.font[data-key="Gotham Black"] .scale-step', n: 4, side: 'top', pad: 2 },
+		{ sel: '.font[data-key="Gotham Black"] .orig', n: 5, side: 'left', pad: 2 }
 	]);
 
-	// 32 · texto do preview personalizado
-	await page.fill('#sampleText', 'Créditos 2026 — ÁÉÍÓÚ áéíóú 0123');
+	// 32 · texto do preview
+	await page.click('.font[data-key="Gotham Black"] .font-head');
+	await page.click('#previewBtn');
+	await settle(400);
+	await page.fill('#sampleText', 'Créditos 2026 — ÁÉÍÓÚ 0123');
 	await page.dispatchEvent('#sampleText', 'input');
-	await page.evaluate(() => document.querySelector('.font-list').scrollTop = 0);
-	await page.waitForTimeout(200);
+	await page.evaluate(() => document.getElementById('fontList').scrollTop = 0);
+	await settle(700);
 	await shot(page, '32-preview.png', [
-		{ sel: '#sampleText', n: 1, side: 'left', pad: 2 },
-		{ sel: '#previewSize', n: 2, side: 'top', pad: 2 }
-	], { clip: { x: 0, y: 0, width: 460, height: 520 } });
+		{ sel: '#previewBtn', n: 1, side: 'top', pad: 1 },
+		{ sel: '#sampleText', n: 2, side: 'left', pad: 2 },
+		{ sel: '#previewSize', n: 3, side: 'top', pad: 4 }
+	], { clip: { x: 0, y: 0, width: 460, height: 470 } });
 	await page.fill('#sampleText', '');
 	await page.dispatchEvent('#sampleText', 'input');
+	await page.click('#previewBtn');
 
-	// 40 · criando
+	// 40 · criando / concluído / avisos
+	const footerClip = async () => { const fb = await (await page.$('footer')).boundingBox(); return { x: 0, y: fb.y - 70, width: 460, height: fb.height + 70 }; };
 	await page.evaluate(() => { window.__buildDelay = 700; });
 	await page.click('#btnBuild');
-	await page.waitForFunction(() => /criando .* \(3\//.test(document.getElementById('status').textContent), null, { timeout: 60000 });
-	await shot(page, '40-criando.png', [
-		{ sel: '.progress', n: 1, side: 'right', pad: 4 },
-		{ sel: '#status', n: 2, side: 'right', pad: 2 }
-	], { clip: { x: 0, y: 700, width: 460, height: 160 } });
-	await page.waitForFunction(() => /comps criadas|erro/.test(document.getElementById('status').textContent), null, { timeout: 60000 });
-	await page.click('#btnLog');
-	await page.waitForTimeout(150);
-	const footer = await page.$('footer');
-	const fb = await footer.boundingBox();
+	await page.waitForFunction(() => /criando 3\//.test(document.getElementById('ctaText').textContent), null, { timeout: 60000 });
+	await settle(250);
+	await shot(page, '40-criando.png', [{ sel: '#btnBuild', n: 1, side: 'top', pad: 2 }], { clip: await footerClip() });
+	await page.waitForFunction(() => document.getElementById('btnBuild').classList.contains('done'), null, { timeout: 60000 });
+	await settle(700);
 	await shot(page, '41-concluido.png', [
-		{ sel: '#status', n: 1, side: 'top', pad: 2 },
-		{ sel: '#btnLog', n: 2, side: 'right', pad: 2 },
-		{ sel: '#log', n: 3, side: 'left', pad: 2 }
-	], { clip: { x: 0, y: fb.y - 10, width: 460, height: fb.height + 10 } });
+		{ sel: '#toast', n: 1, side: 'top', pad: 2 },
+		{ sel: '#btnLog', n: 2, side: 'top', pad: 2 },
+		{ sel: '#btnBuild', n: 3, side: 'top', pad: 2 }
+	], { clip: await footerClip() });
+	await settle(1500);
+	await hideToast();
+	await page.click('#btnLog');
+	await settle(500);
+	await shot(page, '42-avisos.png', [
+		{ sel: '#btnLog', n: 1, side: 'left', pad: 2 },
+		{ sel: '#log', n: 2, side: 'left', pad: 2 }
+	], { clip: await footerClip() });
 	await page.click('#btnLog');
 
-	// 50 · ler fontes do projeto e aplicar (outra sessão, sem documento aberto)
+	// 50 · trocar fontes depois (sem documento aberto)
 	await page.reload();
 	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
 	await tab(page, 'fonts');
-	await page.click('#btnScan');
+	await settle(400);
+	await shot(page, '50-fontes-vazio.png', [{ sel: '#emptyScan', n: 1, side: 'right', pad: 2 }], { clip: { x: 0, y: 0, width: 460, height: 420 } });
+	await page.click('#emptyScan');
 	await page.waitForFunction(() => /fontes encontradas/.test(document.getElementById('status').textContent));
+	await hideToast();
 	await pick('Calibri Bold', 'Liberation Sans', 'LiberationSans-Bold');
-	await page.selectOption('#applyScope', 'all');
+	await page.click('#scopeSeg button[data-value="all"]');
 	await page.click('#btnApplyFonts');
 	await page.waitForFunction(() => /camadas atualizadas/.test(document.getElementById('status').textContent));
-	await shot(page, '50-trocar-depois.png', [
-		{ sel: '#btnScan', n: 1, side: 'left', pad: 2 },
-		{ sel: '.font-row[data-key="Calibri Bold"] select.family', n: 2, side: 'left', pad: 2 },
-		{ sel: '#applyScope', n: 3, side: 'left', pad: 2 },
-		{ sel: '#btnApplyFonts', n: 4, side: 'top', pad: 2 },
-		{ sel: '#status', n: 5, side: 'right', pad: 2 }
+	await settle(650);
+	await shot(page, '51-trocar-depois.png', [
+		{ sel: '.font[data-key="Calibri Bold"] .font-head', n: 1, side: 'right', pad: 2 },
+		{ sel: '#scopeSeg', n: 2, side: 'top', pad: 2 },
+		{ sel: '#btnApplyFonts', n: 3, side: 'top', pad: 2 }
 	]);
 
 	// 60 · detecção dos textos (página do PDF, em tamanho grande, com rótulos)

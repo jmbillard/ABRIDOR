@@ -5,179 +5,203 @@
 	<title>ABRIDOR</title>
 	<link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="is-empty">
+	<!-- ============================================================ TOPO -->
 	<header class="top">
-		<div class="brand">ABRIDOR <span id="version">1.0</span></div>
-		<button id="btnOpen" class="btn primary" title="abrir um arquivo .pptx ou .pdf">abrir PPTX / PDF</button>
+		<div class="logo" title="ABRIDOR">
+			<span class="logo-mark"><i data-icon="sparkle"></i></span>
+			<span class="logo-name">ABRIDOR</span>
+		</div>
+		<button id="docChip" class="doc-chip" title="abrir outro documento">
+			<span id="docType" class="doc-type">PDF</span>
+			<span class="doc-text"><b id="docName"></b><small id="docMeta"></small></span>
+			<i data-icon="swap" class="doc-swap"></i>
+		</button>
 	</header>
 
-	<div id="docInfo" class="doc-info empty">nenhum documento carregado</div>
-
-	<nav class="tabs">
-		<button class="tab active" data-tab="pages">páginas</button>
-		<button class="tab" data-tab="comps">comps</button>
-		<button class="tab" data-tab="fonts">fontes <span id="fontBadge" class="badge hidden"></span></button>
+	<nav class="tabs" role="tablist">
+		<span class="tab-ink"></span>
+		<button class="tab active" data-tab="pages" role="tab"><i data-icon="pages"></i><span>páginas</span><b id="pagesBadge" class="pill hidden"></b></button>
+		<button class="tab" data-tab="comps" role="tab"><i data-icon="comps"></i><span>comps</span></button>
+		<button class="tab" data-tab="fonts" role="tab"><i data-icon="fonts"></i><span>fontes</span><b id="fontBadge" class="pill warn hidden"></b></button>
 	</nav>
 
 	<main>
 		<!-- ===================================================== PÁGINAS -->
 		<section id="tab-pages" class="panel active">
-			<div class="toolbar">
-				<button class="btn small" id="selAll">todas</button>
-				<button class="btn small" id="selNone">nenhuma</button>
-				<button class="btn small" id="selInvert">inverter</button>
-				<input type="text" id="selRange" class="range-input" placeholder="ex: 1-3, 5, 8-">
-				<button class="btn small" id="selRangeApply" title="selecionar somente as páginas do intervalo">ok</button>
-			</div>
-			<div class="toolbar">
-				<label class="check"><input type="checkbox" id="showBoxes" checked> mostrar textos detectados</label>
-				<span class="spacer"></span>
-				<button class="btn small" id="btnExtImages" title="usar imagens exportadas do PowerPoint (PNG/JPG) como referência, na ordem dos slides">imagens externas…</button>
-				<button class="btn small hidden" id="btnClearExt" title="voltar a usar a renderização interna">×</button>
-			</div>
-			<div id="selCount" class="hint"></div>
-			<div id="grid" class="grid">
-				<div class="placeholder">
-					abra um arquivo <b>.pptx</b> ou <b>.pdf</b> para listar as páginas.<br>
-					clique numa miniatura para incluir/excluir a página do processamento.
+			<!-- vazio: abrir / arrastar -->
+			<div id="dropZone" class="drop" role="button" tabindex="0">
+				<div class="drop-art">
+					<span class="sheet s3"></span>
+					<span class="sheet s2"></span>
+					<span class="sheet s1"><i data-icon="open"></i></span>
 				</div>
+				<b>abrir PPTX ou PDF</b>
+				<small>clique ou arraste o arquivo aqui</small>
 			</div>
+
+			<div id="pagesTools" class="bar">
+				<span class="sel-count" title="páginas selecionadas"><b id="selN">0</b><span>/<span id="selT">0</span></span></span>
+				<span class="iconbar">
+					<button class="icon-btn" id="selAll" title="selecionar todas"><i data-icon="all"></i></button>
+					<button class="icon-btn" id="selNone" title="limpar seleção"><i data-icon="none"></i></button>
+					<button class="icon-btn" id="selInvert" title="inverter seleção"><i data-icon="invert"></i></button>
+				</span>
+				<span class="range" id="rangeBox">
+					<button class="icon-btn" id="rangeBtn" title="selecionar por intervalo (ex: 1-3, 5, 8-)"><i data-icon="range"></i></button>
+					<input type="text" id="selRange" placeholder="1-3, 5, 8-" spellcheck="false">
+				</span>
+				<span class="spacer"></span>
+				<button class="icon-btn toggle on" id="showBoxes" title="mostrar os textos detectados"><i data-icon="boxes"></i></button>
+				<button class="icon-btn toggle" id="btnExtImages" title="usar imagens exportadas do PowerPoint como referência"><i data-icon="image"></i></button>
+			</div>
+
+			<div id="grid" class="grid"></div>
 		</section>
 
 		<!-- ======================================================= COMPS -->
 		<section id="tab-comps" class="panel">
-			<fieldset>
-				<legend>formato</legend>
-				<div class="row">
-					<label>resolução</label>
-					<select id="preset">
-						<option value="3840x2160">UHD 4K — 3840 × 2160</option>
-						<option value="1920x1080" selected>Full HD — 1920 × 1080</option>
-						<option value="1280x720">HD — 1280 × 720</option>
-						<option value="custom">personalizada…</option>
-					</select>
+			<div class="block">
+				<div class="block-title"><i data-icon="monitor"></i>formato</div>
+				<div class="seg" id="resSeg">
+					<button data-value="3840x2160"><b>4K</b><small>UHD</small></button>
+					<button data-value="1920x1080"><b>1080</b><small>Full HD</small></button>
+					<button data-value="1280x720"><b>720</b><small>HD</small></button>
+					<button data-value="custom" title="tamanho personalizado"><b>···</b><small>outro</small></button>
 				</div>
-				<div class="row hidden" id="customRow">
-					<label>tamanho</label>
-					<input type="number" id="compW" value="1920" min="16" max="30000" class="num"> ×
-					<input type="number" id="compH" value="1080" min="16" max="30000" class="num"> px
+				<div class="collapse" id="customBox">
+					<div class="inline-fields">
+						<input type="number" id="compW" min="16" max="30000" value="1920"><span>×</span><input type="number" id="compH" min="16" max="30000" value="1080"><span class="muted">px</span>
+					</div>
 				</div>
-				<div class="row">
-					<label>frame rate</label>
-					<select id="fps">
-						<option value="23.976">23,976</option>
-						<option value="24">24</option>
-						<option value="25">25</option>
-						<option value="29.97" selected>29,97</option>
-						<option value="30">30</option>
-						<option value="50">50</option>
-						<option value="59.94">59,94</option>
-						<option value="60">60</option>
-					</select>
-					<span class="unit">fps</span>
+				<div class="seg small grid4" id="fpsSeg">
+					<button data-value="23.976">23,976</button>
+					<button data-value="24">24</button>
+					<button data-value="25">25</button>
+					<button data-value="29.97">29,97</button>
+					<button data-value="30">30</button>
+					<button data-value="50">50</button>
+					<button data-value="59.94">59,94</button>
+					<button data-value="60">60</button>
 				</div>
-				<div class="row">
-					<label>encaixe</label>
-					<select id="fit">
-						<option value="fit" selected>ajustar (página inteira visível)</option>
-						<option value="fill">preencher (corta as bordas)</option>
-					</select>
-				</div>
-			</fieldset>
+			</div>
 
-			<fieldset>
-				<legend>duração</legend>
-				<div class="row">
-					<label>por página</label>
-					<input type="number" id="duration" value="5" min="0.1" step="0.5" class="num"> <span class="unit">seg</span>
+			<div class="block">
+				<div class="block-title"><i data-icon="clock"></i>duração por página</div>
+				<div class="stepper">
+					<button class="icon-btn" id="durMinus" title="-0,5 s"><i data-icon="minus"></i></button>
+					<label class="step-val"><input type="text" id="duration" value="5" inputmode="decimal" spellcheck="false"><span>s</span></label>
+					<button class="icon-btn" id="durPlus" title="+0,5 s"><i data-icon="plus"></i></button>
 					<span id="durTC" class="tc"></span>
 				</div>
-				<div class="hint">a duração de cada página pode ser alterada individualmente na aba <b>páginas</b>.</div>
-				<div class="row">
-					<label>total</label>
-					<span id="totalTC" class="tc strong"></span>
-				</div>
-			</fieldset>
+			</div>
 
-			<fieldset>
-				<legend>comps</legend>
-				<div class="row">
-					<label>nome</label>
-					<input type="text" id="prefix" value="LAYOUT" class="wide">
+			<div class="block">
+				<div class="block-title"><i data-icon="tag"></i>nome das comps</div>
+				<div class="name-field">
+					<input type="text" id="prefix" value="LAYOUT" spellcheck="false">
+					<span class="name-suffix" id="nameSuffix">01</span>
 				</div>
-				<div class="hint">as comps serão nomeadas <b id="namePreview">LAYOUT 01</b>, …</div>
-				<div class="row">
-					<label class="check"><input type="checkbox" id="master" checked> criar comp master com todas as páginas em sequência</label>
-				</div>
-			</fieldset>
+			</div>
 
-			<fieldset>
-				<legend>referência</legend>
-				<div class="row">
-					<label class="check"><input type="checkbox" id="refImages" checked> imagem da página como camada guia</label>
+			<div class="block">
+				<label class="switch-row">
+					<i data-icon="master"></i>
+					<span><b>comp master</b><small>todas as páginas em sequência</small></span>
+					<input type="checkbox" id="master" checked><span class="switch"></span>
+				</label>
+				<label class="switch-row">
+					<i data-icon="image"></i>
+					<span><b>referência</b><small>imagem da página como camada guia</small></span>
+					<input type="checkbox" id="refImages" checked><span class="switch"></span>
+				</label>
+				<div class="collapse" id="refBox">
+					<div class="slider-row">
+						<input type="range" id="refOpacity" min="5" max="100" value="50">
+						<span id="refOpacityVal" class="muted">50%</span>
+					</div>
 				</div>
-				<div class="row">
-					<label>opacidade</label>
-					<input type="range" id="refOpacity" min="5" max="100" value="50">
-					<span id="refOpacityVal" class="unit">50%</span>
-				</div>
-				<div class="hint">camadas guia não aparecem no render final nem quando a comp é usada como precomp.</div>
-			</fieldset>
+			</div>
 
-			<fieldset>
-				<legend>textos</legend>
-				<div class="row pdf-only">
-					<label>PDF</label>
-					<select id="groupMode">
-						<option value="paragraph" selected>agrupar linhas em parágrafos</option>
-						<option value="line">uma camada por linha</option>
-					</select>
+			<button class="disclosure" id="advBtn"><i data-icon="tune"></i><span>ajustes finos</span><i data-icon="chevron" class="chev"></i></button>
+			<div class="collapse" id="advBox">
+				<div class="block flat block-adv">
+					<div class="field">
+						<span class="field-label">encaixe da página</span>
+						<div class="seg small" id="fitSeg">
+							<button data-value="fit"><i data-icon="fit"></i>ajustar</button>
+							<button data-value="fill"><i data-icon="fill"></i>preencher</button>
+						</div>
+					</div>
+					<div class="field pdf-only">
+						<span class="field-label">textos do PDF</span>
+						<div class="seg small" id="groupSeg">
+							<button data-value="paragraph"><i data-icon="para"></i>parágrafos</button>
+							<button data-value="line"><i data-icon="line"></i>uma por linha</button>
+						</div>
+					</div>
+					<label class="switch-row pptx-only compact">
+						<i data-icon="autofit"></i>
+						<span><b>redução automática</b><small>manter o encolhimento de texto do PowerPoint</small></span>
+						<input type="checkbox" id="keepAutofit" checked><span class="switch"></span>
+					</label>
+					<div class="field">
+						<span class="field-label">fonte reserva</span>
+						<input type="text" id="fallbackFont" value="ArialMT" spellcheck="false" title="nome PostScript usado quando a fonte não estiver associada">
+					</div>
 				</div>
-				<div class="row pptx-only">
-					<label class="check"><input type="checkbox" id="ignoreAutofit"> ignorar a redução automática de texto do PowerPoint</label>
-				</div>
-				<div class="row">
-					<label>fonte reserva</label>
-					<input type="text" id="fallbackFont" value="ArialMT" class="wide" title="nome PostScript usado quando a fonte não estiver associada">
-				</div>
-			</fieldset>
+			</div>
 		</section>
 
 		<!-- ====================================================== FONTES -->
 		<section id="tab-fonts" class="panel">
-			<div class="toolbar">
-				<button class="btn small" id="btnScan" title="ler as fontes das camadas já criadas no projeto (comentário ABRIDOR)">ler do projeto</button>
-				<button class="btn small" id="btnAuto" title="associar automaticamente pelo nome">auto-associar</button>
-				<button class="btn small" id="btnReloadFonts" title="recarregar a lista de fontes instaladas">↻</button>
+			<div class="bar">
+				<span class="search" id="searchBox">
+					<button class="icon-btn" id="searchBtn" title="filtrar fontes"><i data-icon="search"></i></button>
+					<input type="search" id="fontFilter" placeholder="filtrar fontes" spellcheck="false">
+				</span>
 				<span class="spacer"></span>
-				<input type="search" id="fontFilter" placeholder="filtrar…" class="filter">
+				<button class="icon-btn toggle" id="previewBtn" title="texto e tamanho do preview"><i data-icon="type"></i></button>
+				<button class="icon-btn" id="btnAuto" title="associar automaticamente"><i data-icon="wand"></i></button>
+				<button class="icon-btn" id="btnScan" title="ler as fontes das comps já criadas no projeto"><i data-icon="project"></i></button>
+				<button class="icon-btn" id="btnReloadFonts" title="recarregar as fontes instaladas"><i data-icon="refresh"></i></button>
 			</div>
-			<div class="toolbar">
-				<input type="text" id="sampleText" placeholder="texto do preview (vazio = texto do documento)" class="wide">
-				<input type="range" id="previewSize" min="12" max="48" value="22" title="tamanho do preview">
+			<div class="collapse" id="previewBox">
+				<div class="preview-opts">
+					<input type="text" id="sampleText" placeholder="texto do preview — vazio usa o do documento">
+					<input type="range" id="previewSize" min="12" max="44" value="22" title="tamanho do preview">
+				</div>
 			</div>
-			<div id="fontList" class="font-list">
-				<div class="placeholder">as fontes do documento aparecem aqui depois de abrir um arquivo<br>(ou use <b>ler do projeto</b> para trocar fontes de comps já criadas).</div>
-			</div>
-			<div class="apply-bar">
-				<select id="applyScope">
-					<option value="all">em todas as comps do projeto</option>
-					<option value="selected">nas comps selecionadas</option>
-				</select>
-				<button class="btn primary" id="btnApplyFonts">aplicar fontes</button>
-			</div>
+
+			<div id="fontList" class="font-list"></div>
+
+			<div class="collapse" id="applyBox"><div class="apply-bar">
+				<div class="seg small" id="scopeSeg">
+					<button data-value="all" title="em todas as comps do projeto"><i data-icon="project"></i>projeto</button>
+					<button data-value="selected" title="só nas comps selecionadas no painel Project"><i data-icon="layers"></i>selecionadas</button>
+				</div>
+				<button class="btn" id="btnApplyFonts" title="trocar as fontes nas comps já criadas"><i data-icon="refresh"></i>aplicar<span class="btn-done"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>
+			</div></div>
 		</section>
 	</main>
 
+	<!-- ========================================================= RODAPÉ -->
 	<footer>
-		<div class="progress"><div id="progressBar"></div></div>
-		<div class="status-row">
-			<div id="status" class="status">pronto</div>
-			<button id="btnLog" class="btn small ghost hidden">avisos</button>
+		<div class="summary">
+			<span id="summary"></span>
+			<button id="btnLog" class="warn-chip hidden" title="ver avisos"><i data-icon="alert"></i><b id="logCount">0</b></button>
 		</div>
-		<pre id="log" class="log hidden"></pre>
-		<button id="btnBuild" class="btn primary big" disabled>criar comps</button>
+		<div id="logBox" class="collapse"><pre id="log" class="log"></pre></div>
+		<button id="btnBuild" class="cta" disabled>
+			<span class="cta-fill"></span>
+			<span class="cta-label"><i data-icon="sparkle"></i><span id="ctaText">criar comps</span></span>
+			<span class="cta-done"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
+		</button>
+		<div id="toast" class="toast"></div>
+		<div id="status" class="sr-only" aria-live="polite"></div>
 	</footer>
+
+	<input type="file" id="filePicker" accept=".pptx,.pdf" class="hidden">
 
 	<!-- Bibliotecas: esconde o "module" do Node para que se registrem no window -->
 	<script>
@@ -192,6 +216,7 @@
 	</script>
 
 	<script src="js/cep.js"></script>
+	<script src="js/ui.js"></script>
 	<script src="js/pptx-parser.js"></script>
 	<script src="js/pdf-parser.js"></script>
 	<script src="js/render.js"></script>

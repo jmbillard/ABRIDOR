@@ -85,22 +85,25 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
   <sub><i>ilustração do menu do After Effects.</i></sub>
 </p>
 
-**2.2** o painel abre vazio. ele tem:
+**2.2** o painel abre pronto para receber um documento:
 
 <table>
   <tr>
     <td width="400"><img src="docs/img/10-painel.png" width="380"></td>
     <td>
 
-1. **abrir PPTX / PDF** → escolhe o documento.
+1. **clique** na área ou **arraste** um `.pptx` / `.pdf` para dentro do painel (atalho: `Ctrl/Cmd + O`).
 2. **abas** → `páginas`, `comps` e `fontes`.
-3. **criar comps** → cria tudo no projeto (fica ativo depois de abrir um documento).
-
-no rodapé aparecem o andamento e os avisos. ao abrir, o painel já lê a lista de fontes instaladas (*pronto — N fontes instaladas*).
+3. **criar comps** → fica ativo depois de abrir um documento.
 
   </td>
   </tr>
 </table>
+
+<p align="center">
+  <img src="docs/img/demo.gif" width="360"><br>
+  <sub>o painel em ação: seleção de páginas, duração, formato, fontes e criação.</sub>
+</p>
 
 <br>
 
@@ -110,7 +113,7 @@ no rodapé aparecem o andamento e os avisos. ao abrir, o painel já lê a lista 
 
 ## 3 · abrir o documento
 
-**3.1** clique em **abrir PPTX / PDF** e escolha o arquivo. cada página aparece em miniatura, com os textos detectados destacados por cima.
+**3.1** cada página aparece em miniatura, com os textos detectados destacados por cima.
 
 <table>
   <tr>
@@ -121,17 +124,19 @@ no rodapé aparecem o andamento e os avisos. ao abrir, o painel já lê a lista 
 
 no **PPTX** (à esquerda):
 
-1. slides marcados como **ocultos** no PowerPoint já vêm **desmarcados**.
-2. **duração só desta página** → aqui o slide 1 vai durar 8 s; vazio = duração padrão (aba `comps`).
-3. **imagens externas…** → usa PNG/JPG exportados do PowerPoint como referência (ver [dicas](#-dicas-e-problemas-comuns)).
+1. <img src="docs/img/icons/eye-off.svg" width="14"> slides **ocultos** no PowerPoint já vêm **desmarcados**.
+2. <img src="docs/img/icons/clock.svg" width="14"> **duração desta página** → em azul quando foi alterada (aqui, 8 s).
+3. <img src="docs/img/icons/type.svg" width="14"> **textos encontrados** na página (aparece ao passar o mouse).
+4. a duração padrão também aparece ao passar o mouse — clique para mudar.
+5. seleção rápida: **todas**, **nenhuma** e **inverter**.
+6. <img src="docs/img/icons/image.svg" width="14"> **imagens externas** → usa PNG/JPG exportados do PowerPoint como referência (ver [dicas](#-dicas-e-problemas-comuns)).
 
 no **PDF** (à direita):
 
-1. nome do arquivo, número de páginas, de textos e tamanho da página.
-2. **mostrar textos detectados** liga/desliga os destaques: 🟦 **azul** = caixa de texto, 🟧 **laranja** = texto de ponto.
-3. contador de páginas selecionadas.
-4. a página 1 foi **desmarcada** com um clique: o título dela é uma **imagem** dentro do PDF (só o "globo" é texto), então não vale a pena processar.
-5. passe o mouse sobre a miniatura para ver a lista de textos encontrados.
+1. o documento aberto. clique nele para **trocar de documento**.
+2. páginas selecionadas / total.
+3. <img src="docs/img/icons/boxes.svg" width="14"> liga/desliga o destaque dos textos: 🟦 **azul** = caixa de texto, 🟧 **laranja** = texto de ponto.
+4. a página 1 foi **desmarcada** com um clique: o título dela é uma **imagem** dentro do PDF (só o "globo" é texto).
 
 **3.2** cada destaque vira **uma camada de texto**. abaixo, a mesma detecção em tamanho grande, com a fonte, o tamanho e o alinhamento que o ABRIDOR leu de cada bloco:
 
@@ -155,28 +160,26 @@ no **PDF** (à direita):
 
 ## 4 · escolher as páginas
 
-**4.1** clique na **miniatura** (ou na caixa de seleção) para incluir ou excluir a página. as excluídas ficam apagadas e não viram comps.
+**4.1** clique na **miniatura** para incluir ou excluir a página: a selecionada ganha borda azul e ✔; a excluída fica apagada e não vira comp.
+
+**4.2** para mudar a **duração de uma página**, clique no relógio, digite os segundos (aceita vírgula: `6,5`) e tecle `Enter`. deixe vazio para voltar à duração padrão; `Esc` cancela.
 
 <p align="center">
-  <img src="docs/img/14-miniatura.png" width="300"><br>
-  <sub>página selecionada: borda azul, caixa marcada, quantidade de textos e campo de duração.</sub>
+  <img src="docs/img/14-duracao.png" width="300">
 </p>
 
-**4.2** para seleções maiores:
+**4.3** para seleções maiores, use o **intervalo** <img src="docs/img/icons/range.svg" width="14">:
 
 <table>
   <tr>
     <td width="400"><img src="docs/img/13-intervalo.png" width="380"></td>
     <td>
 
-- **todas / nenhuma / inverter** → seleção rápida.
-
-1. digite um **intervalo** de páginas:
+1. clique no `#` e digite as páginas, depois `Enter`:
    - `1-3, 5` → páginas 1, 2, 3 e 5
    - `8-` → da 8 até o fim
    - `-4` → da 1 até a 4
-2. clique em **ok** (ou tecle `Enter`): ficam selecionadas **somente** essas páginas.
-3. o contador confirma: *4 de 6 páginas selecionadas*.
+2. ficam selecionadas **somente** essas páginas.
 
   </td>
   </tr>
@@ -197,20 +200,30 @@ no **PDF** (à direita):
     <td width="400"><img src="docs/img/20-comps.png" width="380"></td>
     <td>
 
-1. **resolução** → `UHD 4K 3840 × 2160`, `Full HD 1920 × 1080`, `HD 1280 × 720` ou *personalizada*.
-2. **frame rate** → padrão **29,97**. também 23,976 · 24 · 25 · 30 · 50 · 59,94 · 60.
-3. **duração por página** (em segundos), com o timecode e os frames ao lado.
-4. **total** da sequência, já somando as durações individuais (aqui o slide 1 com 8 s).
-5. **nome** das comps → `O SOM DO MAR 01`, `O SOM DO MAR 02`, …
-6. **comp master** → todas as páginas em sequência, com um marcador por página.
-7. **imagem de referência** → render da página como **camada guia** travada, com opacidade ajustável.
+1. **formato** → `4K` (3840 × 2160), `1080` (1920 × 1080), `720` (1280 × 720) ou `···` para um tamanho personalizado.
+2. **frame rate** → padrão **29,97**.
+3. **duração por página** → `−` / `+` de 0,5 s (ou digite; `↑` `↓` também funcionam). ao lado, o timecode e os frames.
+4. **nome das comps** → `O SOM DO MAR 01`, `O SOM DO MAR 02`, …
+5. **comp master** → todas as páginas em sequência, com um marcador por página.<br>**referência** → imagem da página como **camada guia** travada; ao ligar, aparece a opacidade.
+6. **ajustes finos** → opções avançadas (abaixo).
 
-ainda nesta aba:
+o rodapé resume tudo: quantidade de comps, duração total, formato e frame rate.
 
-- **encaixe** → *ajustar* (página inteira visível) ou *preencher* (corta as bordas) quando a proporção do documento for diferente da comp.
-- **PDF** → *agrupar linhas em parágrafos* ou *uma camada por linha*.
-- **PPTX** → *ignorar a redução automática de texto* do PowerPoint.
-- **fonte reserva** → nome PostScript usado quando uma fonte não estiver associada (padrão `ArialMT`).
+  </td>
+  </tr>
+</table>
+
+**5.2** em **ajustes finos**:
+
+<table>
+  <tr>
+    <td width="400"><img src="docs/img/21-ajustes.png" width="380"></td>
+    <td>
+
+1. abre / fecha os ajustes.
+2. **encaixe da página** → *ajustar* (página inteira visível) ou *preencher* (corta as bordas) quando a proporção do documento for diferente da comp.
+3. **redução automática** (PPTX) → mantém o encolhimento de texto que o PowerPoint aplica quando o texto não cabe na caixa.<br>em PDF, aqui aparece **textos do PDF**: *parágrafos* ou *uma por linha*.
+4. **fonte reserva** → nome PostScript usado quando uma fonte não estiver associada (padrão `ArialMT`).
 
   </td>
   </tr>
@@ -228,7 +241,7 @@ ainda nesta aba:
 
 ## 6 · associar as fontes
 
-**6.1** a aba **fontes** lista as fontes do documento, com quantas vezes cada uma aparece **nas páginas selecionadas**. o número vermelho na aba indica quantas ainda **não têm fonte**.
+**6.1** a aba **fontes** lista cada fonte do documento como **origem → destino**, com uma prévia do texto na fonte de destino. o número vermelho na aba indica quantas ainda **não têm fonte**.
 
 <table>
   <tr>
@@ -236,31 +249,30 @@ ainda nesta aba:
     <td>
 
 1. **3 fontes sem associação** (o documento usa *Gotham Black* e *Calibri*, que não estão instaladas).
-2. 🔴 **vermelho** = não encontrada. se continuar assim, a camada usa a **fonte reserva**.
-3. 🟢 **verde** = associada **automaticamente**: *Inter Bold* do PowerPoint → família *Inter*, estilo *Bold*.
-
-cada fonte mostra:
-- em **cinza**, o texto do documento na fonte **original** (se ela estiver instalada);
-- no quadro escuro, o mesmo texto na fonte **escolhida**.
+2. 🔴 **sem fonte** → se continuar assim, a camada usa a **fonte reserva**. as que faltam ficam no topo da lista.
+3. 🟢 **automático** → *Inter Bold* do PowerPoint foi encontrada e associada sozinha. 🔵 = escolhida por você.
+4. **prévia** com o texto do próprio documento, na fonte de destino.
+5. <img src="docs/img/icons/wand.svg" width="14"> **associar automaticamente** de novo.
+6. <img src="docs/img/icons/project.svg" width="14"> **ler do projeto** (ver [passo 8](#8--trocar-as-fontes-depois)).
 
   </td>
   </tr>
 </table>
 
-**6.2** para trocar, escolha **família** e **estilo**. a linha fica 🔵 **azul** (*manual*).
+**6.2** clique numa fonte para **abrir** e trocar:
 
 <table>
   <tr>
-    <td width="400"><img src="docs/img/31-fontes-trocadas.png" width="380"></td>
+    <td width="400"><img src="docs/img/31-fontes-editar.png" width="380"></td>
     <td>
 
 exemplo: *Gotham Black* não está instalada → trocada por **Inter Black**:
 
-1. **família** → `Inter`
-2. **estilo** → `Black` (ao trocar a família, o estilo mais parecido com o original já vem escolhido)
-3. **escala** → `95` %: a fonte nova é um pouco mais larga, então o texto fica 5 % menor
-4. **preview** com a fonte nova
-5. texto original do documento
+1. clique na linha para abrir (clique de novo, ou em outra fonte, para fechar).
+2. **família** → `Inter`.
+3. **estilo** → `Black` (ao trocar a família, o estilo mais parecido com o original já vem escolhido).
+4. **escala** → `−` / `+` de 5 %. aqui `95 %`: a fonte nova é um pouco mais larga.
+5. o texto na fonte **original** (se estiver instalada), para comparar.
 
 as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
 
@@ -268,7 +280,7 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
   </tr>
 </table>
 
-**6.3** para comparar as fontes com outro texto (acentos, números…), digite no campo **texto do preview** (1). o controle deslizante (2) muda o tamanho do preview.
+**6.3** para comparar com outro texto (acentos, números…), clique em <img src="docs/img/icons/type.svg" width="14"> (1), digite o **texto do preview** (2) e ajuste o **tamanho** (3):
 
 <p align="center">
   <img src="docs/img/32-preview.png" width="380">
@@ -276,8 +288,8 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
 
 > 💡 *dicas:*\
 > • as escolhas manuais ficam **memorizadas**: no próximo documento com a mesma fonte, a associação já vem pronta.\
-> • **auto-associar** refaz as associações automáticas; **↻** recarrega a lista de fontes instaladas (útil depois de ativar uma fonte nova no Adobe Fonts).\
-> • **filtrar…** procura pelo nome da fonte do documento.
+> • <img src="docs/img/icons/refresh.svg" width="14"> recarrega a lista de fontes instaladas (útil depois de ativar uma fonte no Adobe Fonts).\
+> • <img src="docs/img/icons/search.svg" width="14"> filtra pelo nome da fonte do documento.
 
 <br>
 
@@ -287,19 +299,27 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
 
 ## 7 · criar as comps
 
-**7.1** clique em **criar comps**. o andamento aparece no rodapé, comp por comp:
+**7.1** clique em **criar N comps**. o próprio botão vira a barra de andamento:
 
 <p align="center">
   <img src="docs/img/40-criando.png" width="460">
 </p>
 
-**7.2** no fim, o rodapé mostra quantas comps foram criadas. se houver **avisos**, clique no botão para ver a lista. avisos comuns:
-- `fonte "X" indisponível (…) → ArialMT` → a fonte escolhida não está instalada nesta máquina e a camada usou a reserva;
-- `estilos mistos simplificados` → a camada tem fontes/tamanhos diferentes, mas a versão do After Effects é anterior à 2024 (24.3), então recebeu um estilo só (exemplo abaixo).
+**7.2** no fim, o botão fica verde com um ✔, e uma mensagem confirma quantas comps foram criadas (1). se houver **avisos**, aparece o ⚠ com a quantidade (2):
 
 <p align="center">
   <img src="docs/img/41-concluido.png" width="460">
 </p>
+
+clique no ⚠ para ver a lista:
+
+<p align="center">
+  <img src="docs/img/42-avisos.png" width="460">
+</p>
+
+avisos comuns:
+- `fonte "X" indisponível (…) → ArialMT` → a fonte escolhida não está instalada nesta máquina e a camada usou a reserva;
+- `estilos mistos simplificados` → a camada tem fontes/tamanhos diferentes, mas a versão do After Effects é anterior à 2024 (24.3), então recebeu um estilo só.
 
 **7.3** no projeto, o ABRIDOR cria:
 
@@ -317,7 +337,7 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
 em cada comp de página: as **camadas de texto**, com o nome do próprio texto, e por baixo a **REF**, a camada guia travada com a imagem da página (veja a [ilustração no topo](#-abridor)).
 
 > 🚩 *obs:*\
-> • as imagens de referência são salvas numa pasta `<nome do documento>_ABRIDOR` ao lado do documento (ou na pasta temporária, se não for possível gravar lá).\
+> • as imagens de referência são salvas numa pasta `<nome do documento>_ABRIDOR` ao lado do documento (ou na pasta temporária, se não for possível gravar lá ou se o arquivo foi arrastado sem caminho conhecido).\
 > • cada etapa pode ser desfeita com `Edit` > `Undo`.\
 > • a coluna **Comment** das camadas de texto guarda a fonte original (`ABRIDOR {...}`). **não apague** esse comentário se quiser trocar as fontes depois.
 
@@ -331,18 +351,26 @@ em cada comp de página: as **camadas de texto**, com o nome do próprio texto, 
 
 as camadas criadas pelo ABRIDOR lembram a fonte original de cada trecho. por isso as fontes podem ser trocadas **a qualquer momento** — no mesmo dia ou meses depois, com o documento original ou sem ele.
 
+**8.1** abra o projeto e vá na aba **fontes**. sem documento aberto, use **ler do projeto** (1):
+
+<p align="center">
+  <img src="docs/img/50-fontes-vazio.png" width="380">
+</p>
+
+**8.2** aparecem as fontes das camadas já criadas, com o último mapeamento usado. troque o que quiser e aplique:
+
 <table>
   <tr>
-    <td width="400"><img src="docs/img/50-trocar-depois.png" width="380"></td>
+    <td width="400"><img src="docs/img/51-trocar-depois.png" width="380"></td>
     <td>
 
-1. abra o projeto, vá na aba **fontes** e clique em **ler do projeto**: aparecem as fontes das camadas já criadas e o último mapeamento usado (*N× no projeto*).
-2. troque as fontes que quiser (aqui *Calibri Bold* → **Liberation Sans Bold**).
-3. escolha onde aplicar:
-   - **em todas as comps do projeto**, ou
-   - **nas comps selecionadas** (selecione as comps no painel *Project* antes).
-4. clique em **aplicar fontes**.
-5. o rodapé mostra quantas camadas foram atualizadas.
+1. troque a fonte (aqui *Calibri Bold* → **Liberation Sans Bold**).
+2. escolha onde aplicar:
+   - **projeto** → em todas as comps do projeto;
+   - **selecionadas** → só nas comps selecionadas no painel *Project*.
+3. **aplicar** → o botão confirma com ✔ quando termina.
+
+a barra **aplicar** só aparece quando há comps do ABRIDOR no projeto (depois de criar ou de ler do projeto).
 
   </td>
   </tr>
@@ -350,8 +378,7 @@ as camadas criadas pelo ABRIDOR lembram a fonte original de cada trecho. por iss
 
 > 🚩 *obs:*\
 > • a troca preserva os tamanhos ajustados à mão (exceto em camadas com fontes misturadas, que voltam ao tamanho original × escala).\
-> • funciona também com keyframes de *Source Text*.\
-> • **duplo clique** no nome de uma fonte seleciona, na comp ativa, as camadas que usam essa fonte.
+> • funciona também com keyframes de *Source Text*.
 
 <br>
 
@@ -424,6 +451,7 @@ abridor-cep/
 ├── css/style.css
 ├── js/
 │   ├── cep.js            → ponte com o AE (evalScript) e sistema de arquivos (Node)
+│   ├── ui.js             → ícones, animações de expandir/recolher, segmentados, toasts
 │   ├── pptx-parser.js    → leitura do PPTX (zip + XML)
 │   ├── pdf-parser.js     → leitura do PDF (pdf.js)
 │   ├── render.js         → miniaturas / referência de PPTX
@@ -442,6 +470,7 @@ abridor-cep/
 - prints do README:
   - `python3 tests/make_example_pptx.py` → gera o `exemplo_creditos.pptx`.
   - `node tests/make_screenshots.js` → gera todos os prints de `docs/img` (painel real no Chromium com o AE simulado; instalador, menu e projeto são ilustrações em `tests/illustrations.html`).
+  - `node tests/make_demo.js` → grava a animação `docs/img/demo.gif` (precisa do `ffmpeg`).
   - `python3 tests/make_banner.py` → gera o banner do instalador como string ExtendScript.
 - `js/lib/pdf.js` e `pdf.worker.js` têm uma alteração: `isNodeJS = false`, porque o CEP expõe `process` e o pdf.js tentaria usar APIs do Node.
 

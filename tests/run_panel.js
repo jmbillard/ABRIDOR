@@ -53,7 +53,7 @@ fam('DejaVu Sans', [['Book', 'DejaVuSans'], ['Bold', 'DejaVuSans-Bold']]);
 
 	await page.goto('file://' + path.resolve(__dirname, '../abridor-cep/index.html'));
 	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
-	await page.click('#btnOpen');
+	await page.click('#dropZone');
 	await page.waitForFunction(() => /carregado|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
 	console.log('status:', await page.textContent('#status'));
 	await page.waitForTimeout(500);

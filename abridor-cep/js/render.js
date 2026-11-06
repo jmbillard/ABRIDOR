@@ -212,7 +212,7 @@
 		ctx.lineWidth = Math.max(1, w / 200);
 		page.texts.forEach(function (t, i) {
 			var col = t.mode === 'box' ? '0,166,255' : '255,140,0';
-			ctx.strokeStyle = 'rgba(' + col + ',0.9)';
+			ctx.strokeStyle = 'rgba(' + col + ',0.6)';
 			ctx.fillStyle = 'rgba(' + col + ',' + (highlight === i ? 0.35 : 0.12) + ')';
 			var cx = t.cx !== undefined ? t.cx : t.ax, cy = t.cy !== undefined ? t.cy : t.ay;
 			withRotation(ctx, ox + cx * s, oy + cy * s, t.rotation, function () {
