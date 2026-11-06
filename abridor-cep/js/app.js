@@ -7,7 +7,7 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.2.0';
+	var VERSION = '1.3.0';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -243,6 +243,7 @@
 	function setDocument(p, bytes, real) {
 		state.path = p;
 		state.realPath = real;
+		state.anchor = null;
 		state.bytes = bytes;
 		state.name = ABR.fs.basename(p).replace(/\.(pptx|pdf)$/i, '');
 		state.extImages = [];
@@ -252,6 +253,44 @@
 		$('docType').classList.toggle('pptx', !/\.pdf$/i.test(p));
 		$('prefix').value = state.name.toUpperCase().replace(/[_\s]+/g, ' ').slice(0, 24).replace(/\s+$/, '') || 'LAYOUT';
 		parseDocument(true);
+	}
+
+	// ------------------------------------------------------ recentes ---------
+	function addRecent(doc) {
+		if (!state.realPath) return;
+		var list = load('recents', []).filter(function (r) { return r.path !== state.path; });
+		list.unshift({ path: state.path, name: ABR.fs.basename(state.path), type: doc.type, pages: doc.pages.length, t: Date.now() });
+		store('recents', list.slice(0, 6));
+		renderRecents();
+	}
+
+	function renderRecents() {
+		var el = $('recent');
+		var list = load('recents', []);
+		el.classList.toggle('hidden', !list.length);
+		if (!list.length) { el.innerHTML = ''; return; }
+		el.innerHTML = '<div class="recent-head"><span>recentes</span><button id="recentClear" title="limpar a lista\nos arquivos não são apagados">limpar</button></div>' +
+			list.map(function (r, i) {
+				var ok = ABR.fs.exists(r.path);
+				return '<button class="recent-item' + (ok ? '' : ' missing') + '" data-i="' + i + '" title="' + esc(r.path) + (ok ? '' : '\narquivo não encontrado') + '">' +
+					'<span class="doc-type' + (r.type === 'pptx' ? ' pptx' : '') + '">' + r.type.toUpperCase() + '</span>' +
+					'<span class="ri-text"><b>' + esc(r.name) + '</b><small>' + (ok ? r.pages + ' páginas · ' + relTime(r.t) : 'arquivo não encontrado') + '</small></span>' +
+					icon(ok ? 'arrow' : 'x', 'ri-go') + '</button>';
+			}).join('');
+		$('recentClear').onclick = function (e) { e.stopPropagation(); store('recents', []); renderRecents(); };
+		each(el.querySelectorAll('.recent-item'), function (b) {
+			b.onclick = function (e) {
+				var r = list[+b.dataset.i];
+				if (b.classList.contains('missing')) {
+					if (e.target.closest('.ri-go')) {
+						store('recents', list.filter(function (x) { return x.path !== r.path; }));
+						renderRecents();
+					}
+					return;
+				}
+				if (!state.busy) loadPath(r.path);
+			};
+		});
 	}
 
 	function skeleton(n) {
@@ -301,6 +340,7 @@
 			var nTexts = doc.pages.reduce(function (n, pg) { return n + pg.texts.length; }, 0);
 			$('docMeta').textContent = doc.pages.length + ' páginas · ' + nTexts + ' textos';
 			$('docChip').title = ABR.fs.basename(state.path) + '\n' + Math.round(doc.width) + ' × ' + Math.round(doc.height) + ' pt\n\nclique para abrir outro documento';
+			if (fresh) addRecent(doc);
 			collectFonts();
 			renderGrid();
 			renderFonts();
@@ -403,9 +443,21 @@
 			}).join('\n') + (pg.texts.length > 8 ? '\n• …' : '') : 'nenhum texto encontrado (texto em imagem?)');
 			thumb.onclick = function (e) {
 				if (e.target.closest('.dur')) return;
-				state.selected[i] = !state.selected[i];
+				var a = state.anchor;
+				if (e.shiftKey && a !== null && a !== undefined && a !== i && a < state.selected.length) {
+					// shift + clique: aplica ao intervalo o novo estado da página clicada
+					var v = !state.selected[i];
+					for (var k = Math.min(a, i); k <= Math.max(a, i); k++) state.selected[k] = v;
+				} else {
+					state.selected[i] = !state.selected[i];
+				}
+				state.anchor = i;
+				state.hoverPage = i;
+				updateRangePreview();
 				updateSelection(true);
 			};
+			thumb.onmouseenter = function (e) { state.hoverPage = i; state.shift = e.shiftKey; updateRangePreview(); };
+			thumb.onmouseleave = function () { if (state.hoverPage === i) { state.hoverPage = null; updateRangePreview(); } };
 			bindDuration(el.querySelector('.dur'), i);
 			grid.appendChild(el);
 		});
@@ -438,6 +490,33 @@
 			if (e.key === 'Escape') commit(true);
 		};
 		input.onblur = function () { commit(); };
+	}
+
+	// prévia do intervalo enquanto o shift está pressionado
+	function updateRangePreview() {
+		var a = state.anchor, h = state.hoverPage;
+		var on = state.shift && state.doc && a !== null && a !== undefined && h !== null && h !== undefined && a !== h;
+		var lo = on ? Math.min(a, h) : -1, hi = on ? Math.max(a, h) : -2;
+		each($('grid').querySelectorAll('.page'), function (el) {
+			var k = +el.dataset.i;
+			el.classList.toggle('range', k >= lo && k <= hi);
+		});
+		var hint = $('rangeHint');
+		if (!on) { if (hint) hint.parentNode.removeChild(hint); return; }
+		if (UI.tip) UI.tip.hide();
+		if (!hint) {
+			hint = document.createElement('div');
+			hint.id = 'rangeHint';
+			hint.className = 'range-hint';
+			document.body.appendChild(hint);
+		}
+		var verb = state.selected[h] ? 'desmarcar' : 'marcar';
+		hint.innerHTML = '<kbd>shift</kbd> + clique: ' + verb + ' páginas ' + (lo + 1) + '–' + (hi + 1);
+		var el = $('grid').querySelector('.page[data-i="' + h + '"]');
+		if (!el) return;
+		var r = el.getBoundingClientRect();
+		hint.style.left = Math.max(6, Math.min(window.innerWidth - hint.offsetWidth - 6, r.left + 8)) + 'px';
+		hint.style.top = Math.max(6, r.top - hint.offsetHeight - 6) + 'px';
 	}
 
 	// "1-3, 5, 8-" -> índices
@@ -551,25 +630,17 @@
 		for (var k in state.fonts) {
 			if (fontState(k) === 'missing' && fontUseCount(state.fonts[k])) missing++;
 		}
+		var chip = $('preChip');
+		var showChip = !!state.doc && missing > 0;
+		chip.querySelector('span').textContent = missing + ' fonte' + (missing === 1 ? '' : 's') + ' sem associação';
+		if (showChip && chip.classList.contains('hidden')) UI.replay(chip, 'pre-chip');
+		chip.classList.toggle('hidden', !showChip);
+		$('ctaDot').classList.toggle('hidden', !showChip);
 		var badge = $('fontBadge');
 		badge.textContent = missing;
 		badge.classList.toggle('hidden', !missing);
 		if (missing !== lastMissing && lastMissing !== -1 && missing) UI.replay(badge, 'bump');
 		lastMissing = missing;
-	}
-
-	var familyOptionsHTML = null;
-
-	function familyOptions() {
-		if (familyOptionsHTML !== null) return familyOptionsHTML;
-		var seen = {}, html = ['<option value="">escolher fonte…</option>'];
-		ABR.fonts.list.forEach(function (f) {
-			if (seen[f.family]) return;
-			seen[f.family] = 1;
-			html.push('<option value="' + esc(f.family) + '">' + esc(f.family) + '</option>');
-		});
-		familyOptionsHTML = html.join('');
-		return familyOptionsHTML;
 	}
 
 	function stylesOf(family) {
@@ -705,7 +776,7 @@
 			'<div class="font-preview"></div>' +
 			'<div class="collapse font-edit"><div class="font-edit-inner">' +
 			'<div class="font-pick">' +
-			(supported ? '<select class="family"></select><select class="style"></select>' : '<input type="text" class="ps" placeholder="nome PostScript (ex: Montserrat-Bold)" spellcheck="false">') +
+			(supported ? '<button class="picker-field family" title="família\nclique para buscar entre as fontes instaladas"><span></span>' + icon('chevron') + '</button><select class="style"></select>' : '<input type="text" class="ps" placeholder="nome PostScript (ex: Montserrat-Bold)" spellcheck="false">') +
 			'</div>' +
 			'<div class="font-tools">' +
 			'<span class="orig" title="original\no texto na fonte do documento, se ela estiver instalada"><small>original</small><span></span></span>' +
@@ -715,7 +786,7 @@
 			'</div></div>';
 
 		var m = state.map[src.key] || (state.map[src.key] = { ps: '', scale: 100, manual: false });
-		var fam = row.querySelector('select.family');
+		var fam = row.querySelector('.picker-field.family');
 		var sty = row.querySelector('select.style');
 		var psIn = row.querySelector('input.ps');
 		var edit = row.querySelector('.font-edit');
@@ -733,11 +804,17 @@
 			if (built) return;
 			built = true;
 			if (fam) {
-				fam.innerHTML = familyOptions();
 				var cur = ABR.fonts.get(m.ps);
-				if (cur) { fam.value = cur.family; fillStyles(cur.family, cur.ps); }
+				setFamilyLabel(cur ? cur.family : '');
+				if (cur) fillStyles(cur.family, cur.ps);
 			}
 			if (psIn) psIn.value = m.ps || '';
+		}
+
+		function setFamilyLabel(family) {
+			fam.dataset.value = family || '';
+			fam.querySelector('span').textContent = family || 'escolher fonte…';
+			fam.classList.toggle('empty', !family);
 		}
 
 		function refresh(animate) {
@@ -782,18 +859,26 @@
 		preview.onclick = function () { toggle(); };
 
 		if (fam) {
-			fam.onchange = function () {
-				var styles = stylesOf(fam.value);
-				// aproveita o peso/estilo que está no nome da fonte original (ex. "Gotham Black" -> Black)
-				var hint = (src.key.match(/thin|hairline|extra ?light|ultra ?light|light|book|regular|medium|semi ?bold|demi ?bold|extra ?bold|ultra ?bold|bold|heavy|black|italic|oblique|condensed|narrow/gi) || []).join(' ');
-				var pick = styles.length ? (ABR.fonts.autoMatch({ key: fam.value + (hint ? ' ' + hint : ''), family: fam.value + (hint ? ' ' + hint : ''), bold: src.bold, italic: src.italic, type: 'pptx' }) || styles[0]) : null;
-				if (pick && pick.family !== fam.value) pick = styles[0];
-				fillStyles(fam.value, pick ? pick.ps : '');
-				m.ps = pick ? pick.ps : '';
-				changed();
+			fam.onclick = function () {
+				openFontPicker(fam, src, fam.dataset.value, function (family) {
+					var pick = styleFor(src, family);
+					setFamilyLabel(family);
+					fillStyles(family, pick ? pick.ps : '');
+					m.ps = pick ? pick.ps : '';
+					changed();
+					offerFamily(row, src, family);
+				});
 			};
 			sty.onchange = function () { m.ps = sty.value; changed(); };
 		}
+		row._refresh = function () {
+			if (built && fam) {
+				var cur = ABR.fonts.get(m.ps);
+				setFamilyLabel(cur ? cur.family : '');
+				if (cur) fillStyles(cur.family, cur.ps);
+			}
+			refresh(true);
+		};
 		if (psIn) psIn.onchange = function () { m.ps = psIn.value.trim(); changed(); };
 
 		function step(d) {
@@ -805,6 +890,185 @@
 
 		refresh(false);
 		return row;
+	}
+
+	// estilo da família escolhida mais parecido com a fonte de origem (ex. "Gotham Black" -> Black)
+	function styleFor(src, family) {
+		var styles = stylesOf(family);
+		if (!styles.length) return null;
+		var hint = (src.key.match(/thin|hairline|extra ?light|ultra ?light|light|book|regular|medium|semi ?bold|demi ?bold|extra ?bold|ultra ?bold|bold|heavy|black|italic|oblique|condensed|narrow/gi) || []).join(' ');
+		var pick = ABR.fonts.autoMatch({ key: family + (hint ? ' ' + hint : ''), family: family + (hint ? ' ' + hint : ''), bold: src.bold, italic: src.italic, type: 'pptx' }) || styles[0];
+		return pick.family === family ? pick : styles[0];
+	}
+
+	// ------------------------------------------------------ família inteira -
+	// depois de trocar uma fonte, oferece trocar os outros estilos da mesma família de origem
+	function offerFamily(row, src, family) {
+		var old = row.querySelector('.family-hint');
+		if (old) old.parentNode.removeChild(old);
+		var fam0 = ABR.fonts.norm(src.family);
+		var list = [];
+		for (var k in state.fonts) {
+			var o = state.fonts[k];
+			if (k === src.key || ABR.fonts.norm(o.family) !== fam0) continue;
+			var cur = ABR.fonts.get((state.map[k] || {}).ps);
+			if (cur && cur.family === family) continue;
+			var pick = styleFor(o, family);
+			if (pick) list.push({ key: k, font: pick });
+		}
+		if (!list.length) return;
+		var h = document.createElement('div');
+		h.className = 'family-hint';
+		h.innerHTML = '<p>' + icon('wand') + 'trocar também os outros estilos de ' + esc(src.family) + '?</p><ul>' +
+			list.map(function (x) { return '<li>' + esc(x.key) + ' ' + icon('arrow') + ' <b>' + esc(x.font.family + ' ' + x.font.style) + '</b></li>'; }).join('') +
+			'</ul><div class="row-btns"><button class="yes">aplicar' + (list.length > 1 ? ' nos ' + list.length : '') + '</button><button class="no">agora não</button></div>';
+		row.querySelector('.font-edit-inner').appendChild(h);
+		function dismiss() {
+			h.classList.add('out');
+			setTimeout(function () { if (h.parentNode) h.parentNode.removeChild(h); }, 200);
+		}
+		h.querySelector('.no').onclick = dismiss;
+		h.querySelector('.yes').onclick = function () {
+			list.forEach(function (x) {
+				var mm = state.map[x.key] || (state.map[x.key] = { scale: 100 });
+				mm.ps = x.font.ps;
+				mm.manual = true;
+				var r = state.fontRows && state.fontRows[x.key];
+				if (r && r._refresh) r._refresh();
+			});
+			rememberMap();
+			updateFontCounts();
+			dismiss();
+			status(list.length + ' estilo' + (list.length === 1 ? '' : 's') + ' de ' + src.family + ' trocado' + (list.length === 1 ? '' : 's') + ' para ' + family + '.', 'ok');
+		};
+	}
+
+	// ------------------------------------------------------ seletor de fontes
+	// fontes com as mesmas medidas (substitutas comuns)
+	var EQUIV = {
+		calibri: 'Carlito', carlito: 'Calibri', cambria: 'Caladea', caladea: 'Cambria',
+		arial: 'Liberation Sans', helvetica: 'Liberation Sans', liberationsans: 'Arial',
+		timesnewroman: 'Liberation Serif', times: 'Liberation Serif', liberationserif: 'Times New Roman',
+		couriernew: 'Liberation Mono', liberationmono: 'Courier New'
+	};
+
+	function familyIndex() {
+		var idx = {};
+		ABR.fonts.list.forEach(function (f) { idx[f.family] = (idx[f.family] || 0) + 1; });
+		return idx;
+	}
+
+	function openFontPicker(field, src, current, onPick) {
+		closeFontPicker();
+		var idx = familyIndex();
+		var families = Object.keys(idx).sort(function (a, b) { return a.localeCompare(b); });
+		var recents = load('recentFamilies', []).filter(function (f) { return idx[f]; });
+		var equiv = EQUIV[ABR.fonts.norm(src.family)];
+		if (equiv && !idx[equiv]) equiv = null;
+
+		var box = document.createElement('div');
+		box.className = 'picker';
+		box.id = 'fontPicker';
+		box.innerHTML = '<div class="picker-search">' + icon('search') + '<input type="text" spellcheck="false" placeholder="buscar fonte…"></div>' +
+			'<div class="picker-list"></div>' +
+			'<div class="picker-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navegar</span><span><kbd>Enter</kbd> escolher</span><span><kbd>Esc</kbd> fechar</span></div>';
+		document.body.appendChild(box);
+		field.classList.add('active');
+
+		var input = box.querySelector('input');
+		var listEl = box.querySelector('.picker-list');
+		var items = [], hl = 0;
+
+		function itemHTML(f, i, q, note) {
+			var name = esc(f);
+			if (q) {
+				var p = f.toLowerCase().indexOf(q);
+				if (p >= 0) name = esc(f.slice(0, p)) + '<mark>' + esc(f.slice(p, p + q.length)) + '</mark>' + esc(f.slice(p + q.length));
+			}
+			return '<div class="picker-item' + (f === current ? ' cur' : '') + '" data-i="' + i + '"><span class="pf" style="font-family:\'' + f.replace(/'/g, '') + '\', sans-serif">' + name + '</span>' +
+				'<span class="ps">' + (note ? esc(note) + ' · ' : '') + idx[f] + ' estilo' + (idx[f] === 1 ? '' : 's') + '</span></div>';
+		}
+
+		function render() {
+			var q = input.value.trim().toLowerCase();
+			var match = function (f) { return !q || f.toLowerCase().indexOf(q) >= 0; };
+			items = [];
+			var html = '';
+			var sec = function (title, list, noteFn) {
+				list = list.filter(match);
+				if (!list.length) return;
+				html += '<div class="picker-sec">' + title + '</div>';
+				list.forEach(function (f) { html += itemHTML(f, items.length, q, noteFn && noteFn(f)); items.push(f); });
+			};
+			if (equiv) sec('sugestão', [equiv], function () { return 'medidas iguais à ' + src.family; });
+			sec('recentes', recents.filter(function (f) { return f !== equiv; }));
+			var rest = families.filter(function (f) { return match(f) && f !== equiv && recents.indexOf(f) < 0; });
+			if (q) rest.sort(function (a, b) { return (a.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.toLowerCase().indexOf(q) === 0 ? 0 : 1) || a.localeCompare(b); });
+			var shown = rest.slice(0, 150);
+			if (shown.length) {
+				html += '<div class="picker-sec">' + (q ? 'todas · ' + rest.length + ' resultado' + (rest.length === 1 ? '' : 's') : 'todas · ' + families.length) + '</div>';
+				shown.forEach(function (f) { html += itemHTML(f, items.length, q); items.push(f); });
+				if (rest.length > shown.length) html += '<div class="picker-empty">e mais ' + (rest.length - shown.length) + ' — continue digitando</div>';
+			}
+			if (!items.length) html = '<div class="picker-empty">nenhuma fonte com “' + esc(input.value) + '”</div>';
+			listEl.innerHTML = html;
+			hl = Math.max(0, items.indexOf(current) >= 0 && !q ? items.indexOf(current) : 0);
+			highlight(false);
+		}
+
+		function highlight(scroll) {
+			each(listEl.querySelectorAll('.picker-item'), function (el) { el.classList.toggle('hl', +el.dataset.i === hl); });
+			var el = listEl.querySelector('.picker-item.hl');
+			if (el && scroll !== false) el.scrollIntoView({ block: 'nearest' });
+		}
+
+		function place() {
+			var r = field.getBoundingClientRect();
+			var h = box.offsetHeight;
+			var below = window.innerHeight - r.bottom - 8;
+			var above = below < h && r.top - 8 > below;
+			box.classList.toggle('above', above);
+			box.style.top = (above ? Math.max(6, r.top - h - 6) : r.bottom + 6) + 'px';
+		}
+
+		function pick(f) {
+			if (!f) return;
+			var rec = load('recentFamilies', []).filter(function (x) { return x !== f; });
+			rec.unshift(f);
+			store('recentFamilies', rec.slice(0, 6));
+			closeFontPicker();
+			onPick(f);
+		}
+
+		input.oninput = render;
+		input.onkeydown = function (e) {
+			if (e.key === 'ArrowDown') { e.preventDefault(); hl = Math.min(items.length - 1, hl + 1); highlight(); }
+			if (e.key === 'ArrowUp') { e.preventDefault(); hl = Math.max(0, hl - 1); highlight(); }
+			if (e.key === 'Enter') { e.preventDefault(); pick(items[hl]); }
+			if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); closeFontPicker(); }
+		};
+		listEl.onmousemove = function (e) {
+			var it = e.target.closest('.picker-item');
+			if (it && +it.dataset.i !== hl) { hl = +it.dataset.i; highlight(false); }
+		};
+		listEl.onclick = function (e) {
+			var it = e.target.closest('.picker-item');
+			if (it) pick(items[+it.dataset.i]);
+		};
+		render();
+		place();
+		setTimeout(function () { input.focus(); }, 20);
+		state.picker = { box: box, field: field, place: place };
+	}
+
+	function closeFontPicker() {
+		var p = state.picker;
+		if (!p) return;
+		state.picker = null;
+		p.field.classList.remove('active');
+		p.box.style.transition = 'opacity .15s';
+		p.box.style.opacity = '0';
+		setTimeout(function () { if (p.box.parentNode) p.box.parentNode.removeChild(p.box); }, 150);
 	}
 
 	function fontMapForHost() {
@@ -822,7 +1086,6 @@
 	}
 
 	function loadInstalledFonts() {
-		familyOptionsHTML = null;
 		ABR.fonts.previewCache = {};
 		return ABR.fonts.load().then(function () {
 			if (!ABR.fonts.supported) {
@@ -983,9 +1246,134 @@
 		}
 	};
 
-	function build() {
+	// ------------------------------------------------------ antes de criar ---
+	function missingFonts() {
+		var out = [];
+		for (var k in state.fonts) if (fontState(k) === 'missing' && fontUseCount(state.fonts[k])) out.push(k);
+		return out;
+	}
+
+	// algum texto das páginas selecionadas tem trechos com fontes/tamanhos/cores diferentes?
+	function docHasMixed() {
+		return selectedIndexes().some(function (i) {
+			return state.doc.pages[i].texts.some(function (t) {
+				var first = null;
+				return t.paragraphs.some(function (p) {
+					return p.runs.some(function (r) {
+						if (!r.text || r.text === '\r') return false;
+						var k = r.fontKey + '|' + r.size + '|' + r.color.join(',');
+						if (first === null) { first = k; return false; }
+						return k !== first;
+					});
+				});
+			});
+		});
+	}
+
+	function goToMissing() {
+		var miss = missingFonts();
+		showTab('fonts');
+		if (!miss.length) return;
+		setTimeout(function () {
+			var row = state.fontRows && state.fontRows[miss[0]];
+			if (!row) return;
+			row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+			if (!row.classList.contains('open')) row.querySelector('.font-head').click();
+		}, 380);
+	}
+
+	function requestBuild() {
+		if (state.busy || !state.doc || $('btnBuild').disabled) return;
+		var missing = missingFonts();
+		ABR.callHostJSON('abridor_inspect', [state.name]).catch(function () { return {}; }).then(function (info) {
+			var mixed = info.ranges === false && docHasMixed();
+			if (!missing.length && !mixed && !info.existing) { build({ mode: 'new' }); return; }
+			openPreflight(missing, info, mixed);
+		});
+	}
+
+	function relTime(str) {
+		var d = new Date(str);
+		if (isNaN(d)) return '';
+		var now = new Date(), hm = pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2);
+		var mins = Math.floor((now - d) / 60000);
+		if (mins < 1) return 'agora';
+		if (mins < 60) return 'há ' + mins + ' min';
+		var days = Math.floor((new Date(now.toDateString()) - new Date(d.toDateString())) / 864e5);
+		if (days <= 0) return 'hoje às ' + hm;
+		if (days === 1) return 'ontem, ' + hm;
+		return 'há ' + days + ' dias';
+	}
+
+	function openPreflight(missing, info, mixed) {
+		var n = selectedIndexes().length;
+		var choice = info.existing ? 'texts' : 'new';
+		var wrap = document.createElement('div');
+		wrap.id = 'preWrap';
+		var html = '<div class="scrim"></div><div class="pre-sheet" role="dialog"><div class="sheet-grip"></div>' +
+			'<h3>' + icon('sparkle') + 'antes de criar ' + n + ' comp' + (n === 1 ? '' : 's') + '</h3>';
+		if (missing.length) {
+			var names = missing.slice(0, 3).join(', ') + (missing.length > 3 ? ' e mais ' + (missing.length - 3) : '');
+			html += '<div class="check-item warn">' + icon('alert') + '<div class="ci-body"><b>' + missing.length + ' fonte' + (missing.length === 1 ? '' : 's') + ' sem associação</b>' +
+				'<small>' + esc(names) + ' — vão sair em ' + esc(S.fallbackFont) + '</small></div><button class="mini-btn" data-act="fonts">associar</button></div>';
+		}
+		if (mixed) {
+			html += '<div class="check-item info">' + icon('info') + '<div class="ci-body"><b>After Effects ' + esc(String(info.version || '').replace(/x.*/, '')) + '</b>' +
+				'<small>trechos com fontes diferentes na mesma linha recebem um estilo só (precisa do 2024.3)</small></div></div>';
+		}
+		if (info.existing) {
+			var ex = info.existing;
+			html += '<div class="check-item folder">' + icon('project') + '<div class="ci-body"><b>“' + esc(ex.name) + '” já existe no projeto</b>' +
+				'<small>' + ex.comps + ' comp' + (ex.comps === 1 ? '' : 's') + (ex.created ? ' · criadas ' + relTime(ex.created) : '') + '</small>' +
+				'<div class="choice">' +
+				'<button data-mode="replace" title="substituir\napaga a pasta e as comps antigas do documento e cria de novo">' + icon('refresh') + 'substituir<small>apaga e cria de novo</small></button>' +
+				'<button data-mode="side" title="criar ao lado\nmantém as antigas; as novas vão para “' + esc(state.name + ' ' + info.next) + '”">' + icon('plus') + 'criar ao lado<small>as novas ganham “' + info.next + '”</small></button>' +
+				'<button data-mode="texts" title="só os textos\nmantém as comps, posições, animações e efeitos; troca só o conteúdo das camadas de texto">' + icon('type') + 'só os textos<small>mantém animações</small></button>' +
+				'</div></div></div>';
+		}
+		html += '<div class="sheet-actions"><button class="btn" data-act="back">voltar</button><button class="btn primary" data-act="go">' + icon('sparkle') + '<span></span></button></div></div>';
+		wrap.innerHTML = html;
+		document.body.appendChild(wrap);
+
+		var goLabel = wrap.querySelector('[data-act=go] span');
+		function setChoice(m) {
+			choice = m;
+			each(wrap.querySelectorAll('.choice button'), function (b) { b.classList.toggle('on', b.dataset.mode === m); });
+			goLabel.textContent = m === 'texts' ? 'atualizar os textos' : 'criar ' + n + ' comp' + (n === 1 ? '' : 's');
+		}
+		setChoice(choice);
+		function close(cb) {
+			document.removeEventListener('keydown', onKey, true);
+			wrap.querySelector('.scrim').classList.add('out');
+			wrap.querySelector('.pre-sheet').classList.add('out');
+			setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); if (cb) cb(); }, 230);
+		}
+		function onKey(e) {
+			if (e.key === 'Escape') { e.stopPropagation(); close(); }
+			if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); go(); }
+		}
+		function go() {
+			var opts = { mode: choice };
+			if (choice === 'side') { opts.folderName = state.name + ' ' + info.next; opts.suffix = ' (' + info.next + ')'; }
+			close(function () { build(opts); });
+		}
+		document.addEventListener('keydown', onKey, true);
+		wrap.querySelector('.scrim').onclick = function () { close(); };
+		wrap.addEventListener('click', function (e) {
+			var b = e.target.closest('button');
+			if (!b) return;
+			if (b.dataset.mode) setChoice(b.dataset.mode);
+			if (b.dataset.act === 'back') close();
+			if (b.dataset.act === 'go') go();
+			if (b.dataset.act === 'fonts') close(goToMissing);
+		});
+	}
+
+	function build(opts) {
+		opts = opts || { mode: 'new' };
 		if (state.busy || !state.doc) return;
 		var st = settings();
+		var suffix = opts.suffix || '';
 		var idx = selectedIndexes();
 		if (!idx.length) { status('nenhuma página selecionada.', 'error'); return; }
 		setBusy(true);
@@ -997,14 +1385,17 @@
 			docName: state.name,
 			settings: {
 				width: st.width, height: st.height, par: 1, fps: st.fps, fit: st.fit,
-				master: st.master, masterName: st.prefix + ' MASTER',
+				master: st.master, masterName: st.prefix + ' MASTER' + suffix,
+				mode: opts.mode,
 				refImages: st.refImages, refOpacity: st.refOpacity,
 				fallbackFont: st.fallbackFont,
 				lines: S.layerMode === 'lines'
 			},
 			fontMap: fontMapForHost(),
+			folderName: opts.folderName || '',
 			pages: []
 		};
+		var totals = { updated: 0, added: 0, left: 0 };
 
 		var jobPath = ABR.fs.join(ABR.fs.tmpDir(), 'abridor_job.json');
 		var chain = Promise.resolve();
@@ -1034,7 +1425,7 @@
 				var pg = state.doc.pages[i];
 				job.pages.push({
 					index: pg.index,
-					compName: compName(pg),
+					compName: compName(pg) + suffix,
 					duration: pageDuration(i),
 					width: pg.width, height: pg.height,
 					refImage: st.refImages ? (pg._ref || '') : '',
@@ -1056,6 +1447,9 @@
 					return ABR.callHostJSON('abridor_buildPage', [jobPath, n]);
 				}).then(function (res) {
 					(res.log || []).forEach(function (l) { log.push(pg.compName + ': ' + l); });
+					totals.updated += res.updated || 0;
+					totals.added += res.isNew ? 0 : (res.added || 0);
+					totals.left += res.left || 0;
 				});
 			});
 			return c;
@@ -1074,7 +1468,20 @@
 			cta.finish(true);
 			showApply(true);
 			UI.replay($('logoMark'), 'pry');
-			status(res.comps + ' comps criadas' + (res.master ? ' + "' + res.master + '"' : '') + '.' + (log.length ? ' veja os avisos.' : ''), 'ok');
+			var msg;
+			if (res.mode === 'texts') {
+				msg = totals.updated + ' camada' + (totals.updated === 1 ? '' : 's') + ' de texto atualizada' + (totals.updated === 1 ? '' : 's') +
+					(totals.added ? ', ' + totals.added + ' nova' + (totals.added === 1 ? '' : 's') : '') +
+					(totals.left ? ', ' + totals.left + ' sem correspondente' : '') + '.';
+			} else {
+				msg = res.comps + ' comps criadas' + (res.master ? ' + “' + res.master + '”' : '') + '.';
+			}
+			if (log.length) msg += ' veja os avisos.';
+			var actions = [];
+			if (res.masterId) actions.push({ label: 'abrir master', icon: 'master', fn: function () { ABR.callHost('abridor_reveal', [res.masterId]); } });
+			if (res.folderId) actions.push({ label: 'mostrar no projeto', icon: 'project', fn: function () { ABR.callHost('abridor_reveal', [res.folderId]); } });
+			$('status').textContent = msg;
+			UI.toast(msg, 'ok', false, actions);
 		}).catch(function (e) {
 			console.error(e);
 			cta.finish(false);
@@ -1320,14 +1727,23 @@
 		$('btnApplyFonts').onclick = applyFonts;
 
 		// rodapé
-		$('btnBuild').onclick = build;
+		$('btnBuild').onclick = requestBuild;
+		$('preChip').onclick = goToMissing;
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
 		$('toast').onclick = UI.hideToast;
 
 		global.addEventListener('resize', placeTabInk);
+		document.addEventListener('mousedown', function (e) {
+			if (state.picker && !e.target.closest('#fontPicker') && !e.target.closest('.picker-field.active')) closeFontPicker();
+		}, true);
+		$('fontList').addEventListener('scroll', function () { if (state.picker) closeFontPicker(); });
+		global.addEventListener('resize', function () { if (state.picker) closeFontPicker(); });
+		document.addEventListener('keydown', function (e) { if (e.key === 'Shift' && !state.shift) { state.shift = true; updateRangePreview(); } });
+		document.addEventListener('keyup', function (e) { if (e.key === 'Shift') { state.shift = false; updateRangePreview(); } });
+		global.addEventListener('blur', function () { state.shift = false; updateRangePreview(); });
 		document.addEventListener('keydown', function (e) {
 			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); pickDocument(); }
-			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (!$('btnBuild').disabled) build(); }
+			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); requestBuild(); }
 			// 1 2 3 trocam de aba (fora de campos de texto)
 			var typing = /^(input|select|textarea)$/i.test((document.activeElement || {}).tagName || '');
 			if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey && /^[123]$/.test(e.key)) showTab(TABS[+e.key - 1]);
@@ -1338,6 +1754,7 @@
 		var saved = load('settings2', {});
 		for (var k in DEFAULTS) S[k] = saved[k] !== undefined ? saved[k] : DEFAULTS[k];
 		bind();
+		renderRecents();
 		renderFonts();
 		updateCompsInfo();
 		requestAnimationFrame(function () { placeTabInk(); UI.relayout(); });

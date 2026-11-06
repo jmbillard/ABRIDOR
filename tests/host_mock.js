@@ -101,9 +101,15 @@ class CompItem {
 	}
 	get numLayers() { return this._layers.length; }
 	layer(i) { return this._layers[i - 1]; }
-	openInViewer() { }
+	openInViewer() { this.opened = true; }
+	remove() { const k = items.indexOf(this); if (k >= 0) items.splice(k, 1); }
 }
-class FolderItem { constructor(name) { this.name = name; this.id = nextId++; this.comment = ''; this.parentFolder = null; } }
+class FolderItem {
+	constructor(name) { this.name = name; this.id = nextId++; this.comment = ''; this.parentFolder = null; this.selected = false; }
+	get numItems() { return items.filter((i) => i.parentFolder === this).length; }
+	item(i) { return items.filter((x) => x.parentFolder === this)[i - 1]; }
+	remove() { const k = items.indexOf(this); if (k >= 0) items.splice(k, 1); }
+}
 const items = [];
 const root = new FolderItem('root');
 const project = {
@@ -114,7 +120,7 @@ const project = {
 		addFolder(n) { const f = new FolderItem(n); f.parentFolder = root; items.push(f); return f; },
 		addComp(...a) { const c = new CompItem(...a); items.push(c); return c; }
 	},
-	importFile(opt) { const f = { name: path.basename(opt.file.path), width: job.settings.width, height: job.settings.height, id: nextId++, file: opt.file.path }; items.push(f); return f; },
+	importFile(opt) { const f = { name: path.basename(opt.file.path), width: job.settings.width, height: job.settings.height, id: nextId++, file: opt.file.path, remove() { items.splice(items.indexOf(this), 1); } }; items.push(f); return f; },
 	selection: [],
 	activeItem: null
 };
@@ -125,8 +131,8 @@ class File {
 	read() { return fs.readFileSync(this.path, 'utf8'); }
 }
 const ctx = {
-	app: { project, version: 'mock', fonts: null, beginUndoGroup() { }, endUndoGroup() { } },
-	File, FolderItem, CompItem, TextLayer,
+	app: { project, version: '25.0x50', fonts: null, beginUndoGroup() { }, endUndoGroup() { }, executeCommand() { }, findMenuCommandId() { return 0; } },
+	File, FolderItem, CompItem, TextLayer, TextDocument,
 	ImportOptions: function (f) { this.file = f; },
 	MarkerValue: function (n) { this.name = n; },
 	ParagraphJustification: { LEFT_JUSTIFY: 'L', CENTER_JUSTIFY: 'C', RIGHT_JUSTIFY: 'R', FULL_JUSTIFY_LASTLINE_LEFT: 'J' },
@@ -143,12 +149,47 @@ function call(expr) {
 	return o;
 }
 const jp = JSON.stringify(jobPath);
-call(`abridor_begin(${jp})`);
-job.pages.forEach((p, i) => {
-	const r = call(`abridor_buildPage(${jp}, ${i})`);
-	if (r.log.length) console.log(p.compName, r.log);
+function runJob(mode) {
+	job.settings.mode = mode;
+	delete job.folderName;
+	if (mode === 'side') {
+		const ins = call(`abridor_inspect(${JSON.stringify(job.docName)})`);
+		job.folderName = job.docName + ' ' + ins.next;
+	}
+	fs.writeFileSync(jobPath, JSON.stringify(job));
+	call(`abridor_begin(${jp})`);
+	const sum = { updated: 0, added: 0, left: 0, isNew: 0 };
+	job.pages.forEach((p, i) => {
+		const r = call(`abridor_buildPage(${jp}, ${i})`);
+		if (r.log.length && !process.env.QUIET) console.log(p.compName, r.log);
+		['updated', 'added', 'left'].forEach((k) => { sum[k] += r[k] || 0; });
+		if (r.isNew) sum.isNew++;
+	});
+	const fin = call(`abridor_finish(${jp})`);
+	return Object.assign(sum, { master: fin.master, reused: fin.reused, masterId: fin.masterId, folderId: fin.folderId });
+}
+const MODES = (process.env.MODES || 'new').split(',');
+MODES.forEach((m) => {
+	const r = runJob(m);
+	const comps = items.filter((i) => i instanceof CompItem).length;
+	const folders = items.filter((i) => i instanceof FolderItem && i.parentFolder && i.parentFolder.name === 'ABRIDOR').map((f) => f.name);
+	console.log('modo', m.padEnd(7), '| comps novas', r.isNew, '| atualizadas', r.updated, '| acrescentadas', r.added, '| sobraram', r.left, '| master', r.master, r.reused ? '(mantida)' : '', '| total comps no projeto', comps, '| pastas', folders.join(' / '));
+	if (m === MODES[0]) console.log('inspect depois:', JSON.stringify(call(`abridor_inspect(${JSON.stringify(job.docName)})`)));
+	// simula um ajuste à mão antes da rodada "só os textos" seguinte
+	if (m === MODES[0]) {
+		const c = items.find((i) => i instanceof CompItem && /02$/.test(i.name));
+		const l = c._layers.find((x) => x instanceof TextLayer);
+		l.tr.property('ADBE Position').setValue([111, 222, 0]);
+		const p = l.text.property('ADBE Text Document'); const d = p.value; d.text = 'EDITADO À MÃO'; p.setValue(d);
+		global.__probe = l;
+	}
+	if (m === 'texts' && global.__probe && !global.__probed) {
+		global.__probed = true;
+		const l = global.__probe;
+		console.log('   camada ajustada à mão → posição', JSON.stringify(l.tr.property('ADBE Position').value), '| texto', JSON.stringify(l.text.property('ADBE Text Document').value.text), '| ainda no projeto:', l.comp._layers.includes(l));
+	}
 });
-console.log(call(`abridor_finish(${jp})`));
+console.log('reveal master', JSON.stringify(call(`abridor_reveal(${items.find((i) => i instanceof CompItem && /MASTER/.test(i.name)).id})`)));
 // passo extra: dividir em linhas as comps selecionadas no painel Project
 if (process.env.SPLIT) {
 	project.selection = items.filter((i) => i instanceof CompItem && !/MASTER/.test(i.name));
@@ -156,7 +197,7 @@ if (process.env.SPLIT) {
 }
 
 // SVG de conferência (antes da troca de fontes não guardamos; usa o estado atual)
-const comps = items.filter(i => i instanceof CompItem && !/MASTER/.test(i.name));
+const comps = items.filter(i => i instanceof CompItem && !/MASTER/.test(i.name)).slice(0, job.pages.length);
 fs.mkdirSync(outDir, { recursive: true });
 comps.forEach((c, ci) => {
 	const W = c.width, H = c.height;

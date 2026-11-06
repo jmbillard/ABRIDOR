@@ -96,6 +96,7 @@
 		},
 		exists: function (p) {
 			if (fs) return fs.existsSync(p);
+			if (global.ABR_MOCK && global.ABR_MOCK.exists) return global.ABR_MOCK.exists(p);
 			return false;
 		},
 		readBinary: function (p) {

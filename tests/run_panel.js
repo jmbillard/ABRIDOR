@@ -80,6 +80,8 @@ fam('DejaVu Sans', [['Book', 'DejaVuSans'], ['Bold', 'DejaVuSans-Bold']]);
 	await page.screenshot({ path: path.join(outDir, '3-fontes.png') });
 
 	await page.click('#btnBuild');
+	await page.waitForTimeout(400);
+	if (await page.$('#preWrap [data-act=go]')) await page.click('#preWrap [data-act=go]');
 	await page.waitForFunction(() => /comps criadas|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
 	console.log('status:', await page.textContent('#status'));
 	const written = await page.evaluate(() => window.__written);

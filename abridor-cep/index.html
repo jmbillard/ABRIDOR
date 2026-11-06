@@ -45,6 +45,8 @@
 				<small>clique ou arraste o arquivo aqui</small>
 			</div>
 
+			<div id="recent" class="recent hidden"></div>
+
 			<div id="pagesTools" class="bar">
 				<span class="sel-count" title="páginas selecionadas&#10;selecionadas / total do documento"><b id="selN">0</b><span>/<span id="selT">0</span></span></span>
 				<span class="iconbar">
@@ -199,12 +201,14 @@
 	<footer>
 		<div class="summary">
 			<span id="summary"></span>
+			<button id="preChip" class="pre-chip hidden" title="fontes sem associação&#10;as camadas sairiam na fonte reserva; clique para associar"><i data-icon="alert"></i><span></span></button>
 			<button id="btnLog" class="warn-chip hidden" title="avisos da última operação"><i data-icon="alert"></i><b id="logCount">0</b></button>
 		</div>
 		<div id="logBox" class="collapse"><pre id="log" class="log"></pre></div>
 		<button id="btnBuild" class="cta" data-kbd="mod+Enter" disabled>
 			<span class="cta-fill"></span>
 			<span class="cta-label"><i data-icon="sparkle"></i><span id="ctaText">criar comps</span></span>
+			<span class="cta-dot hidden" id="ctaDot"></span>
 			<span class="cta-done"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span>
 		</button>
 		<div id="toast" class="toast"></div>

@@ -262,7 +262,12 @@ async function tab(page, t) {
 	async function pick(key, family, ps, scaleClicks) {
 		const row = `.font[data-key="${key}"]`;
 		if (!(await page.$(row + '.open'))) { await page.click(row + ' .font-head'); await settle(450); }
-		await page.selectOption(row + ' select.family', family);
+		await page.click(row + ' .picker-field.family');
+		await page.waitForTimeout(200);
+		await page.fill('#fontPicker input', family);
+		await page.press('#fontPicker input', 'Enter');
+		await page.waitForTimeout(300);
+		if (await page.$(row + ' .family-hint .no')) { await page.click(row + ' .family-hint .no'); await page.waitForTimeout(250); }
 		if (ps) await page.selectOption(row + ' select.style', ps);
 		for (let i = 0; i < (scaleClicks || 0); i++) await page.click(row + ' .s-minus');
 		await settle(300);
@@ -274,7 +279,7 @@ async function tab(page, t) {
 	await settle(600);
 	await shot(page, '31-fontes-editar.png', [
 		{ sel: '.font[data-key="Gotham Black"] .font-head', n: 1, side: 'right', pad: 2 },
-		{ sel: '.font[data-key="Gotham Black"] select.family', n: 2, side: 'left', pad: 2 },
+		{ sel: '.font[data-key="Gotham Black"] .picker-field.family', n: 2, side: 'left', pad: 2 },
 		{ sel: '.font[data-key="Gotham Black"] select.style', n: 3, side: 'top', pad: 2 },
 		{ sel: '.font[data-key="Gotham Black"] .scale-step', n: 4, side: 'top', pad: 2 },
 		{ sel: '.font[data-key="Gotham Black"] .orig', n: 5, side: 'left', pad: 2 }
@@ -301,6 +306,8 @@ async function tab(page, t) {
 	const footerClip = async () => { const fb = await (await page.$('footer')).boundingBox(); return { x: 0, y: fb.y - 70, width: 460, height: fb.height + 70 }; };
 	await page.evaluate(() => { window.__buildDelay = 700; });
 	await page.click('#btnBuild');
+	await page.waitForTimeout(400);
+	if (await page.$('#preWrap [data-act=go]')) await page.click('#preWrap [data-act=go]');
 	await page.waitForFunction(() => /criando 3\//.test(document.getElementById('ctaText').textContent), null, { timeout: 60000 });
 	await settle(250);
 	await shot(page, '40-criando.png', [{ sel: '#btnBuild', n: 1, side: 'top', pad: 2 }], { clip: await footerClip() });
@@ -368,7 +375,10 @@ async function tab(page, t) {
 		await lp.waitForTimeout(500);
 		await lp.click('.font[data-key="Gotham Black"] .font-head');
 		await lp.waitForTimeout(450);
-		await lp.selectOption('.font[data-key="Gotham Black"] select.family', 'Inter');
+		await lp.click('.font[data-key="Gotham Black"] .picker-field.family');
+		await lp.waitForTimeout(200);
+		await lp.fill('#fontPicker input', 'Inter');
+		await lp.press('#fontPicker input', 'Enter');
 		await lp.waitForTimeout(600);
 		await shot(lp, '16-claro-fontes.png', []);
 		// detalhe do botão nos três modos

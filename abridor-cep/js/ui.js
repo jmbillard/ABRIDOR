@@ -150,16 +150,26 @@
 
 	// ------------------------------------------------------ toast ----------
 	var toastTimer = null;
-	UI.toast = function (msg, kind, sticky) {
+	// actions: [{ label, icon, fn }] viram botões dentro do aviso
+	UI.toast = function (msg, kind, sticky, actions) {
 		var t = document.getElementById('toast');
 		if (!t) return;
 		clearTimeout(toastTimer);
 		t.className = 'toast ' + (kind || 'info');
-		t.innerHTML = UI.icon(kind === 'error' ? 'alert' : (kind === 'ok' ? 'check' : 'info')) + '<span></span>';
+		t.innerHTML = UI.icon(kind === 'error' ? 'alert' : (kind === 'ok' ? 'check' : 'info')) +
+			'<div class="t-body"><span></span>' + (actions && actions.length ? '<div class="t-actions"></div>' : '') + '</div>';
 		t.querySelector('span').textContent = msg;
+		(actions || []).forEach(function (a) {
+			var b = document.createElement('button');
+			b.innerHTML = (a.icon ? UI.icon(a.icon) : '') + '<span></span>';
+			b.querySelector('span').textContent = a.label;
+			b.onclick = function (e) { e.stopPropagation(); UI.hideToast(); a.fn(); };
+			t.querySelector('.t-actions').appendChild(b);
+		});
 		void t.offsetWidth;
 		t.classList.add('show');
-		if (!sticky) toastTimer = setTimeout(function () { t.classList.remove('show'); }, kind === 'error' ? 7000 : 3200);
+		var life = actions && actions.length ? 9000 : (kind === 'error' ? 7000 : 3200);
+		if (!sticky) toastTimer = setTimeout(function () { t.classList.remove('show'); }, life);
 	};
 	UI.hideToast = function () {
 		var t = document.getElementById('toast');

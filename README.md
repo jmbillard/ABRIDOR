@@ -137,6 +137,12 @@ atalhos: `Ctrl/⌘ + O` abre um documento · `1` `2` `3` trocam de aba · `Ctrl/
 
 ## 3 · abrir o documento
 
+**3.0** a tela vazia lista os **documentos recentes**: clique para reabrir. arquivos que mudaram de lugar aparecem apagados (o **×** tira da lista; **limpar** esvazia a lista sem apagar arquivos).
+
+<p align="center">
+  <img src="docs/img/19-recentes.png" width="380">
+</p>
+
 **3.1** cada página aparece em miniatura, com os textos detectados destacados por cima.
 
 <table>
@@ -186,6 +192,12 @@ no **PDF** (à direita):
 
 **4.1** clique na **miniatura** para incluir ou excluir a página: a selecionada ganha borda azul e ✔; a excluída fica apagada e não vira comp.
 
+segure **shift** e clique em outra miniatura para marcar ou desmarcar **todo o intervalo** entre as duas. com o shift pressionado, o painel já mostra o intervalo antes do clique:
+
+<p align="center">
+  <img src="docs/img/15-intervalo-shift.png" width="380">
+</p>
+
 **4.2** para mudar a **duração de uma página**, clique no relógio, digite os segundos (aceita vírgula: `6,5`) e tecle `Enter`. deixe vazio para voltar à duração padrão; `Esc` cancela.
 
 <p align="center">
@@ -230,7 +242,7 @@ no **PDF** (à direita):
 4. **camadas de texto**:
    - **uma por linha** (padrão) → cada linha vira uma camada de **texto de ponto**, com o **anchor point em [0, 0] na linha de base**, no ponto de alinhamento (início, centro ou fim da linha). nada é cortado se a fonte nova for mais larga.
    - **por bloco** → uma camada por caixa de texto do PowerPoint (*paragraph text*) ou por parágrafo do PDF.
-5. **dividir camadas já criadas em linhas** → o mesmo resultado do modo *uma por linha*, aplicado depois (ver [passo 7.4](#7--criar-as-comps)).
+5. **dividir camadas já criadas em linhas** → o mesmo resultado do modo *uma por linha*, aplicado depois (ver [passo 7.5](#7--criar-as-comps)).
 
 o rodapé resume tudo: quantidade de comps, duração total, formato e frame rate.
 
@@ -295,7 +307,7 @@ o rodapé resume tudo: quantidade de comps, duração total, formato e frame rat
 exemplo: *Gotham Black* não está instalada → trocada por **Inter Black**:
 
 1. clique na linha para abrir (clique de novo, ou em outra fonte, para fechar).
-2. **família** → `Inter`.
+2. **família** → clique e digite para buscar (`Inter`). veja o [seletor de fontes](#-seletor-de-fontes) abaixo.
 3. **estilo** → `Black` (ao trocar a família, o estilo mais parecido com o original já vem escolhido).
 4. **escala** → `−` / `+` de 5 %. aqui `95 %`: a fonte nova é um pouco mais larga.
 5. o texto na fonte **original** (se estiver instalada), para comparar.
@@ -305,6 +317,28 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
   </td>
   </tr>
 </table>
+
+#### 🔎 seletor de fontes
+
+<table>
+  <tr>
+    <td width="400"><img src="docs/img/33-seletor-fontes.png" width="380"></td>
+    <td>
+
+- digite parte do nome para filtrar; cada fonte aparece **desenhada nela mesma**;
+- **sugestão** → fonte instalada com as **mesmas medidas** da original (*Calibri → Carlito*, *Cambria → Caladea*, *Arial → Liberation Sans*…);
+- **recentes** → as últimas famílias escolhidas ficam no topo;
+- `↑` `↓` navegam, `Enter` escolhe, `Esc` fecha.
+
+  </td>
+  </tr>
+</table>
+
+depois de trocar uma fonte, se o documento tiver **outros estilos da mesma família** (ex. *Calibri* e *Calibri Bold*), o painel oferece trocar todos de uma vez, mantendo o peso de cada um:
+
+<p align="center">
+  <img src="docs/img/34-familia.png" width="380">
+</p>
 
 **6.3** para comparar com outro texto (acentos, números…), clique em <img src="docs/img/icons/type.svg" width="14"> (1), digite o **texto do preview** (2) e ajuste o **tamanho** (3):
 
@@ -327,16 +361,48 @@ as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
 
 ## 7 · criar as comps
 
-**7.1** clique em **criar N comps**. o próprio botão vira a barra de andamento:
+**7.1** antes de criar, o painel avisa o que pode dar errado. se alguma fonte usada nas páginas selecionadas está sem associação, o rodapé mostra **⚠ N fontes sem associação** e o botão ganha um ponto laranja. clique no aviso para ir direto à fonte que falta:
+
+<p align="center">
+  <img src="docs/img/43-aviso-fontes.png" width="460">
+</p>
+
+ao clicar em **criar**, se houver algo a decidir, sobe a folha **antes de criar**:
+
+<table>
+  <tr>
+    <td width="400"><img src="docs/img/44-antes-de-criar.png" width="380"></td>
+    <td>
+
+- ⚠ **fontes sem associação** → quais são e em que fonte vão sair. **associar** leva para a aba fontes, já com a primeira aberta.
+- ⓘ **versão do After Effects** → só aparece se o AE for anterior ao 2024 (24.3) e o documento tiver trechos com fontes diferentes na mesma linha.
+- 📁 **o documento já existe no projeto** → escolha:
+  - **só os textos** (padrão) → mantém as comps, posições, animações e efeitos e troca só o **conteúdo** das camadas de texto. textos novos viram camadas novas; camadas que perderam o texto ficam e aparecem nos avisos;
+  - **criar ao lado** → mantém as antigas; as novas vão para a pasta “nome 2” e as comps ganham “(2)”;
+  - **substituir** → apaga a pasta e as comps antigas do documento e cria de novo.
+
+`Enter` confirma, `Esc` volta. sem nada a decidir, o botão cria direto.
+
+  </td>
+  </tr>
+</table>
+
+**7.2** clique em **criar N comps** (ou **atualizar os textos**). o próprio botão vira a barra de andamento:
 
 <p align="center">
   <img src="docs/img/40-criando.png" width="460">
 </p>
 
-**7.2** no fim, o botão fica verde com um ✔, e uma mensagem confirma quantas comps foram criadas (1). se houver **avisos**, aparece o ⚠ com a quantidade (2):
+**7.3** no fim, o botão fica verde com um ✔, e uma mensagem confirma quantas comps foram criadas (1). se houver **avisos**, aparece o ⚠ com a quantidade (2):
 
 <p align="center">
   <img src="docs/img/41-concluido.png" width="460">
+</p>
+
+o aviso final tem atalhos para **abrir master** e **mostrar no projeto** (seleciona a pasta do documento no painel *Project*):
+
+<p align="center">
+  <img src="docs/img/45-concluido-acoes.png" width="460">
 </p>
 
 clique no ⚠ para ver a lista:
@@ -349,7 +415,7 @@ avisos comuns:
 - `fonte "X" indisponível (…) → ArialMT` → a fonte escolhida não está instalada nesta máquina e a camada usou a reserva;
 - `estilos mistos simplificados` → a camada tem fontes/tamanhos diferentes, mas a versão do After Effects é anterior à 2024 (24.3), então recebeu um estilo só.
 
-**7.3** no projeto, o ABRIDOR cria:
+**7.4** no projeto, o ABRIDOR cria:
 
 ```
 📁 ABRIDOR
@@ -364,7 +430,7 @@ avisos comuns:
 
 em cada comp de página: as **camadas de texto**, com o nome do próprio texto, e por baixo a **REF**, a camada guia travada com a imagem da página (veja a [ilustração no topo](#-abridor)).
 
-**7.4** para dividir em linhas camadas que já existem (criadas *por bloco*, por uma versão anterior do ABRIDOR ou até digitadas à mão):
+**7.5** para dividir em linhas camadas que já existem (criadas *por bloco*, por uma versão anterior do ABRIDOR ou até digitadas à mão):
 
 1. selecione as **camadas de texto** na comp ativa — ou selecione **comps** no painel *Project* para dividir todas as camadas de texto delas;
 2. na aba **comps**, clique em **dividir camadas já criadas em linhas**.
@@ -500,6 +566,8 @@ abridor-cep/
 - testes fora do After Effects (Node + Playwright):
   - `node tests/run_panel.js <arquivo.pptx|pdf> <saída>` → abre o painel no Chromium com o AE simulado, extrai e gera o job.
   - `node tests/host_mock.js <saída>/job.json <saída>/host` → executa o `host.jsx` contra um mock do After Effects e desenha as camadas sobre a referência.
+  - `node tests/features_check.js <saída>` → verifica no painel a checagem antes de criar, o seletor de fontes, a troca da família, o shift+clique, as ações no fim e os recentes (com `--docs`, grava os prints do README).
+  - `MODES=new,texts,side,replace node tests/host_mock.js …` → roda os modos de criação em sequência no mock do After Effects.
   - `node tests/installer_mock.js <pasta temporária>` → executa o instalador com File/Folder/ScriptUI simulados (instala e remove).
   - `python3 tests/make_test_pptx.py <arquivo.pptx>` → gera um PPTX com casos variados.
 - prints do README:

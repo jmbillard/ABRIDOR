@@ -388,29 +388,241 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 // estado entre as chamadas (uma chamada por slide para o painel mostrar o progresso)
 $.global.__abridor = $.global.__abridor || {};
 
+var ABRIDOR_DOC_TAG = 'ABRIDOR_DOC ';
+
+// pasta do documento dentro da pasta ABRIDOR (ou null)
+function abr_docFolder(name) {
+	var root = abr_rootFolder(false);
+	if (!root) return null;
+	return abr_findFolder(name, root);
+}
+
+function abr_subFolder(name, parent, create) {
+	var f = abr_findFolder(name, parent);
+	if (!f && create) f = abr_newFolder(name, parent);
+	return f;
+}
+
+// todos os itens de uma pasta (recursivo)
+function abr_itemsIn(folder, out) {
+	out = out || [];
+	for (var i = 1; i <= folder.numItems; i++) {
+		var it = folder.item(i);
+		out.push(it);
+		if (it instanceof FolderItem) abr_itemsIn(it, out);
+	}
+	return out;
+}
+
+function abr_rangesSupported() {
+	try {
+		var td = new TextDocument('x');
+		return typeof td.characterRange === 'function';
+	} catch (e) {
+		return parseFloat(app.version) >= 24.3;
+	}
+}
+
+// o que existe no projeto antes de criar: versão do AE e se o documento já foi criado
+function abridor_inspect(docName) {
+	try {
+		var out = { ok: true, version: app.version, ranges: abr_rangesSupported(), existing: null, next: 2 };
+		var root = abr_rootFolder(false);
+		if (root) {
+			for (var i = 1; i <= root.numItems; i++) {
+				var it = root.item(i);
+				if (!(it instanceof FolderItem)) continue;
+				if (it.name === docName) {
+					var comps = 0, all = abr_itemsIn(it);
+					for (var j = 0; j < all.length; j++) if (all[j] instanceof CompItem) comps++;
+					var created = '';
+					if (it.comment && it.comment.indexOf(ABRIDOR_DOC_TAG) === 0) {
+						try { created = abr_parse(it.comment.substr(ABRIDOR_DOC_TAG.length)).t || ''; } catch (e) { }
+					}
+					out.existing = { name: it.name, comps: comps, created: created };
+				}
+				var m = it.name.match(/^(.*) (\d+)$/);
+				if (m && m[1] === docName) out.next = Math.max(out.next, parseInt(m[2], 10) + 1);
+			}
+		}
+		return abr_stringify(out);
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
 function abridor_begin(jobPath) {
 	try {
 		var job = abr_readJSON(jobPath);
+		var mode = job.settings.mode || 'new';
 		app.beginUndoGroup('ABRIDOR - preparar');
 		try {
 			if (!app.project) app.newProject();
 			var root = abr_rootFolder(true);
-			var docFolder = abr_newFolder(job.docName, root);
-			var slides = abr_newFolder('slides', docFolder);
-			var refs = job.settings.refImages ? abr_newFolder('refer\u00eancias', docFolder) : null;
+			var existing = abr_docFolder(job.docName);
+			var docFolder = null;
+
+			if (existing && mode === 'replace') {
+				// apaga as comps, imagens e pastas antigas do documento
+				var all = abr_itemsIn(existing);
+				for (var i = all.length - 1; i >= 0; i--) {
+					try { if (!(all[i] instanceof FolderItem)) all[i].remove(); } catch (e1) { }
+				}
+				try { existing.remove(); } catch (e2) { }
+				existing = null;
+			}
+			if (existing && mode === 'texts') docFolder = existing;
+			else {
+				docFolder = abr_newFolder(job.folderName || job.docName, root);
+				docFolder.comment = ABRIDOR_DOC_TAG + abr_stringify({ t: new Date().toString() });
+				mode = mode === 'texts' ? 'new' : mode;
+			}
+
+			var slides = abr_subFolder('slides', docFolder, true);
+			var refs = job.settings.refImages ? abr_subFolder('refer\u00eancias', docFolder, true) : null;
 			abr_storeMap(job.fontMap);
 			$.global.__abridor = {
 				docFolder: docFolder.id,
 				slides: slides.id,
 				refs: refs ? refs.id : 0,
+				mode: mode,
 				comps: []
 			};
 		} finally {
 			app.endUndoGroup();
 		}
-		return abr_stringify({ ok: true });
+		return abr_stringify({ ok: true, mode: mode });
 	} catch (e) {
 		return abr_error(e);
+	}
+}
+
+// comp de uma página já criada antes (modo "só os textos")
+function abr_findPageComp(st, name) {
+	var folder = abr_itemById(st.docFolder);
+	if (!folder) return null;
+	var all = abr_itemsIn(folder);
+	for (var i = 0; i < all.length; i++) if (all[i] instanceof CompItem && all[i].name === name) return all[i];
+	return null;
+}
+
+// cria as camadas de texto de uma página e numera na ordem do documento
+function abr_buildTexts(comp, page, S, s, ox, oy, fontMap, log) {
+	var made = [], seq = 0;
+	for (var i = 0; i < page.texts.length; i++) {
+		try {
+			var layer = abr_createText(comp, page.texts[i], s, ox, oy, fontMap, S.fallbackFont || 'ArialMT', log);
+			if (!layer) continue;
+			var layers = [layer];
+			if (S.lines) layers = abr_splitLayer(layer, log).layers || [];
+			for (var j = 0; j < layers.length; j++) {
+				var meta = abr_layerMeta(layers[j]);
+				if (meta) {
+					meta.i = seq;
+					layers[j].comment = ABRIDOR_TAG + abr_stringify(meta);
+				}
+				seq++;
+				made.push(layers[j]);
+			}
+		} catch (e) {
+			log.push('erro no texto ' + (i + 1) + ': ' + e.message + (e.line ? ' (linha ' + e.line + ')' : ''));
+		}
+	}
+	return made;
+}
+
+// ordem de leitura: pelo índice gravado na criação, senão pela posição (de cima para baixo)
+function abr_readingOrder(layers) {
+	var info = [];
+	for (var i = 0; i < layers.length; i++) {
+		var meta = abr_layerMeta(layers[i]);
+		var p = layers[i].property('ADBE Transform Group').property('ADBE Position').value;
+		info.push({ l: layers[i], i: meta && meta.i !== undefined ? meta.i : null, x: p[0], y: p[1] });
+	}
+	var allIndexed = true;
+	for (i = 0; i < info.length; i++) if (info[i].i === null) allIndexed = false;
+	info.sort(function (a, b) {
+		if (allIndexed) return a.i - b.i;
+		if (Math.abs(a.y - b.y) > 4) return a.y - b.y;
+		return a.x - b.x;
+	});
+	return { list: info, indexed: allIndexed };
+}
+
+function abr_contains(arr, x) {
+	for (var i = 0; i < arr.length; i++) if (arr[i] === x) return true;
+	return false;
+}
+
+// modo "só os textos": mantém cada camada antiga (posição, animação, efeitos) e troca só o conteúdo
+function abr_updateTexts(comp, made, log) {
+	var old = [];
+	for (var i = 1; i <= comp.numLayers; i++) {
+		var l = comp.layer(i);
+		if (abr_layerMeta(l) && !abr_contains(made, l)) old.push(l);
+	}
+	var A = abr_readingOrder(old), B = abr_readingOrder(made);
+	var olds = A.list, news = B.list;
+	var updated = 0, added = 0;
+	for (i = 0; i < news.length; i++) {
+		var nl = news[i].l;
+		var match = null;
+		if (A.indexed && B.indexed) {
+			for (var k = 0; k < olds.length; k++) if (olds[k].i === news[i].i && !olds[k].used) { match = olds[k]; break; }
+		} else if (i < olds.length) match = olds[i];
+		if (!match) { added++; continue; }
+		match.used = true;
+		var ol = match.l;
+		var op = abr_textProp(ol), np = abr_textProp(nl);
+		var oldText = '';
+		try { oldText = op.value.text; } catch (e0) { }
+		try {
+			var wasLocked = ol.locked;
+			ol.locked = false;
+			if (op.numKeys > 0) {
+				for (var key = 1; key <= op.numKeys; key++) op.setValueAtKey(key, np.value);
+			} else {
+				op.setValue(np.value);
+			}
+			ol.comment = nl.comment;
+			if (ol.name === abr_layerName(oldText)) ol.name = nl.name;
+			ol.locked = wasLocked;
+			nl.remove();
+			updated++;
+		} catch (e) {
+			log.push('"' + ol.name + '": ' + e.message + ' (mantida a camada nova)');
+			added++;
+		}
+	}
+	var left = 0;
+	for (i = 0; i < olds.length; i++) {
+		if (!olds[i].used) {
+			left++;
+			log.push('"' + olds[i].l.name + '" n\u00e3o tem mais texto correspondente no documento (mantida)');
+		}
+	}
+	return { updated: updated, added: added, left: left };
+}
+
+function abr_addReference(comp, page, S, st, log) {
+	try {
+		var file = new File(page.refImage);
+		if (!file.exists) { log.push('imagem de refer\u00eancia n\u00e3o encontrada: ' + page.refImage); return; }
+		var footage = app.project.importFile(new ImportOptions(file));
+		var refs = abr_itemById(st.refs);
+		if (refs) footage.parentFolder = refs;
+		var ref = comp.layers.add(footage);
+		ref.name = 'REF - ' + page.compName;
+		ref.moveToEnd();
+		var sc = Math.min(S.width / footage.width, S.height / footage.height) * 100;
+		if (page.refFit === 'fill') sc = Math.max(S.width / footage.width, S.height / footage.height) * 100;
+		ref.property('ADBE Transform Group').property('ADBE Scale').setValue([sc, sc, 100]);
+		ref.property('ADBE Transform Group').property('ADBE Opacity').setValue(S.refOpacity);
+		ref.guideLayer = true;
+		ref.label = 0;
+		ref.locked = true;
+	} catch (e2) {
+		log.push('erro na imagem de refer\u00eancia: ' + e2.message);
 	}
 }
 
@@ -421,66 +633,45 @@ function abridor_buildPage(jobPath, index) {
 		var page = job.pages[index];
 		var st = $.global.__abridor;
 		var log = [];
+		var result = { ok: true, texts: 0, log: log };
 
 		app.beginUndoGroup('ABRIDOR - ' + page.compName);
 		try {
-			var fps = S.fps;
-			var frames = Math.max(1, Math.round(page.duration * fps));
-			var comp = app.project.items.addComp(page.compName, S.width, S.height, S.par || 1, frames / fps, fps);
-			comp.bgColor = [0, 0, 0];
-			var slidesFolder = abr_itemById(st.slides);
-			if (slidesFolder) comp.parentFolder = slidesFolder;
-
-			var fit = S.fit === 'fill' ? 'fill' : 'fit';
-			var s = fit === 'fill' ? Math.max(S.width / page.width, S.height / page.height) : Math.min(S.width / page.width, S.height / page.height);
-			var ox = (S.width - page.width * s) / 2;
-			var oy = (S.height - page.height * s) / 2;
-
-			// textos (de baixo para cima, para manter a ordem de empilhamento do documento)
-			var created = 0;
-			for (var i = 0; i < page.texts.length; i++) {
-				try {
-					var layer = abr_createText(comp, page.texts[i], s, ox, oy, job.fontMap, S.fallbackFont || 'ArialMT', log);
-					if (layer && S.lines) {
-						var res = abr_splitLayer(layer, log);
-						created += res.created || 1;
-					} else if (layer) created++;
-				} catch (e) {
-					log.push('erro no texto ' + (i + 1) + ': ' + e.message + (e.line ? ' (linha ' + e.line + ')' : ''));
-				}
+			var comp = st.mode === 'texts' ? abr_findPageComp(st, page.compName) : null;
+			var isNew = !comp;
+			if (isNew) {
+				var fps = S.fps;
+				var frames = Math.max(1, Math.round(page.duration * fps));
+				comp = app.project.items.addComp(page.compName, S.width, S.height, S.par || 1, frames / fps, fps);
+				comp.bgColor = [0, 0, 0];
+				var slidesFolder = abr_itemById(st.slides);
+				if (slidesFolder) comp.parentFolder = slidesFolder;
 			}
 
-			// imagem de referência (camada guia: não aparece no render final)
-			if (S.refImages && page.refImage) {
-				try {
-					var file = new File(page.refImage);
-					if (file.exists) {
-						var footage = app.project.importFile(new ImportOptions(file));
-						var refs = abr_itemById(st.refs);
-						if (refs) footage.parentFolder = refs;
-						var ref = comp.layers.add(footage);
-						ref.name = 'REF - ' + page.compName;
-						ref.moveToEnd();
-						var sc = Math.min(S.width / footage.width, S.height / footage.height) * 100;
-						if (page.refFit === 'fill') sc = Math.max(S.width / footage.width, S.height / footage.height) * 100;
-						ref.property('ADBE Transform Group').property('ADBE Scale').setValue([sc, sc, 100]);
-						ref.property('ADBE Transform Group').property('ADBE Opacity').setValue(S.refOpacity);
-						ref.guideLayer = true;
-						ref.label = 0;
-						ref.locked = true;
-					} else {
-						log.push('imagem de refer\u00eancia n\u00e3o encontrada: ' + page.refImage);
-					}
-				} catch (e2) {
-					log.push('erro na imagem de refer\u00eancia: ' + e2.message);
-				}
+			// a escala usa o tamanho da comp (no modo "só os textos", o da comp existente)
+			var W = comp.width, H = comp.height;
+			var s = S.fit === 'fill' ? Math.max(W / page.width, H / page.height) : Math.min(W / page.width, H / page.height);
+			var ox = (W - page.width * s) / 2;
+			var oy = (H - page.height * s) / 2;
+
+			var made = abr_buildTexts(comp, page, S, s, ox, oy, job.fontMap, log);
+			result.texts = made.length;
+			if (!isNew) {
+				var up = abr_updateTexts(comp, made, log);
+				result.updated = up.updated;
+				result.added = up.added;
+				result.left = up.left;
+			} else if (S.refImages && page.refImage) {
+				abr_addReference(comp, page, S, st, log);
 			}
 
+			result.compId = comp.id;
+			result.isNew = isNew;
 			st.comps.push(comp.id);
 		} finally {
 			app.endUndoGroup();
 		}
-		return abr_stringify({ ok: true, texts: created, log: log, compId: comp.id });
+		return abr_stringify(result);
 	} catch (e) {
 		return abr_error(e);
 	}
@@ -498,32 +689,62 @@ function abridor_finish(jobPath) {
 		}
 		if (!comps.length) return abr_stringify({ ok: true, comps: 0 });
 
-		var master = null;
+		var master = null, reused = false;
 		app.beginUndoGroup('ABRIDOR - master');
 		try {
 			if (S.master) {
-				var total = 0;
-				for (i = 0; i < comps.length; i++) total += comps[i].duration;
-				master = app.project.items.addComp(S.masterName, S.width, S.height, S.par || 1, total, S.fps);
-				master.bgColor = [0, 0, 0];
-				var docFolder = abr_itemById(st.docFolder);
-				if (docFolder) master.parentFolder = docFolder;
-				var t = 0;
-				for (i = 0; i < comps.length; i++) {
-					var l = master.layers.add(comps[i]);
-					l.startTime = t;
-					l.moveToEnd();
-					try {
-						master.markerProperty.setValueAtTime(t, new MarkerValue(comps[i].name));
-					} catch (em) { /* marcadores de comp: AE 14.0+ */ }
-					t += comps[i].duration;
+				// no modo "só os textos" a master existente é mantida
+				if (st.mode === 'texts') {
+					master = abr_findPageComp(st, S.masterName);
+					reused = !!master;
+				}
+				if (!master) {
+					var total = 0;
+					for (i = 0; i < comps.length; i++) total += comps[i].duration;
+					master = app.project.items.addComp(S.masterName, S.width, S.height, S.par || 1, total, S.fps);
+					master.bgColor = [0, 0, 0];
+					var docFolder = abr_itemById(st.docFolder);
+					if (docFolder) master.parentFolder = docFolder;
+					var t = 0;
+					for (i = 0; i < comps.length; i++) {
+						var l = master.layers.add(comps[i]);
+						l.startTime = t;
+						l.moveToEnd();
+						try {
+							master.markerProperty.setValueAtTime(t, new MarkerValue(comps[i].name));
+						} catch (em) { /* marcadores de comp: AE 14.0+ */ }
+						t += comps[i].duration;
+					}
 				}
 			}
 			(master || comps[0]).openInViewer();
 		} finally {
 			app.endUndoGroup();
 		}
-		return abr_stringify({ ok: true, comps: comps.length, master: master ? master.name : '' });
+		return abr_stringify({
+			ok: true, comps: comps.length, mode: st.mode,
+			master: master ? master.name : '', masterId: master ? master.id : 0, reused: reused,
+			folderId: st.docFolder
+		});
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+// ações depois de criar: abrir a master / mostrar a pasta no painel Project
+function abridor_reveal(id) {
+	try {
+		var item = abr_itemById(parseInt(id, 10));
+		if (!item) return abr_stringify({ error: 'item n\u00e3o encontrado no projeto' });
+		if (item instanceof CompItem) {
+			item.openInViewer();
+		} else {
+			var sel = app.project.selection;
+			for (var i = 0; i < sel.length; i++) sel[i].selected = false;
+			item.selected = true;
+			try { app.executeCommand(app.findMenuCommandId('Project')); } catch (e) { }
+		}
+		return abr_stringify({ ok: true });
 	} catch (e) {
 		return abr_error(e);
 	}
@@ -964,7 +1185,7 @@ function abr_splitLayer(layer, log) {
 			ap.setValue([0, 0, 0]);
 			tr.property('ADBE Position').setValue(p0);
 		}
-		return { created: 1, kept: true };
+		return { created: 1, kept: true, layers: [layer] };
 	}
 
 	var styles = abr_readStyles(td, text.length);
@@ -1041,7 +1262,7 @@ function abr_splitLayer(layer, log) {
 	// mantém a ordem: 1ª linha em cima, todas no lugar da camada original
 	for (i = 0; i < made.length; i++) made[i].moveBefore(layer);
 	layer.remove();
-	return { created: made.length };
+	return { created: made.length, layers: made };
 }
 
 // passo extra para comps já criadas: camadas de texto selecionadas na comp ativa,
