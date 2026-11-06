@@ -1,0 +1,674 @@
+/*
+ * ABRIDOR - host (ExtendScript / After Effects)
+ *
+ * Funções chamadas pelo painel via evalScript. Todas retornam uma string JSON.
+ * Os dados grandes (estrutura dos slides, mapa de fontes) chegam por arquivo
+ * JSON temporário escrito pelo painel.
+ *
+ * Cada camada de texto criada recebe um comentário "ABRIDOR {...}" com a fonte
+ * original de cada trecho. É isso que permite trocar as fontes depois que as
+ * comps já foram criadas (mesmo em outra sessão do After Effects).
+ */
+
+var ABRIDOR_TAG = 'ABRIDOR ';
+var ABRIDOR_ROOT = 'ABRIDOR';
+var ABRIDOR_MAP_TAG = 'ABRIDOR_FONT_MAP ';
+
+// ------------------------------------------------------------------ JSON --
+function abr_stringify(v) {
+	var t = typeof v;
+	if (v === null || v === undefined) return 'null';
+	if (t === 'number') return isFinite(v) ? String(v) : 'null';
+	if (t === 'boolean') return v ? 'true' : 'false';
+	if (t === 'string') {
+		var out = '"';
+		for (var i = 0; i < v.length; i++) {
+			var c = v.charAt(i), code = v.charCodeAt(i);
+			if (c === '"') out += '\\"';
+			else if (c === '\\') out += '\\\\';
+			else if (c === '\n') out += '\\n';
+			else if (c === '\r') out += '\\r';
+			else if (c === '\t') out += '\\t';
+			else if (code < 32 || code > 126) {
+				var h = code.toString(16);
+				while (h.length < 4) h = '0' + h;
+				out += '\\u' + h;
+			} else out += c;
+		}
+		return out + '"';
+	}
+	if (v instanceof Array) {
+		var a = [];
+		for (var j = 0; j < v.length; j++) a.push(abr_stringify(v[j]));
+		return '[' + a.join(',') + ']';
+	}
+	if (t === 'object') {
+		var o = [];
+		for (var k in v) {
+			if (v.hasOwnProperty(k) && typeof v[k] !== 'function') o.push(abr_stringify(k) + ':' + abr_stringify(v[k]));
+		}
+		return '{' + o.join(',') + '}';
+	}
+	return 'null';
+}
+
+function abr_parse(str) {
+	// o conteúdo é gerado pelo próprio painel (JSON.stringify)
+	return eval('(' + str + ')');
+}
+
+function abr_readJSON(path) {
+	var f = new File(path);
+	if (!f.exists) throw new Error('arquivo n\u00e3o encontrado: ' + path);
+	f.encoding = 'UTF-8';
+	f.open('r');
+	var s = f.read();
+	f.close();
+	return abr_parse(s);
+}
+
+function abr_error(e) {
+	return abr_stringify({ error: (e && e.message ? e.message : String(e)) + (e && e.line ? ' (linha ' + e.line + ')' : '') });
+}
+
+// ------------------------------------------------------------- projeto --
+function abr_findFolder(name, parent) {
+	for (var i = 1; i <= app.project.numItems; i++) {
+		var it = app.project.item(i);
+		if (it instanceof FolderItem && it.name === name && (!parent || it.parentFolder === parent)) return it;
+	}
+	return null;
+}
+
+function abr_rootFolder(create) {
+	var f = abr_findFolder(ABRIDOR_ROOT, app.project.rootFolder);
+	if (!f && create) f = app.project.items.addFolder(ABRIDOR_ROOT);
+	return f;
+}
+
+function abr_newFolder(name, parent) {
+	var f = app.project.items.addFolder(name);
+	if (parent) f.parentFolder = parent;
+	return f;
+}
+
+function abr_itemById(id) {
+	for (var i = 1; i <= app.project.numItems; i++) {
+		if (app.project.item(i).id === id) return app.project.item(i);
+	}
+	return null;
+}
+
+// mapa de fontes salvo no comentário da pasta ABRIDOR do projeto
+function abr_loadStoredMap() {
+	var root = abr_rootFolder(false);
+	if (!root || !root.comment || root.comment.indexOf(ABRIDOR_MAP_TAG) !== 0) return {};
+	try { return abr_parse(root.comment.substr(ABRIDOR_MAP_TAG.length)) || {}; } catch (e) { return {}; }
+}
+
+function abr_storeMap(map) {
+	var root = abr_rootFolder(true);
+	var old = abr_loadStoredMap();
+	for (var k in map) if (map.hasOwnProperty(k)) old[k] = map[k];
+	root.comment = ABRIDOR_MAP_TAG + abr_stringify(old);
+	return old;
+}
+
+// ------------------------------------------------------------- fontes ---
+function abridor_ping() {
+	return abr_stringify({ ok: true, version: app.version, fonts: !!(app.fonts && app.fonts.allFonts) });
+}
+
+function abridor_getFonts() {
+	try {
+		if (!app.fonts || !app.fonts.allFonts) return abr_stringify({ unsupported: true });
+		var groups = app.fonts.allFonts;
+		var parts = [];
+		for (var i = 0; i < groups.length; i++) {
+			var g = groups[i];
+			var list = (g instanceof Array) ? g : [g];
+			for (var j = 0; j < list.length; j++) {
+				var f = list[j];
+				var o = {};
+				try { o.f = f.familyName; } catch (e1) { o.f = ''; }
+				try { o.s = f.styleName; } catch (e2) { o.s = ''; }
+				try { o.p = f.postScriptName; } catch (e3) { o.p = ''; }
+				try { o.n = f.fullName; } catch (e4) { }
+				try { o.l = f.location; } catch (e5) { }
+				try { if (f.isSubstitute) continue; } catch (e6) { }
+				if (o.p) parts.push(abr_stringify(o));
+			}
+		}
+		return '{"fonts":[' + parts.join(',') + ']}';
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+// --------------------------------------------------------- texto --------
+var ABR_JUST = null;
+function abr_just(align) {
+	if (!ABR_JUST) {
+		ABR_JUST = {
+			left: ParagraphJustification.LEFT_JUSTIFY,
+			center: ParagraphJustification.CENTER_JUSTIFY,
+			right: ParagraphJustification.RIGHT_JUSTIFY,
+			justify: ParagraphJustification.FULL_JUSTIFY_LASTLINE_LEFT
+		};
+	}
+	return ABR_JUST[align] || ABR_JUST.left;
+}
+
+// junta os parágrafos num texto único e calcula os intervalos de cada trecho
+function abr_flatten(paragraphs) {
+	var text = '', runs = [], para = [];
+	for (var i = 0; i < paragraphs.length; i++) {
+		var p = paragraphs[i];
+		if (i > 0) {
+			// o "\r" herda o estilo do último trecho do parágrafo anterior
+			text += '\r';
+		}
+		var pStart = text.length;
+		for (var j = 0; j < p.runs.length; j++) {
+			var r = p.runs[j];
+			var t = r.caps ? r.text.toUpperCase() : r.text;
+			if (!t.length) continue;
+			runs.push({ start: text.length, end: text.length + t.length, run: r, para: i });
+			text += t;
+		}
+		para.push({ start: pStart, end: text.length, p: p });
+	}
+	return { text: text, runs: runs, paras: para };
+}
+
+function abr_sameStyle(a, b) {
+	return a.fontKey === b.fontKey && Math.abs(a.size - b.size) < 0.01 &&
+		Math.abs(a.color[0] - b.color[0]) < 0.01 && Math.abs(a.color[1] - b.color[1]) < 0.01 &&
+		Math.abs(a.color[2] - b.color[2]) < 0.01 && (a.tracking || 0) === (b.tracking || 0);
+}
+
+function abr_try(fn) { try { fn(); return true; } catch (e) { return false; } }
+
+function abr_fontFor(run, fontMap, fallback) {
+	var m = fontMap[run.fontKey];
+	return {
+		ps: (m && m.ps) ? m.ps : fallback,
+		scale: (m && m.scale) ? m.scale / 100 : 1
+	};
+}
+
+// aplica as propriedades de um trecho num TextDocument ou CharacterRange
+function abr_applyRunStyle(target, run, s, fontMap, fallback, leading) {
+	var f = abr_fontFor(run, fontMap, fallback);
+	var size = run.size * s * f.scale;
+	abr_try(function () { target.font = f.ps; });
+	abr_try(function () { target.fontSize = size; });
+	abr_try(function () { target.applyFill = true; });
+	abr_try(function () { target.fillColor = [run.color[0], run.color[1], run.color[2]]; });
+	abr_try(function () { target.applyStroke = false; });
+	abr_try(function () { target.tracking = run.tracking || 0; });
+	if (leading) {
+		abr_try(function () { target.autoLeading = false; });
+		// a entrelinha não acompanha a escala da fonte: mantém a posição das linhas do documento
+		abr_try(function () { target.leading = leading; });
+	}
+	return size;
+}
+
+function abr_layerName(text) {
+	var n = text.replace(/[\r\n]+/g, ' ').replace(/^\s+|\s+$/g, '');
+	if (n.length > 40) n = n.substr(0, 40) + '\u2026';
+	return n || 'texto';
+}
+
+// cria uma camada de texto a partir de um item do modelo
+function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
+	var flat = abr_flatten(t.paragraphs);
+	if (!flat.text.replace(/\s/g, '').length) return null;
+
+	// trecho dominante (mais caracteres) define o estilo base da camada
+	var dom = flat.runs[0].run, domLen = 0, counts = {};
+	var maxSize = 0;
+	for (var i = 0; i < flat.runs.length; i++) {
+		var r = flat.runs[i];
+		var k = r.run.fontKey + '|' + r.run.size;
+		counts[k] = (counts[k] || 0) + (r.end - r.start);
+		if (counts[k] > domLen) { domLen = counts[k]; dom = r.run; }
+		if (r.run.size > maxSize) maxSize = r.run.size;
+	}
+
+	var p0 = t.paragraphs[0];
+	var leading = p0.leading * s;
+	var isBox = t.mode === 'box';
+	var bw = 0, bh = 0, boxH = 0;
+	var layer;
+
+	if (isBox) {
+		bw = Math.max(4, t.w * s);
+		bh = Math.max(4, t.h * s);
+		// folga extra na altura para o texto não ser cortado se a fonte nova for maior
+		boxH = Math.max(bh * 2, bh + maxSize * s * 6);
+		layer = comp.layers.addBoxText([bw, boxH]);
+	} else {
+		layer = comp.layers.addText(' ');
+	}
+
+	var prop = layer.property('ADBE Text Properties').property('ADBE Text Document');
+	var td = prop.value;
+	abr_try(function () { td.resetCharStyle(); });
+	abr_try(function () { td.resetParagraphStyle(); });
+	td.text = flat.text;
+	abr_applyRunStyle(td, dom, s, fontMap, fallback, leading);
+	abr_try(function () { td.justification = abr_just(isBox ? p0.align : (t.align || p0.align)); });
+	prop.setValue(td);
+
+	// confere se a fonte foi aceita
+	var wanted = abr_fontFor(dom, fontMap, fallback).ps;
+	td = prop.value;
+	if (td.font !== wanted) {
+		log.push('fonte "' + wanted + '" indispon\u00edvel (' + dom.fontKey + ') \u2192 ' + td.font);
+	}
+
+	// estilos por trecho (AE 24.3+: TextDocument.characterRange)
+	var multi = false;
+	for (i = 0; i < flat.runs.length; i++) {
+		if (!abr_sameStyle(flat.runs[i].run, dom)) { multi = true; break; }
+	}
+	var perParagraph = false;
+	for (i = 1; i < t.paragraphs.length; i++) {
+		if (t.paragraphs[i].align !== p0.align || Math.abs(t.paragraphs[i].leading - p0.leading) > 0.01) { perParagraph = true; break; }
+	}
+	var rangesOK = false;
+	if ((multi || perParagraph) && typeof td.characterRange === 'function') {
+		rangesOK = abr_try(function () {
+			for (var q = 0; q < flat.runs.length; q++) {
+				var fr = flat.runs[q];
+				var lead = t.paragraphs[fr.para].leading * s;
+				// inclui o "\r" seguinte no mesmo estilo
+				var end = fr.end;
+				if (end < flat.text.length && flat.text.charAt(end) === '\r') end++;
+				var cr = td.characterRange(fr.start, end);
+				abr_applyRunStyle(cr, fr.run, s, fontMap, fallback, lead);
+			}
+			if (perParagraph && typeof td.paragraphRange === 'function') {
+				for (var pp = 0; pp < flat.paras.length; pp++) {
+					var P = flat.paras[pp];
+					// paragraphRange usa índices de parágrafo
+					var pr = td.paragraphRange(pp, pp + 1);
+					pr.justification = abr_just(P.p.align);
+				}
+			}
+			prop.setValue(td);
+		});
+		if (!rangesOK) log.push('estilos por trecho n\u00e3o suportados nesta vers\u00e3o do AE (camada "' + abr_layerName(flat.text) + '")');
+	} else if (multi) {
+		log.push('estilos mistos simplificados (AE sem characterRange): "' + abr_layerName(flat.text) + '"');
+	}
+
+	// ----- posição
+	var tr = layer.property('ADBE Transform Group');
+	if (isBox) {
+		td = prop.value;
+		var bp = null;
+		try { bp = td.boxTextPos; } catch (e) { bp = null; }
+		if (!bp || bp.length < 2) bp = [-bw / 2, -boxH / 2];
+
+		// alinhamento vertical: mede as linhas (baselineLocs) para centralizar/alinhar embaixo
+		var dy = 0;
+		if (t.vAlign === 'middle' || t.vAlign === 'bottom') {
+			var total = null;
+			try {
+				var locs = td.baselineLocs;
+				var ys = [];
+				for (var b = 0; b + 3 < locs.length; b += 4) {
+					if (isFinite(locs[b + 1]) && Math.abs(locs[b + 1]) < 1e6) ys.push(locs[b + 1]);
+				}
+				if (ys.length) total = (ys[ys.length - 1] - ys[0]) + leading;
+			} catch (e) { total = null; }
+			if (total === null) {
+				// estimativa: largura média de caractere ~ 0.5 x tamanho
+				var lines = 0;
+				for (i = 0; i < t.paragraphs.length; i++) {
+					var chars = 0, sz = 0;
+					for (var j = 0; j < t.paragraphs[i].runs.length; j++) {
+						chars += t.paragraphs[i].runs[j].text.length;
+						sz = Math.max(sz, t.paragraphs[i].runs[j].size);
+					}
+					lines += Math.max(1, Math.ceil(chars * sz * s * 0.5 / bw));
+				}
+				total = lines * leading;
+			}
+			dy = t.vAlign === 'middle' ? (bh - total) / 2 : (bh - total);
+		}
+
+		var anchor = [bp[0] + (t.cx - t.x) * s, bp[1] + (t.cy - t.y) * s - dy];
+		tr.property('ADBE Anchor Point').setValue([anchor[0], anchor[1], 0]);
+		tr.property('ADBE Position').setValue([ox + t.cx * s, oy + t.cy * s, 0]);
+	} else {
+		tr.property('ADBE Anchor Point').setValue([0, 0, 0]);
+		tr.property('ADBE Position').setValue([ox + t.ax * s, oy + t.ay * s, 0]);
+	}
+	if (t.rotation) tr.property('ADBE Rotate Z').setValue(t.rotation);
+
+	layer.name = abr_layerName(flat.text);
+
+	// metadados para a troca de fontes posterior
+	var meta = { v: 1, k: dom.fontKey, sz: dom.size * s, sc: abr_fontFor(dom, fontMap, fallback).scale, runs: [] };
+	if (rangesOK && multi) {
+		for (i = 0; i < flat.runs.length; i++) {
+			var fr2 = flat.runs[i];
+			meta.runs.push([fr2.start, fr2.end, fr2.run.fontKey, Math.round(fr2.run.size * s * 1000) / 1000]);
+		}
+	}
+	layer.comment = ABRIDOR_TAG + abr_stringify(meta);
+	return layer;
+}
+
+// ----------------------------------------------------------- criação ----
+// estado entre as chamadas (uma chamada por slide para o painel mostrar o progresso)
+$.global.__abridor = $.global.__abridor || {};
+
+function abridor_begin(jobPath) {
+	try {
+		var job = abr_readJSON(jobPath);
+		app.beginUndoGroup('ABRIDOR - preparar');
+		try {
+			if (!app.project) app.newProject();
+			var root = abr_rootFolder(true);
+			var docFolder = abr_newFolder(job.docName, root);
+			var slides = abr_newFolder('slides', docFolder);
+			var refs = job.settings.refImages ? abr_newFolder('refer\u00eancias', docFolder) : null;
+			abr_storeMap(job.fontMap);
+			$.global.__abridor = {
+				docFolder: docFolder.id,
+				slides: slides.id,
+				refs: refs ? refs.id : 0,
+				comps: []
+			};
+		} finally {
+			app.endUndoGroup();
+		}
+		return abr_stringify({ ok: true });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+function abridor_buildPage(jobPath, index) {
+	try {
+		var job = abr_readJSON(jobPath);
+		var S = job.settings;
+		var page = job.pages[index];
+		var st = $.global.__abridor;
+		var log = [];
+
+		app.beginUndoGroup('ABRIDOR - ' + page.compName);
+		try {
+			var fps = S.fps;
+			var frames = Math.max(1, Math.round(page.duration * fps));
+			var comp = app.project.items.addComp(page.compName, S.width, S.height, S.par || 1, frames / fps, fps);
+			comp.bgColor = [0, 0, 0];
+			var slidesFolder = abr_itemById(st.slides);
+			if (slidesFolder) comp.parentFolder = slidesFolder;
+
+			var fit = S.fit === 'fill' ? 'fill' : 'fit';
+			var s = fit === 'fill' ? Math.max(S.width / page.width, S.height / page.height) : Math.min(S.width / page.width, S.height / page.height);
+			var ox = (S.width - page.width * s) / 2;
+			var oy = (S.height - page.height * s) / 2;
+
+			// textos (de baixo para cima, para manter a ordem de empilhamento do documento)
+			var created = 0;
+			for (var i = 0; i < page.texts.length; i++) {
+				try {
+					var layer = abr_createText(comp, page.texts[i], s, ox, oy, job.fontMap, S.fallbackFont || 'ArialMT', log);
+					if (layer) created++;
+				} catch (e) {
+					log.push('erro no texto ' + (i + 1) + ': ' + e.message + (e.line ? ' (linha ' + e.line + ')' : ''));
+				}
+			}
+
+			// imagem de referência (camada guia: não aparece no render final)
+			if (S.refImages && page.refImage) {
+				try {
+					var file = new File(page.refImage);
+					if (file.exists) {
+						var footage = app.project.importFile(new ImportOptions(file));
+						var refs = abr_itemById(st.refs);
+						if (refs) footage.parentFolder = refs;
+						var ref = comp.layers.add(footage);
+						ref.name = 'REF - ' + page.compName;
+						ref.moveToEnd();
+						var sc = Math.min(S.width / footage.width, S.height / footage.height) * 100;
+						if (page.refFit === 'fill') sc = Math.max(S.width / footage.width, S.height / footage.height) * 100;
+						ref.property('ADBE Transform Group').property('ADBE Scale').setValue([sc, sc, 100]);
+						ref.property('ADBE Transform Group').property('ADBE Opacity').setValue(S.refOpacity);
+						ref.guideLayer = true;
+						ref.label = 0;
+						ref.locked = true;
+					} else {
+						log.push('imagem de refer\u00eancia n\u00e3o encontrada: ' + page.refImage);
+					}
+				} catch (e2) {
+					log.push('erro na imagem de refer\u00eancia: ' + e2.message);
+				}
+			}
+
+			st.comps.push(comp.id);
+		} finally {
+			app.endUndoGroup();
+		}
+		return abr_stringify({ ok: true, texts: created, log: log, compId: comp.id });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+function abridor_finish(jobPath) {
+	try {
+		var job = abr_readJSON(jobPath);
+		var S = job.settings;
+		var st = $.global.__abridor;
+		var comps = [];
+		for (var i = 0; i < st.comps.length; i++) {
+			var c = abr_itemById(st.comps[i]);
+			if (c) comps.push(c);
+		}
+		if (!comps.length) return abr_stringify({ ok: true, comps: 0 });
+
+		var master = null;
+		app.beginUndoGroup('ABRIDOR - master');
+		try {
+			if (S.master) {
+				var total = 0;
+				for (i = 0; i < comps.length; i++) total += comps[i].duration;
+				master = app.project.items.addComp(S.masterName, S.width, S.height, S.par || 1, total, S.fps);
+				master.bgColor = [0, 0, 0];
+				var docFolder = abr_itemById(st.docFolder);
+				if (docFolder) master.parentFolder = docFolder;
+				var t = 0;
+				for (i = 0; i < comps.length; i++) {
+					var l = master.layers.add(comps[i]);
+					l.startTime = t;
+					l.moveToEnd();
+					try {
+						master.markerProperty.setValueAtTime(t, new MarkerValue(comps[i].name));
+					} catch (em) { /* marcadores de comp: AE 14.0+ */ }
+					t += comps[i].duration;
+				}
+			}
+			(master || comps[0]).openInViewer();
+		} finally {
+			app.endUndoGroup();
+		}
+		return abr_stringify({ ok: true, comps: comps.length, master: master ? master.name : '' });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+// -------------------------------------------------- troca de fontes -----
+function abr_compsInScope(scope) {
+	var out = [];
+	var i;
+	if (scope === 'selected') {
+		var sel = app.project.selection;
+		for (i = 0; i < sel.length; i++) if (sel[i] instanceof CompItem) out.push(sel[i]);
+		if (!out.length && app.project.activeItem instanceof CompItem) out.push(app.project.activeItem);
+		return out;
+	}
+	for (i = 1; i <= app.project.numItems; i++) {
+		if (app.project.item(i) instanceof CompItem) out.push(app.project.item(i));
+	}
+	return out;
+}
+
+function abr_layerMeta(layer) {
+	if (!(layer instanceof TextLayer)) return null;
+	var c = layer.comment;
+	if (!c || c.indexOf(ABRIDOR_TAG) !== 0) return null;
+	try { return abr_parse(c.substr(ABRIDOR_TAG.length)); } catch (e) { return null; }
+}
+
+function abr_remapDoc(td, meta, map) {
+	var changed = false;
+	var len = td.text.length;
+	if (meta.runs && meta.runs.length > 1 && typeof td.characterRange === 'function') {
+		for (var i = 0; i < meta.runs.length; i++) {
+			var r = meta.runs[i];
+			var m = map[r[2]];
+			if (!m || !m.ps) continue;
+			var a = Math.min(r[0], len), b = Math.min(r[1], len);
+			if (b <= a) continue;
+			var cr = td.characterRange(a, b);
+			cr.font = m.ps;
+			cr.fontSize = r[3] * ((m.scale || 100) / 100);
+			changed = true;
+		}
+	} else {
+		var mm = map[meta.k];
+		if (mm && mm.ps) {
+			var newScale = (mm.scale || 100) / 100;
+			var oldScale = meta.sc || 1;
+			td.font = mm.ps;
+			if (Math.abs(newScale - oldScale) > 0.0001) td.fontSize = td.fontSize / oldScale * newScale;
+			changed = true;
+		}
+	}
+	return changed;
+}
+
+function abridor_applyFonts(mapPath, scope) {
+	try {
+		var data = abr_readJSON(mapPath);
+		var map = data.map;
+		var comps = abr_compsInScope(scope);
+		var layers = 0, failed = [];
+
+		app.beginUndoGroup('ABRIDOR - trocar fontes');
+		try {
+			abr_storeMap(map);
+			for (var c = 0; c < comps.length; c++) {
+				var comp = comps[c];
+				for (var i = 1; i <= comp.numLayers; i++) {
+					var layer = comp.layer(i);
+					var meta = abr_layerMeta(layer);
+					if (!meta) continue;
+					var wasLocked = layer.locked;
+					layer.locked = false;
+					var prop = layer.property('ADBE Text Properties').property('ADBE Text Document');
+					var changed = false;
+					try {
+						if (prop.numKeys > 0) {
+							for (var k = 1; k <= prop.numKeys; k++) {
+								var tdk = prop.keyValue(k);
+								if (abr_remapDoc(tdk, meta, map)) { prop.setValueAtKey(k, tdk); changed = true; }
+							}
+						} else {
+							var td = prop.value;
+							if (abr_remapDoc(td, meta, map)) { prop.setValue(td); changed = true; }
+						}
+					} catch (e) {
+						failed.push(comp.name + ' / ' + layer.name + ': ' + e.message);
+					}
+					if (changed) {
+						layers++;
+						if (map[meta.k]) meta.sc = (map[meta.k].scale || 100) / 100;
+						layer.comment = ABRIDOR_TAG + abr_stringify(meta);
+					}
+					layer.locked = wasLocked;
+				}
+			}
+		} finally {
+			app.endUndoGroup();
+		}
+		return abr_stringify({ ok: true, layers: layers, comps: comps.length, failed: failed });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+// lista as fontes de origem presentes nas camadas do projeto + mapa salvo
+function abridor_scanProject() {
+	try {
+		var stored = abr_loadStoredMap();
+		var fonts = {};
+		var comps = abr_compsInScope('all');
+		for (var c = 0; c < comps.length; c++) {
+			for (var i = 1; i <= comps[c].numLayers; i++) {
+				var layer = comps[c].layer(i);
+				var meta = abr_layerMeta(layer);
+				if (!meta) continue;
+				var text = '';
+				try { text = layer.property('ADBE Text Properties').property('ADBE Text Document').value.text; } catch (e) { }
+				var keys = [meta.k];
+				if (meta.runs) for (var r = 0; r < meta.runs.length; r++) keys.push(meta.runs[r][2]);
+				for (var k = 0; k < keys.length; k++) {
+					var key = keys[k];
+					if (!fonts[key]) fonts[key] = { count: 0, sample: '' };
+					fonts[key].count++;
+					if (!fonts[key].sample && text) {
+						var sample = text;
+						if (meta.runs && meta.runs.length > 1 && k > 0) sample = text.substring(meta.runs[k - 1][0], meta.runs[k - 1][1]);
+						fonts[key].sample = sample.replace(/[\r\n]+/g, ' ').substr(0, 80);
+					}
+				}
+			}
+		}
+		return abr_stringify({ ok: true, map: stored, fonts: fonts });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+function abridor_saveMap(mapPath) {
+	try {
+		var data = abr_readJSON(mapPath);
+		abr_storeMap(data.map);
+		return abr_stringify({ ok: true });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+// seleciona no projeto as camadas que usam uma fonte de origem
+function abridor_selectLayers(fontKey) {
+	try {
+		var comp = app.project.activeItem;
+		if (!(comp instanceof CompItem)) return abr_stringify({ ok: true, count: 0 });
+		var n = 0;
+		for (var i = 1; i <= comp.numLayers; i++) {
+			var l = comp.layer(i);
+			var meta = abr_layerMeta(l);
+			var hit = false;
+			if (meta) {
+				if (meta.k === fontKey) hit = true;
+				if (meta.runs) for (var r = 0; r < meta.runs.length; r++) if (meta.runs[r][2] === fontKey) hit = true;
+			}
+			l.selected = hit;
+			if (hit) n++;
+		}
+		return abr_stringify({ ok: true, count: n });
+	} catch (e) {
+		return abr_error(e);
+	}
+}

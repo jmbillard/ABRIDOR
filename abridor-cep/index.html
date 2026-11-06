@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+	<meta charset="utf-8">
+	<title>ABRIDOR</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+	<header class="top">
+		<div class="brand">ABRIDOR <span id="version">1.0</span></div>
+		<button id="btnOpen" class="btn primary" title="abrir um arquivo .pptx ou .pdf">abrir PPTX / PDF</button>
+	</header>
+
+	<div id="docInfo" class="doc-info empty">nenhum documento carregado</div>
+
+	<nav class="tabs">
+		<button class="tab active" data-tab="pages">páginas</button>
+		<button class="tab" data-tab="comps">comps</button>
+		<button class="tab" data-tab="fonts">fontes <span id="fontBadge" class="badge hidden"></span></button>
+	</nav>
+
+	<main>
+		<!-- ===================================================== PÁGINAS -->
+		<section id="tab-pages" class="panel active">
+			<div class="toolbar">
+				<button class="btn small" id="selAll">todas</button>
+				<button class="btn small" id="selNone">nenhuma</button>
+				<button class="btn small" id="selInvert">inverter</button>
+				<input type="text" id="selRange" class="range-input" placeholder="ex: 1-3, 5, 8-">
+				<button class="btn small" id="selRangeApply" title="selecionar somente as páginas do intervalo">ok</button>
+			</div>
+			<div class="toolbar">
+				<label class="check"><input type="checkbox" id="showBoxes" checked> mostrar textos detectados</label>
+				<span class="spacer"></span>
+				<button class="btn small" id="btnExtImages" title="usar imagens exportadas do PowerPoint (PNG/JPG) como referência, na ordem dos slides">imagens externas…</button>
+				<button class="btn small hidden" id="btnClearExt" title="voltar a usar a renderização interna">×</button>
+			</div>
+			<div id="selCount" class="hint"></div>
+			<div id="grid" class="grid">
+				<div class="placeholder">
+					abra um arquivo <b>.pptx</b> ou <b>.pdf</b> para listar as páginas.<br>
+					clique numa miniatura para incluir/excluir a página do processamento.
+				</div>
+			</div>
+		</section>
+
+		<!-- ======================================================= COMPS -->
+		<section id="tab-comps" class="panel">
+			<fieldset>
+				<legend>formato</legend>
+				<div class="row">
+					<label>resolução</label>
+					<select id="preset">
+						<option value="3840x2160">UHD 4K — 3840 × 2160</option>
+						<option value="1920x1080" selected>Full HD — 1920 × 1080</option>
+						<option value="1280x720">HD — 1280 × 720</option>
+						<option value="custom">personalizada…</option>
+					</select>
+				</div>
+				<div class="row hidden" id="customRow">
+					<label>tamanho</label>
+					<input type="number" id="compW" value="1920" min="16" max="30000" class="num"> ×
+					<input type="number" id="compH" value="1080" min="16" max="30000" class="num"> px
+				</div>
+				<div class="row">
+					<label>frame rate</label>
+					<select id="fps">
+						<option value="23.976">23,976</option>
+						<option value="24">24</option>
+						<option value="25">25</option>
+						<option value="29.97" selected>29,97</option>
+						<option value="30">30</option>
+						<option value="50">50</option>
+						<option value="59.94">59,94</option>
+						<option value="60">60</option>
+					</select>
+					<span class="unit">fps</span>
+				</div>
+				<div class="row">
+					<label>encaixe</label>
+					<select id="fit">
+						<option value="fit" selected>ajustar (página inteira visível)</option>
+						<option value="fill">preencher (corta as bordas)</option>
+					</select>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>duração</legend>
+				<div class="row">
+					<label>por página</label>
+					<input type="number" id="duration" value="5" min="0.1" step="0.5" class="num"> <span class="unit">seg</span>
+					<span id="durTC" class="tc"></span>
+				</div>
+				<div class="hint">a duração de cada página pode ser alterada individualmente na aba <b>páginas</b>.</div>
+				<div class="row">
+					<label>total</label>
+					<span id="totalTC" class="tc strong"></span>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>comps</legend>
+				<div class="row">
+					<label>nome</label>
+					<input type="text" id="prefix" value="LAYOUT" class="wide">
+				</div>
+				<div class="hint">as comps serão nomeadas <b id="namePreview">LAYOUT 01</b>, …</div>
+				<div class="row">
+					<label class="check"><input type="checkbox" id="master" checked> criar comp master com todas as páginas em sequência</label>
+				</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>referência</legend>
+				<div class="row">
+					<label class="check"><input type="checkbox" id="refImages" checked> imagem da página como camada guia</label>
+				</div>
+				<div class="row">
+					<label>opacidade</label>
+					<input type="range" id="refOpacity" min="5" max="100" value="50">
+					<span id="refOpacityVal" class="unit">50%</span>
+				</div>
+				<div class="hint">camadas guia não aparecem no render final nem quando a comp é usada como precomp.</div>
+			</fieldset>
+
+			<fieldset>
+				<legend>textos</legend>
+				<div class="row pdf-only">
+					<label>PDF</label>
+					<select id="groupMode">
+						<option value="paragraph" selected>agrupar linhas em parágrafos</option>
+						<option value="line">uma camada por linha</option>
+					</select>
+				</div>
+				<div class="row pptx-only">
+					<label class="check"><input type="checkbox" id="ignoreAutofit"> ignorar a redução automática de texto do PowerPoint</label>
+				</div>
+				<div class="row">
+					<label>fonte reserva</label>
+					<input type="text" id="fallbackFont" value="ArialMT" class="wide" title="nome PostScript usado quando a fonte não estiver associada">
+				</div>
+			</fieldset>
+		</section>
+
+		<!-- ====================================================== FONTES -->
+		<section id="tab-fonts" class="panel">
+			<div class="toolbar">
+				<button class="btn small" id="btnScan" title="ler as fontes das camadas já criadas no projeto (comentário ABRIDOR)">ler do projeto</button>
+				<button class="btn small" id="btnAuto" title="associar automaticamente pelo nome">auto-associar</button>
+				<button class="btn small" id="btnReloadFonts" title="recarregar a lista de fontes instaladas">↻</button>
+				<span class="spacer"></span>
+				<input type="search" id="fontFilter" placeholder="filtrar…" class="filter">
+			</div>
+			<div class="toolbar">
+				<input type="text" id="sampleText" placeholder="texto do preview (vazio = texto do documento)" class="wide">
+				<input type="range" id="previewSize" min="12" max="48" value="22" title="tamanho do preview">
+			</div>
+			<div id="fontList" class="font-list">
+				<div class="placeholder">as fontes do documento aparecem aqui depois de abrir um arquivo<br>(ou use <b>ler do projeto</b> para trocar fontes de comps já criadas).</div>
+			</div>
+			<div class="apply-bar">
+				<select id="applyScope">
+					<option value="all">em todas as comps do projeto</option>
+					<option value="selected">nas comps selecionadas</option>
+				</select>
+				<button class="btn primary" id="btnApplyFonts">aplicar fontes</button>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<div class="progress"><div id="progressBar"></div></div>
+		<div class="status-row">
+			<div id="status" class="status">pronto</div>
+			<button id="btnLog" class="btn small ghost hidden">avisos</button>
+		</div>
+		<pre id="log" class="log hidden"></pre>
+		<button id="btnBuild" class="btn primary big" disabled>criar comps</button>
+	</footer>
+
+	<!-- Bibliotecas: esconde o "module" do Node para que se registrem no window -->
+	<script>
+		if (typeof module === 'object' && module) { window.__abrNodeModule = module; module = undefined; }
+	</script>
+	<script src="js/lib/jszip.min.js"></script>
+	<script src="js/lib/pdf.js"></script>
+	<script src="js/lib/pdf.worker.js"></script>
+	<script>
+		if (window.__abrNodeModule) { module = window.__abrNodeModule; }
+		if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib/pdf.worker.js';
+	</script>
+
+	<script src="js/cep.js"></script>
+	<script src="js/pptx-parser.js"></script>
+	<script src="js/pdf-parser.js"></script>
+	<script src="js/render.js"></script>
+	<script src="js/fonts.js"></script>
+	<script src="js/app.js"></script>
+</body>
+</html>
