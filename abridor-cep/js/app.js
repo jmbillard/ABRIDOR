@@ -7,7 +7,7 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.1.0';
+	var VERSION = '1.2.0';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
