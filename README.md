@@ -496,7 +496,7 @@ abridor-cep/
   - `python3 tests/make_example_pptx.py` → gera o `exemplo_creditos.pptx`.
   - `node tests/make_screenshots.js` → gera todos os prints de `docs/img` (painel real no Chromium com o AE simulado; instalador, menu e projeto são ilustrações em `tests/illustrations.html`).
   - `node tests/make_demo.js` → grava a animação `docs/img/demo.gif` (precisa do `ffmpeg`).
-  - `python3 tests/make_banner.py` → gera o banner do instalador como string ExtendScript.
+  - `node tests/make_banner.js` → gera o banner do instalador (com o logo) e grava a string ExtendScript no instalador.
 - `js/lib/pdf.js` e `pdf.worker.js` têm uma alteração: `isNodeJS = false`, porque o CEP expõe `process` e o pdf.js tentaria usar APIs do Node.
 
 <br>

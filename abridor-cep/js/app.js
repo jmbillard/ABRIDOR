@@ -976,6 +976,7 @@
 			setLog(log);
 			cta.finish(true);
 			showApply(true);
+			UI.replay($('logoMark'), 'pry');
 			status(res.comps + ' comps criadas' + (res.master ? ' + "' + res.master + '"' : '') + '.' + (log.length ? ' veja os avisos.' : ''), 'ok');
 		}).catch(function (e) {
 			console.error(e);

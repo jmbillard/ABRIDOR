@@ -144,7 +144,20 @@ button { cursor: pointer; }
 	box-shadow: 0 4px 14px rgba(76, 157, 255, .35);
 }
 
-.logo-mark .ico { width: 15px; height: 15px; stroke-width: 2; }
+.logo-mark { cursor: default; }
+
+.logo-mark .opener { width: 19px; height: 19px; overflow: visible; transform-origin: 50% 50%; }
+
+/* o abridor "abre": alavanca para cima e volta */
+.logo-mark:hover .opener, .logo-mark.pry .opener { animation: pry .9s var(--spring); }
+
+@keyframes pry {
+	0% { transform: rotate(0); }
+	25% { transform: rotate(-22deg) translateY(-1px); }
+	45% { transform: rotate(8deg); }
+	65% { transform: rotate(-6deg); }
+	100% { transform: rotate(0); }
+}
 
 .logo-name { font-weight: 700; letter-spacing: 2.5px; font-size: 12px; transition: opacity var(--t), max-width var(--t) var(--ease); max-width: 120px; overflow: hidden; }
 

@@ -18,7 +18,7 @@
 		doc: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
 		pages: '<rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/>',
 		comps: '<path d="M12 3 21 8l-9 5-9-5z"/><path d="m3 12.5 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
-		fonts: '<path d="M4 20 9.5 5h1L16 20"/><path d="M6.2 14h7.6"/><path d="M17.5 11.5a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6zM20.3 11v9"/>',
+		fonts: '<path d="M3 7V5h11v2"/><path d="M8.5 5v14"/><path d="M6.5 19h4"/><path d="M17 9v8.5a1.5 1.5 0 0 0 1.5 1.5h1.5"/><path d="M15 12h5"/>',
 		check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
 		x: '<path d="M6 6l12 12M18 6 6 18"/>',
 		eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
