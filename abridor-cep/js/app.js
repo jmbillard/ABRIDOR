@@ -341,12 +341,13 @@
 							if (!f || f.type === 'project') {
 								f = fonts[r.fontKey] = {
 									key: r.fontKey, family: r.family, bold: r.bold, italic: r.italic,
-									type: state.doc.type, count: 0, pages: {}, sample: ''
+									type: state.doc.type, count: 0, pages: {}, texts: {}, sample: ''
 								};
 							}
 							f.pages[pi] = (f.pages[pi] || 0) + 1;
-							if (f.sample.length < 30 && r.text.replace(/\s/g, '').length > 1) {
-								f.sample = (f.sample ? f.sample + ' ' : '') + r.text.replace(/[\r\n]+/g, ' ').trim();
+							var tx = f.texts[pi] || '';
+							if (tx.length < 30 && r.text.replace(/\s/g, '').length > 1) {
+								f.texts[pi] = (tx ? tx + ' ' : '') + r.text.replace(/[\r\n]+/g, ' ').trim();
 							}
 						});
 					});
@@ -384,6 +385,17 @@
 		var n = 0;
 		for (var p in f.pages) if (state.selected[p]) n += f.pages[p];
 		return n;
+	}
+
+	// texto de exemplo da fonte, priorizando as páginas selecionadas
+	function sampleOf(f) {
+		if (!f.texts) return f.sample || '';
+		var out = '', any = '';
+		for (var p in f.texts) {
+			if (!any) any = f.texts[p];
+			if (state.selected[p] && out.length < 30) out = (out ? out + ' ' : '') + f.texts[p];
+		}
+		return out || any || f.sample || '';
 	}
 
 	function updateFontCounts() {
@@ -489,7 +501,7 @@
 				row.classList.add(m.ps ? 'manual' : 'missing');
 				st.textContent = m.ps ? 'PostScript' : 'sem fonte — usa reserva';
 			}
-			var sample = $('sampleText').value || src.sample || src.key;
+			var sample = $('sampleText').value || sampleOf(src) || src.key;
 			var size = $('previewSize').value + 'px';
 			var tgt = row.querySelector('.preview.target');
 			var orig = row.querySelector('.preview.orig');
@@ -553,7 +565,7 @@
 				ps: state.map[k].ps || '',
 				scale: state.map[k].scale || 100,
 				family: src.family || '', bold: !!src.bold, italic: !!src.italic, type: src.type || '',
-				sample: (src.sample || '').slice(0, 60)
+				sample: sampleOf(src).slice(0, 60)
 			};
 		}
 		return out;

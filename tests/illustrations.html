@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>ABRIDOR · ilustrações</title>
+<!-- Recriações (HTML) de telas do After Effects usadas no README: instalador ScriptUI, menu e projeto.
+     Abra com #inst-0, #inst-1, #inst-2, #inst-3, #menu ou #projeto. -->
+<style>
+	* { box-sizing: border-box; }
+	body { margin: 0; background: transparent; font: 12px/1.45 "Segoe UI", Inter, Arial, sans-serif; color: #c8c8c8; }
+	#stage { display: inline-block; padding: 18px; }
+	.hidden { display: none !important; }
+
+	/* ---------- janela ScriptUI */
+	.win { width: 370px; background: #262626; border: 1px solid #111; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.55); overflow: hidden; }
+	.titlebar { height: 30px; background: #1d1d1d; display: flex; align-items: center; padding: 0 12px; color: #d8d8d8; font-size: 12px; border-bottom: 1px solid #111; }
+	.titlebar .dots { display: flex; gap: 7px; margin-right: 10px; }
+	.titlebar .dots i { width: 11px; height: 11px; border-radius: 50%; background: #444; display: block; }
+	.banner { display: block; width: 360px; height: 84px; margin: 0 auto; }
+	.body { padding: 14px 14px 0; min-height: 168px; }
+	.body p { margin: 0 0 10px; }
+	.check { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
+	.dot { font-size: 13px; }
+	.ok { color: #5cd18c; } .warn { color: #fac254; } .bad { color: #f56b6b; }
+	.link { color: #05a6ff; margin-top: 6px; }
+	.radios { display: flex; gap: 24px; margin: 6px 0 12px; }
+	.radio { display: flex; align-items: center; gap: 6px; }
+	.radio i { width: 13px; height: 13px; border-radius: 50%; border: 1px solid #8a8a8a; display: inline-block; position: relative; }
+	.radio.on i::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: #e0e0e0; }
+	.radio.off { color: #6a6a6a; } .radio.off i { border-color: #555; }
+	.path { color: #9a9a9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 3px 0; }
+	.progress { padding: 4px 14px 0; }
+	.progress .lab { height: 18px; }
+	.progress .bar { height: 4px; background: #3a3a3a; border-radius: 2px; overflow: hidden; }
+	.progress .bar b { display: block; height: 100%; background: #2d8ceb; }
+	.buttons { display: flex; justify-content: space-between; padding: 14px; }
+	.buttons div { display: flex; gap: 8px; }
+	.btn { background: #3c3c3c; border: 1px solid #545454; color: #e2e2e2; border-radius: 4px; padding: 4px 16px; min-width: 80px; text-align: center; }
+	.btn.default { border-color: #2d8ceb; box-shadow: inset 0 0 0 1px #2d8ceb; }
+
+	/* ---------- menu */
+	.menubar { width: 640px; background: #232323; border: 1px solid #111; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.55); padding-bottom: 6px; position: relative; height: 330px; }
+	.menubar .top { display: flex; gap: 16px; padding: 6px 12px; background: #1b1b1b; border-bottom: 1px solid #111; border-radius: 6px 6px 0 0; color: #d0d0d0; }
+	.menubar .top span.sel { background: #2d8ceb; color: #fff; border-radius: 3px; padding: 0 6px; margin: 0 -6px; }
+	.menu { position: absolute; background: #2b2b2b; border: 1px solid #111; box-shadow: 0 6px 18px rgba(0,0,0,.5); border-radius: 4px; padding: 4px 0; min-width: 190px; }
+	.menu div { white-space: nowrap; padding: 3px 22px 3px 22px; display: flex; justify-content: space-between; gap: 30px; color: #d2d2d2; }
+	.menu div.sep { padding: 0; margin: 4px 0; border-top: 1px solid #3c3c3c; }
+	.menu div.sel { background: #2d8ceb; color: #fff; }
+	.menu div small { color: #8a8a8a; }
+	.menu div.sel small { color: #e8f2ff; }
+
+	/* ---------- projeto */
+	.ae { display: flex; gap: 6px; background: #1a1a1a; padding: 6px; border-radius: 6px; box-shadow: 0 10px 30px rgba(0,0,0,.55); }
+	.panel { background: #232323; border: 1px solid #111; border-radius: 3px; }
+	.panel .ptitle { height: 26px; display: flex; align-items: center; padding: 0 10px; color: #e0e0e0; border-bottom: 1px solid #111; background: #1f1f1f; }
+	.panel .ptitle b { border-bottom: 2px solid #2d8ceb; padding: 3px 0; font-weight: 400; }
+	.tree { width: 300px; padding: 4px 0; }
+	.tree .row { display: flex; align-items: center; gap: 6px; height: 21px; padding-right: 8px; white-space: nowrap; }
+	.tree .row.sel { background: #2b4f78; }
+	.ico { width: 14px; height: 11px; display: inline-block; border-radius: 2px; flex: none; }
+	.ico.folder { background: #c8a24a; }
+	.ico.comp { background: #8a7ad8; border-radius: 2px; }
+	.ico.img { background: #4aa3c8; }
+	.tw { color: #777; width: 10px; text-align: center; flex: none; }
+	.tree .type { margin-left: auto; color: #777; font-size: 11px; }
+	.timeline { width: 640px; }
+	.tl-head, .tl-row { display: grid; grid-template-columns: 26px 22px 26px 1fr 210px; align-items: center; height: 24px; border-bottom: 1px solid #1a1a1a; }
+	.tl-head { color: #8a8a8a; font-size: 11px; background: #1f1f1f; }
+	.tl-row .num { color: #8a8a8a; text-align: center; }
+	.lbl { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+	.tl-row .name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.tl-row .comment { color: #8aa4bf; font-family: Consolas, Menlo, monospace; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px; }
+	.tl-row .lock { color: #c8c8c8; text-align: center; }
+	.tl-row.guide .name { color: #9aa; font-style: italic; }
+	.T { color: #d9d9d9; font-weight: 700; font-family: Georgia, serif; }
+	.timecode { padding: 6px 10px; color: #2d8ceb; font: 600 16px Consolas, Menlo, monospace; border-bottom: 1px solid #111; }
+	.markers { position: relative; height: 26px; border-bottom: 1px solid #111; background: #1f1f1f; }
+	.markers span { position: absolute; top: 4px; font-size: 10px; color: #cfcfcf; white-space: nowrap; }
+	.markers span::before { content: ''; display: inline-block; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #6fbf73; margin-right: 4px; vertical-align: -1px; }
+	.bars { padding: 4px 0 6px; }
+	.bars .bar { height: 18px; margin: 3px 0; border-radius: 2px; background: #8a7ad8; color: #111; font-size: 10.5px; padding: 1px 6px; white-space: nowrap; overflow: hidden; }
+	.caption { color: #8a8a8a; font-size: 11px; padding: 6px 10px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<!-- ======================================================= INSTALADOR -->
+<template id="inst">
+	<div class="win">
+		<div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>ABRIDOR v1.0.0 · instalador</div>
+		<img class="banner" src="../docs/img/banner.png" alt="">
+		<div class="body">
+			<div data-step="0">
+				<p>olá! vamos instalar o ABRIDOR no After Effects.</p>
+				<p>a extensão será copiada para este computador: depois de instalada ela não depende mais desta pasta. para atualizar, rode o instalador da versão nova.</p>
+			</div>
+			<div data-step="1">
+				<p>conferindo o que o ABRIDOR precisa:</p>
+				<div class="check"><span class="dot ok">●</span>After Effects 2020 ou mais novo</div>
+				<div class="check"><span class="dot ok">●</span>After Effects 2024 (lista e preview de fontes)</div>
+				<div class="check"><span class="dot ok">●</span>acesso à rede e escrita de arquivos</div>
+				<div class="check"><span class="dot ok">●</span>pasta "abridor-cep" ao lado do instalador</div>
+				<p style="margin-top:10px">tudo certo!</p>
+				<div class="link">› verificar de novo</div>
+			</div>
+			<div data-step="2">
+				<p>tudo pronto! o que você quer fazer?</p>
+				<div class="radios">
+					<span class="radio on"><i></i>instalar</span>
+					<span class="radio off"><i></i>remover</span>
+				</div>
+				<div class="path">origem: \\servidor\grafismo\ABRIDOR\abridor-cep</div>
+				<div class="path">destino: C:\Users\editor\AppData\Roaming\Adobe\CEP\extensions\com.abridor.panel</div>
+			</div>
+			<div data-step="3">
+				<p>ABRIDOR v1.0.0 instalado! (16 arquivos)</p>
+				<p>reinicie o After Effects e abra o painel em:<br>Window &gt; Extensions &gt; ABRIDOR</p>
+			</div>
+		</div>
+		<div class="progress" data-step="3"><div class="lab">pronto!</div><div class="bar"><b style="width:100%"></b></div></div>
+		<div class="buttons">
+			<div><span class="btn" data-hide="3">cancelar</span></div>
+			<div><span class="btn" data-show="1 2">anterior</span><span class="btn default" id="nextBtn">começar</span></div>
+		</div>
+	</div>
+</template>
+
+<!-- ======================================================= MENU -->
+<template id="menu">
+	<div class="menubar">
+		<div class="top"><span>File</span><span>Edit</span><span>Composition</span><span>Layer</span><span>Effect</span><span>Animation</span><span>View</span><span class="sel">Window</span><span>Help</span></div>
+		<div class="menu" style="left:268px;top:30px">
+			<div>Workspace <small>›</small></div>
+			<div class="sep"></div>
+			<div>Align</div>
+			<div>Audio</div>
+			<div>Character <small>Ctrl+6</small></div>
+			<div>Effects &amp; Presets <small>Ctrl+5</small></div>
+			<div>Paragraph <small>Ctrl+7</small></div>
+			<div>Properties</div>
+			<div class="sep"></div>
+			<div class="sel">Extensions <small>›</small></div>
+			<div class="sep"></div>
+			<div>Project <small>Ctrl+0</small></div>
+		</div>
+		<div class="menu" style="left:458px;top:218px;min-width:150px">
+			<div class="sel">ABRIDOR</div>
+			<div>Adobe Color Themes</div>
+		</div>
+	</div>
+</template>
+
+<!-- ======================================================= PROJETO -->
+<template id="projeto">
+	<div class="ae">
+		<div class="panel">
+			<div class="ptitle"><b>Project</b></div>
+			<div class="tree">
+				<div class="row"><span class="tw">▾</span><span class="ico folder"></span>ABRIDOR<span class="type">Folder</span></div>
+				<div class="row" style="padding-left:16px"><span class="tw">▾</span><span class="ico folder"></span>exemplo_creditos<span class="type">Folder</span></div>
+				<div class="row" style="padding-left:32px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR MASTER<span class="type">Composition</span></div>
+				<div class="row" style="padding-left:32px"><span class="tw">▾</span><span class="ico folder"></span>referências<span class="type">Folder</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico img"></span>ref_001_1920x1080.png<span class="type">PNG file</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico img"></span>ref_002_1920x1080.png<span class="type">PNG file</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico img"></span>…</div>
+				<div class="row" style="padding-left:32px"><span class="tw">▾</span><span class="ico folder"></span>slides<span class="type">Folder</span></div>
+				<div class="row sel" style="padding-left:48px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR 01<span class="type">Composition</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR 02<span class="type">Composition</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR 03<span class="type">Composition</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR 05<span class="type">Composition</span></div>
+				<div class="row" style="padding-left:48px"><span class="tw"></span><span class="ico comp"></span>O SOM DO MAR 06<span class="type">Composition</span></div>
+			</div>
+		</div>
+		<div style="display:flex;flex-direction:column;gap:6px">
+			<div class="panel timeline">
+				<div class="ptitle"><b>O SOM DO MAR 01</b></div>
+				<div class="timecode">0;00;00;00 <span style="color:#777;font-size:11px;font-weight:400">(29.97 fps) · 1920 × 1080 · 0;00;08;00</span></div>
+				<div class="tl-head"><span>#</span><span></span><span>🔒</span><span>Layer Name</span><span>Comment</span></div>
+				<div class="tl-row"><span class="num">1</span><span class="lbl" style="background:#d34"></span><span class="lock"></span><span class="name"><span class="T">T</span> O SOM DO MAR</span><span class="comment">ABRIDOR {"v":1,"k":"Gotham Black","sz":144…</span></div>
+				<div class="tl-row"><span class="num">2</span><span class="lbl" style="background:#d34"></span><span class="lock"></span><span class="name"><span class="T">T</span> série original · episódio 1</span><span class="comment">ABRIDOR {"v":1,"k":"Inter Light","sz":48…</span></div>
+				<div class="tl-row guide"><span class="num">3</span><span class="lbl" style="background:#777"></span><span class="lock">🔒</span><span class="name">▣ REF - O SOM DO MAR 01 (guia, 50%)</span><span class="comment"></span></div>
+			</div>
+			<div class="panel timeline">
+				<div class="ptitle"><b>O SOM DO MAR MASTER</b></div>
+				<div class="markers">
+					<span style="left:6px">O SOM DO MAR 01</span><span style="left:150px">02</span><span style="left:260px">03</span><span style="left:370px">05</span><span style="left:480px">06</span>
+				</div>
+				<div class="bars">
+					<div class="bar" style="margin-left:0;width:150px">O SOM DO MAR 01 · 8 s</div>
+					<div class="bar" style="margin-left:150px;width:110px">O SOM DO MAR 02</div>
+					<div class="bar" style="margin-left:260px;width:110px">O SOM DO MAR 03</div>
+					<div class="bar" style="margin-left:370px;width:110px">O SOM DO MAR 05</div>
+					<div class="bar" style="margin-left:480px;width:110px">O SOM DO MAR 06</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script>
+	function render() {
+		var h = (location.hash || '#inst-0').slice(1);
+		var stage = document.getElementById('stage');
+		stage.innerHTML = '';
+		var m = h.match(/^inst-(\d)$/);
+		var tpl = document.getElementById(m ? 'inst' : h);
+		stage.appendChild(tpl.content.cloneNode(true));
+		if (!m) return;
+		var step = m[1];
+		stage.querySelectorAll('[data-step]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.step !== step); });
+		stage.querySelectorAll('[data-hide]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.hide === step); });
+		stage.querySelectorAll('[data-show]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.show.split(' ').indexOf(step) < 0); });
+		document.getElementById('nextBtn').textContent = ['começar', 'próximo', 'instalar', 'concluir'][step];
+	}
+	window.addEventListener('hashchange', render);
+	render();
+</script>
+</body>
+</html>
