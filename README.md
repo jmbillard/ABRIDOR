@@ -105,7 +105,15 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
   <sub>o painel em ação: seleção de páginas, duração, formato, fontes e criação.</sub>
 </p>
 
-**2.3** o painel tem **tema claro e escuro**. o botão no canto superior direito alterna entre:
+**2.3** passe o mouse sobre qualquer botão para ver o **tooltip**: o que ele faz e, quando houver, o atalho de teclado. nas miniaturas, o tooltip lista os textos encontrados na página.
+
+<p align="center">
+  <img src="docs/img/18-tooltip.png" width="380">
+</p>
+
+atalhos: `Ctrl/⌘ + O` abre um documento · `1` `2` `3` trocam de aba · `Ctrl/⌘ + Enter` cria as comps · `↑` `↓` mudam a duração.
+
+**2.4** o painel tem **tema claro e escuro**. o botão no canto superior direito alterna entre:
 
 <p align="center">
   <img src="docs/img/17-tema-botao.png" width="300">

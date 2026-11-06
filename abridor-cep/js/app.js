@@ -371,11 +371,11 @@
 			el.innerHTML =
 				'<div class="thumb"><img alt="">' +
 				'<span class="chip num">' + pad(pg.number, 2) + '</span>' +
-				(pg.hidden ? '<span class="chip flag" title="oculto no PowerPoint">' + icon('eyeOff') + '</span>' : '') +
+				(pg.hidden ? '<span class="chip flag" title="slide oculto\nestava oculto no PowerPoint; por isso veio desmarcado">' + icon('eyeOff') + '</span>' : '') +
 				(state.extImages[i] ? '<span class="chip flag ext" title="' + esc(state.extImages[i]) + '">' + icon('image') + '</span>' : '') +
 				'<span class="check">' + icon('check') + '</span>' +
-				'<span class="chip texts" title="textos detectados">' + icon('type') + pg.texts.length + '</span>' +
-				'<button class="dur' + (custom ? ' custom' : '') + '" data-i="' + i + '" title="duração desta página">' + icon('clock') +
+				'<span class="chip texts" title="textos detectados nesta página">' + icon('type') + pg.texts.length + '</span>' +
+				'<button class="dur' + (custom ? ' custom' : '') + '" data-i="' + i + '" title="duração desta página\nclique para mudar · vazio volta ao padrão">' + icon('clock') +
 				'<span class="dur-val">' + fmtSec(custom || settings().duration) + 's</span>' +
 				'<input type="text" inputmode="decimal" spellcheck="false"></button>' +
 				'</div>';
@@ -391,9 +391,9 @@
 				thumb.insertBefore(c, img.nextSibling);
 			};
 			img.src = pg.thumb || '';
-			thumb.title = pg.name + (pg.texts.length ? '\n\n' + pg.texts.slice(0, 12).map(function (t) {
+			thumb.title = pg.name + '\n' + (pg.texts.length ? pg.texts.length + ' texto' + (pg.texts.length === 1 ? '' : 's') + ' · clique para incluir/excluir\n' + pg.texts.slice(0, 8).map(function (t) {
 				return '• ' + t.paragraphs.map(function (p) { return p.runs.map(function (r) { return r.text; }).join(''); }).join(' / ').slice(0, 60);
-			}).join('\n') : '\n\nnenhum texto encontrado');
+			}).join('\n') + (pg.texts.length > 8 ? '\n• …' : '') : 'nenhum texto encontrado (texto em imagem?)');
 			thumb.onclick = function (e) {
 				if (e.target.closest('.dur')) return;
 				state.selected[i] = !state.selected[i];
@@ -603,7 +603,7 @@
 		row.innerHTML =
 			'<div class="font-head">' +
 			'<i class="dot"></i>' +
-			'<span class="font-names"><span class="src" title="fonte do documento">' + esc(src.key) + '</span>' + icon('arrow') + '<span class="dst"></span></span>' +
+			'<span class="font-names"><span class="src" title="' + esc(src.key) + '\nfonte usada no documento">' + esc(src.key) + '</span>' + icon('arrow') + '<span class="dst"></span></span>' +
 			'<span class="uses"></span>' + icon('chevron', 'chev') +
 			'</div>' +
 			'<div class="font-preview"></div>' +
@@ -612,8 +612,8 @@
 			(supported ? '<select class="family"></select><select class="style"></select>' : '<input type="text" class="ps" placeholder="nome PostScript (ex: Montserrat-Bold)" spellcheck="false">') +
 			'</div>' +
 			'<div class="font-tools">' +
-			'<span class="orig" title="texto na fonte original (se instalada)"><small>original</small><span></span></span>' +
-			'<span class="scale-step" title="escala do tamanho">' +
+			'<span class="orig" title="original\no texto na fonte do documento, se ela estiver instalada"><small>original</small><span></span></span>' +
+			'<span class="scale-step" title="escala do tamanho\npassos de 5%; útil quando a fonte nova é maior ou menor">' +
 			'<button class="icon-btn s-minus">' + icon('minus') + '</button><span class="s-val"></span><button class="icon-btn s-plus">' + icon('plus') + '</button>' +
 			'</span></div>' +
 			'</div></div>';
@@ -650,7 +650,8 @@
 			row.className = 'font ' + st + (row.classList.contains('open') ? ' open' : '');
 			var dst = row.querySelector('.dst');
 			dst.textContent = f ? f.family + ' ' + f.style : (m.ps ? m.ps : 'sem fonte');
-			dst.title = f ? f.ps : (m.ps ? 'não instalada: ' + m.ps : 'usa a fonte reserva (' + S.fallbackFont + ')');
+			dst.title = f ? f.family + ' ' + f.style + '\nPostScript: ' + f.ps : (m.ps ? 'não instalada\n' + m.ps : 'sem fonte\nas camadas vão usar a fonte reserva (' + S.fallbackFont + ')');
+			row.querySelector('.dot').title = { ok: 'automático\nencontrada pelo nome', manual: 'manual\nescolhida por você', missing: 'sem fonte\nescolha uma família abaixo' }[st];
 			var sample = $('sampleText').value || sampleOf(src) || src.key;
 			preview.textContent = sample;
 			preview.style.fontSize = Math.round(S.previewSize * (m.scale || 100) / 100) + 'px';
@@ -1055,6 +1056,7 @@
 
 	function bind() {
 		UI.hydrateIcons();
+		UI.tooltips();
 
 		// tema
 		applyTheme(false);
@@ -1229,6 +1231,10 @@
 		global.addEventListener('resize', placeTabInk);
 		document.addEventListener('keydown', function (e) {
 			if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'o') { e.preventDefault(); pickDocument(); }
+			if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); if (!$('btnBuild').disabled) build(); }
+			// 1 2 3 trocam de aba (fora de campos de texto)
+			var typing = /^(input|select|textarea)$/i.test((document.activeElement || {}).tagName || '');
+			if (!typing && !e.ctrlKey && !e.metaKey && !e.altKey && /^[123]$/.test(e.key)) showTab(TABS[+e.key - 1]);
 		});
 	}
 

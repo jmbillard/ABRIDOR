@@ -166,6 +166,129 @@
 		if (t) t.classList.remove('show');
 	};
 
+	// ------------------------------------------------------ tooltips -------
+	// Substitui as dicas nativas (atributo title) por um balão próprio:
+	// 1ª linha = título, demais = descrição; linhas "• " viram lista; data-kbd = atalho.
+	UI.tooltips = function () {
+		var tip = document.createElement('div');
+		tip.id = 'tip';
+		tip.className = 'tip';
+		tip.setAttribute('role', 'tooltip');
+		document.body.appendChild(tip);
+
+		var cur = null, showTimer = null, coolTimer = null, warm = false;
+		var mac = /Mac/i.test(global.navigator.platform || '');
+
+		function escT(t) {
+			return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; });
+		}
+
+		function kbd(k) {
+			return k.replace('mod', mac ? '⌘' : 'Ctrl').split('+').map(function (x) { return '<kbd>' + escT(x) + '</kbd>'; }).join('');
+		}
+
+		// o title vira data-tip na hora do hover (assim títulos alterados depois também funcionam)
+		function findTarget(el) {
+			while (el && el !== document && el.getAttribute) {
+				if (el.hasAttribute('title') || el.hasAttribute('data-tip')) return el;
+				el = el.parentNode;
+			}
+			return null;
+		}
+
+		function textOf(el) {
+			if (el.hasAttribute('title')) {
+				var t = el.getAttribute('title');
+				if (t) el.setAttribute('data-tip', t);
+				el.removeAttribute('title');
+			}
+			return el.getAttribute('data-tip') || '';
+		}
+
+		function render(el) {
+			var lines = textOf(el).split('\n').filter(function (l) { return l.replace(/\s/g, '').length; });
+			if (!lines.length) return false;
+			var html = '<div class="tip-head"><span>' + escT(lines[0]) + '</span>' +
+				(el.getAttribute('data-kbd') ? '<span class="tip-kbd">' + kbd(el.getAttribute('data-kbd')) + '</span>' : '') + '</div>';
+			var list = [], body = [];
+			lines.slice(1).forEach(function (l) {
+				if (/^\s*•\s/.test(l)) list.push('<li>' + escT(l.replace(/^\s*•\s*/, '')) + '</li>');
+				else body.push('<div class="tip-body">' + escT(l) + '</div>');
+			});
+			html += body.join('') + (list.length ? '<ul class="tip-list">' + list.join('') + '</ul>' : '');
+			tip.innerHTML = html + '<i class="tip-arrow"></i>';
+			tip.classList.toggle('rich', lines.length > 1);
+			return true;
+		}
+
+		function place(el) {
+			var r = el.getBoundingClientRect();
+			var vw = global.innerWidth, vh = global.innerHeight;
+			tip.style.left = '0px';
+			tip.style.top = '0px';
+			var w = tip.offsetWidth, h = tip.offsetHeight;
+			var gap = 8;
+			// acima, se couber; senão abaixo
+			var up = r.top - h - gap > 6 && !(r.top < vh * 0.28 && r.bottom + h + gap < vh - 6);
+			var top = up ? r.top - h - gap : r.bottom + gap;
+			var cx = r.left + r.width / 2;
+			var left = Math.max(6, Math.min(vw - w - 6, cx - w / 2));
+			tip.style.left = Math.round(left) + 'px';
+			tip.style.top = Math.round(Math.max(6, Math.min(vh - h - 6, top))) + 'px';
+			tip.style.setProperty('--ax', Math.round(Math.max(10, Math.min(w - 10, cx - left))) + 'px');
+			tip.classList.toggle('up', up);
+			tip.classList.toggle('down', !up);
+		}
+
+		function show(el) {
+			if (!el.isConnected || !render(el)) return;
+			cur = el;
+			place(el);
+			tip.classList.remove('show');
+			void tip.offsetWidth;
+			tip.classList.add('show');
+			warm = true;
+			clearTimeout(coolTimer);
+		}
+
+		function hide() {
+			clearTimeout(showTimer);
+			if (!cur) return;
+			cur = null;
+			tip.classList.remove('show');
+			// por um instante os próximos tooltips aparecem sem espera
+			clearTimeout(coolTimer);
+			coolTimer = setTimeout(function () { warm = false; }, 500);
+		}
+
+		document.addEventListener('mouseover', function (e) {
+			var el = findTarget(e.target);
+			if (el === cur) return;
+			if (!el) { hide(); return; }
+			textOf(el);
+			clearTimeout(showTimer);
+			if (cur) { show(el); return; }
+			showTimer = setTimeout(function () { show(el); }, warm ? 40 : 480);
+		});
+		document.addEventListener('mouseout', function (e) {
+			if (!e.relatedTarget || !findTarget(e.relatedTarget)) hide();
+		});
+		['mousedown', 'wheel', 'keydown', 'dragstart'].forEach(function (ev) {
+			document.addEventListener(ev, function () { hide(); warm = false; }, true);
+		});
+		global.addEventListener('blur', hide);
+		global.addEventListener('scroll', hide, true);
+
+		// teclado: foco mostra a dica dos botões
+		document.addEventListener('focusin', function (e) {
+			var el = findTarget(e.target);
+			if (el && e.target.matches && e.target.matches(':focus-visible')) show(el);
+		});
+		document.addEventListener('focusout', hide);
+
+		UI.tip = { show: show, hide: hide };
+	};
+
 	// reinicia uma animação CSS (classe) num elemento
 	UI.replay = function (el, cls) {
 		if (!el) return;

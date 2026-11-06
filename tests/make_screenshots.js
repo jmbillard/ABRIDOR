@@ -66,7 +66,14 @@ async function annotate(page, marks) {
 async function shot(page, name, marks, opts) {
 	opts = opts || {};
 	if (!opts.noMouse) await page.mouse.move(1, 700);
+	// tooltips só aparecem nos prints que pedem
+	await page.evaluate((keep) => {
+		let st = document.getElementById('__noTip');
+		if (!st) { st = document.createElement('style'); st.id = '__noTip'; document.head.appendChild(st); }
+		st.textContent = keep ? '' : '.tip{display:none!important}';
+	}, !!opts.tip);
 	delete opts.noMouse;
+	delete opts.tip;
 	if (marks && marks.length) await annotate(page, marks);
 	await page.waitForTimeout(150);
 	await page.screenshot(Object.assign({ path: path.join(OUT, name) }, opts || {}));
@@ -178,6 +185,14 @@ async function tab(page, t) {
 		{ sel: '.iconbar', n: 5, side: 'top', pad: 2 },
 		{ sel: '#btnExtImages', n: 6, side: 'top', pad: 1 }
 	], { noMouse: true });
+
+	// 18 · tooltip (miniatura com a lista de textos)
+	await page.evaluate(() => { const st = document.getElementById('__noTip'); if (st) st.textContent = ''; });
+	await page.mouse.move(1, 700);
+	await settle(700);
+	await page.hover('.page:nth-child(5) .thumb');
+	await settle(900);
+	await shot(page, '18-tooltip.png', [], { noMouse: true, tip: true, clip: { x: 0, y: 200, width: 460, height: 420 } });
 
 	// 13 · intervalo
 	await page.click('#rangeBtn');
