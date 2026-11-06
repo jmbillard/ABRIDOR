@@ -52,7 +52,10 @@
 		type: '<path d="M4 7V5h16v2M12 5v14M9 19h6"/>',
 		layers: '<path d="M12 3 21 8l-9 5-9-5z"/><path d="m3 12.5 9 5 9-5"/>',
 		info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
-		arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>'
+		arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+		sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+		moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+		themeAuto: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/>'
 	};
 
 	UI.icon = function (name, cls) {

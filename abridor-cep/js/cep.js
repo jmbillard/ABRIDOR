@@ -159,6 +159,12 @@
 		}
 	};
 
+	// Avisa quando o usuário muda o brilho da interface do After Effects.
+	ABR.onHostThemeChange = function (cb) {
+		if (!cep || !cep.addEventListener) return;
+		try { cep.addEventListener('com.adobe.csxs.events.ThemeColorChanged', function () { cb(); }); } catch (e) { }
+	};
+
 	// Lê o tema do After Effects para ajustar as cores do painel.
 	ABR.hostSkin = function () {
 		if (!cep) return null;

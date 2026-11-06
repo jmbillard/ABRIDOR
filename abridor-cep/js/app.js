@@ -33,7 +33,7 @@
 	var DEFAULTS = {
 		res: '1920x1080', w: 1920, h: 1080, fps: '29.97', fit: 'fit', duration: 5,
 		master: true, refImages: true, refOpacity: 50, groupMode: 'paragraph', keepAutofit: true,
-		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false
+		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false, theme: 'auto'
 	};
 	var S = {};
 
@@ -156,6 +156,33 @@
 			var i = +d.dataset.i;
 			if (!state.durations[i]) d.querySelector('.dur-val').textContent = fmtSec(st.duration) + 's';
 		});
+	}
+
+	// ------------------------------------------------------ tema ------------
+	var THEME_NEXT = { auto: 'light', light: 'dark', dark: 'auto' };
+	var THEME_LABEL = { auto: 'tema automático (segue o After Effects)', light: 'tema claro', dark: 'tema escuro' };
+
+	// claro ou escuro conforme o brilho do painel do After Effects (ou do sistema, fora do AE)
+	function hostTheme() {
+		var skin = ABR.hostSkin();
+		var c = skin && skin.panelBackgroundColor && skin.panelBackgroundColor.color;
+		if (c) return (0.299 * c.red + 0.587 * c.green + 0.114 * c.blue) / 255 > 0.5 ? 'light' : 'dark';
+		return global.matchMedia && global.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+	}
+
+	function applyTheme(animate) {
+		var mode = S.theme === 'auto' ? hostTheme() : S.theme;
+		var root = document.documentElement;
+		if (root.dataset.theme === mode && !animate) return;
+		if (animate && !UI.reduced()) {
+			root.classList.add('theme-anim');
+			clearTimeout(applyTheme.t);
+			applyTheme.t = setTimeout(function () { root.classList.remove('theme-anim'); }, 550);
+		}
+		root.dataset.theme = mode;
+		var btn = $('themeBtn');
+		btn.dataset.mode = S.theme;
+		btn.title = THEME_LABEL[S.theme] + ' — clique para trocar';
 	}
 
 	// ------------------------------------------------------ abas ------------
@@ -1003,6 +1030,21 @@
 
 	function bind() {
 		UI.hydrateIcons();
+
+		// tema
+		applyTheme(false);
+		$('themeBtn').onclick = function () {
+			S.theme = THEME_NEXT[S.theme] || 'auto';
+			saveSettings();
+			applyTheme(true);
+			status(THEME_LABEL[S.theme], 'silent');
+		};
+		ABR.onHostThemeChange(function () { if (S.theme === 'auto') applyTheme(true); });
+		if (global.matchMedia) {
+			var mq = global.matchMedia('(prefers-color-scheme: light)');
+			var onMq = function () { if (S.theme === 'auto' && !ABR.isCEP) applyTheme(true); };
+			if (mq.addEventListener) mq.addEventListener('change', onMq); else if (mq.addListener) mq.addListener(onMq);
+		}
 
 		// abas
 		each(document.querySelectorAll('.tab'), function (t) {

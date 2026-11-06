@@ -105,6 +105,22 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
   <sub>o painel em ação: seleção de páginas, duração, formato, fontes e criação.</sub>
 </p>
 
+**2.3** o painel tem **tema claro e escuro**. o botão no canto superior direito alterna entre:
+
+<p align="center">
+  <img src="docs/img/17-tema-botao.png" width="300">
+</p>
+
+- **automático** (padrão) → segue o brilho da interface do After Effects (`Preferences` > `Appearance`) e muda junto se você ajustar o AE;
+- **claro** ou **escuro** → fixo, independente do After Effects.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/img/15-claro-paginas.png" width="380"><br><sub>tema claro: páginas</sub></td>
+    <td align="center"><img src="docs/img/16-claro-fontes.png" width="380"><br><sub>tema claro: fontes</sub></td>
+  </tr>
+</table>
+
 <br>
 
 ---

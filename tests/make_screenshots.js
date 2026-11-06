@@ -326,6 +326,56 @@ async function tab(page, t) {
 		{ sel: '#btnApplyFonts', n: 3, side: 'top', pad: 2 }
 	]);
 
+	// 15 · tema claro (o modo automático segue o sistema fora do After Effects)
+	{
+		const lctx = await browser.newContext({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2, colorScheme: 'light' });
+		const lp = await lctx.newPage();
+		lp.on('pageerror', (e) => console.log('[pageerror]', e.message));
+		await lp.addInitScript(({ b64, FONTS, PPTX }) => {
+			window.__nextFile = PPTX;
+			window.ABR_MOCK = {
+				openFile: () => window.__nextFile,
+				readBinary: (p) => { const bin = atob(b64[p]); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; },
+				writeText() { }, writeDataURL() { },
+				callHost: (fn) => fn === 'abridor_getFonts' ? JSON.stringify({ fonts: FONTS }) : JSON.stringify({ ok: true })
+			};
+			try { localStorage.clear(); } catch (e) { }
+		}, { b64, FONTS, PPTX });
+		await lp.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
+		await lp.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+		await lp.click('#dropZone');
+		await lp.waitForFunction(() => /carregado/.test(document.getElementById('status').textContent));
+		await lp.evaluate(() => ABR.ui.hideToast());
+		await lp.waitForTimeout(900);
+		await lp.mouse.move(1, 700);
+		await shot(lp, '15-claro-paginas.png', [{ sel: '#themeBtn', n: 1, side: 'left', pad: 1 }]);
+		await lp.click('.tab[data-tab=fonts]');
+		await lp.waitForTimeout(500);
+		await lp.click('.font[data-key="Gotham Black"] .font-head');
+		await lp.waitForTimeout(450);
+		await lp.selectOption('.font[data-key="Gotham Black"] select.family', 'Inter');
+		await lp.waitForTimeout(600);
+		await shot(lp, '16-claro-fontes.png', []);
+		// detalhe do botão nos três modos
+		const modes = [];
+		for (const m of ['auto', 'light', 'dark']) {
+			await lp.evaluate((m) => { ABR.app.settings.theme = m === 'auto' ? 'dark' : (m === 'light' ? 'auto' : 'light'); document.getElementById('themeBtn').click(); }, m);
+			await lp.waitForTimeout(700);
+			await lp.mouse.move(1, 700);
+			const bb = await (await lp.$('#themeBtn')).boundingBox();
+			modes.push(await lp.screenshot({ clip: { x: bb.x - 6, y: bb.y - 10, width: bb.width + 16, height: bb.height + 20 } }));
+		}
+		await lctx.close();
+		// monta a faixa com os três estados do botão
+		const sp = await (await browser.newContext({ deviceScaleFactor: 1 })).newPage();
+		const labels = ['automático', 'claro', 'escuro'];
+		await sp.setContent('<body style="margin:0;background:transparent;font:600 22px Inter,sans-serif;color:#8b949e"><div id="s" style="display:inline-flex;gap:28px;padding:14px">' +
+			modes.map((m, i) => '<figure style="margin:0;text-align:center"><img src="data:image/png;base64,' + m.toString('base64') + '" style="width:96px;border-radius:14px;display:block;box-shadow:0 2px 10px rgba(0,0,0,.15)"><figcaption style="margin-top:8px">' + labels[i] + '</figcaption></figure>').join('') + '</div></body>');
+		await (await sp.$('#s')).screenshot({ path: path.join(OUT, '17-tema-botao.png'), omitBackground: true });
+		await sp.close();
+		console.log('✓ 17-tema-botao.png');
+	}
+
 	// 60 · detecção dos textos (página do PDF, em tamanho grande, com rótulos)
 	await openDoc(page, PDF);
 	const det = await page.evaluate(async () => {
