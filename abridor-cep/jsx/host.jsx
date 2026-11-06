@@ -276,7 +276,8 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 	}
 	var perParagraph = false;
 	for (i = 1; i < t.paragraphs.length; i++) {
-		if (t.paragraphs[i].align !== p0.align || Math.abs(t.paragraphs[i].leading - p0.leading) > 0.01) { perParagraph = true; break; }
+		if (t.paragraphs[i].align !== p0.align || Math.abs(t.paragraphs[i].leading - p0.leading) > 0.01 ||
+			t.paragraphs[i].spaceBefore || t.paragraphs[i - 1].spaceAfter) { perParagraph = true; break; }
 	}
 	var rangesOK = false;
 	if ((multi || perParagraph) && typeof td.characterRange === 'function') {
@@ -296,6 +297,8 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 					// paragraphRange usa índices de parágrafo
 					var pr = td.paragraphRange(pp, pp + 1);
 					pr.justification = abr_just(P.p.align);
+					abr_try(function () { pr.spaceBefore = pp ? (P.p.spaceBefore || 0) * s : 0; });
+					abr_try(function () { pr.spaceAfter = (P.p.spaceAfter || 0) * s; });
 				}
 			}
 			prop.setValue(td);
@@ -341,6 +344,22 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 			dy = t.vAlign === 'middle' ? (bh - total) / 2 : (bh - total);
 		}
 
+		// caixa original (espaço da camada) + modelo de linhas do PowerPoint, para dividir em linhas depois
+		var lay = { x: bp[0], y: bp[1] - dy, w: bw, h: bh, v: t.vAlign, ps: [], p: [] };
+		for (i = 0; i < flat.paras.length; i++) {
+			var PP = flat.paras[i].p;
+			var big = 0;
+			for (var q2 = 0; q2 < PP.runs.length; q2++) big = Math.max(big, PP.runs[q2].size);
+			lay.ps.push(flat.paras[i].start);
+			lay.p.push([
+				Math.round(PP.leading * s * 100) / 100,
+				Math.round((PP.base !== undefined ? PP.base : PP.leading - big * 0.2) * s * 100) / 100,
+				Math.round((PP.spaceBefore || 0) * s * 100) / 100,
+				Math.round((PP.spaceAfter || 0) * s * 100) / 100,
+				PP.align
+			]);
+		}
+
 		var anchor = [bp[0] + (t.cx - t.x) * s, bp[1] + (t.cy - t.y) * s - dy];
 		tr.property('ADBE Anchor Point').setValue([anchor[0], anchor[1], 0]);
 		tr.property('ADBE Position').setValue([ox + t.cx * s, oy + t.cy * s, 0]);
@@ -354,6 +373,7 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 
 	// metadados para a troca de fontes posterior
 	var meta = { v: 1, k: dom.fontKey, sz: dom.size * s, sc: abr_fontFor(dom, fontMap, fallback).scale, runs: [] };
+	if (isBox) meta.lay = lay;
 	if (rangesOK && multi) {
 		for (i = 0; i < flat.runs.length; i++) {
 			var fr2 = flat.runs[i];
@@ -421,7 +441,10 @@ function abridor_buildPage(jobPath, index) {
 			for (var i = 0; i < page.texts.length; i++) {
 				try {
 					var layer = abr_createText(comp, page.texts[i], s, ox, oy, job.fontMap, S.fallbackFont || 'ArialMT', log);
-					if (layer) created++;
+					if (layer && S.lines) {
+						var res = abr_splitLayer(layer, log);
+						created += res.created || 1;
+					} else if (layer) created++;
 				} catch (e) {
 					log.push('erro no texto ' + (i + 1) + ': ' + e.message + (e.line ? ' (linha ' + e.line + ')' : ''));
 				}
@@ -668,6 +691,398 @@ function abridor_selectLayers(fontKey) {
 			if (hit) n++;
 		}
 		return abr_stringify({ ok: true, count: n });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+
+// ------------------------------------------------- dividir em linhas ----
+// Converte uma camada de texto (caixa ou ponto, com várias linhas) em uma camada
+// de texto de ponto por linha, com o anchor point em [0,0] na linha de base.
+
+function abr_textProp(layer) {
+	return layer.property('ADBE Text Properties').property('ADBE Text Document');
+}
+
+// ponto do espaço da camada -> espaço do pai (posição), considerando anchor, escala e rotação
+function abr_toParent(layer, p) {
+	var tr = layer.property('ADBE Transform Group');
+	var a = tr.property('ADBE Anchor Point').value;
+	var pos = tr.property('ADBE Position').value;
+	var sc = tr.property('ADBE Scale').value;
+	var rot = tr.property('ADBE Rotate Z').value * Math.PI / 180;
+	var vx = (p[0] - a[0]) * sc[0] / 100, vy = (p[1] - a[1]) * sc[1] / 100;
+	return [pos[0] + vx * Math.cos(rot) - vy * Math.sin(rot), pos[1] + vx * Math.sin(rot) + vy * Math.cos(rot), pos.length > 2 ? pos[2] : 0];
+}
+
+// estilo de cada caractere (AE 24.3+), ou null
+function abr_readStyles(td, len) {
+	if (typeof td.characterRange !== 'function') return null;
+	var out = [];
+	try {
+		for (var c = 0; c < len; c++) {
+			var cr = td.characterRange(c, c + 1);
+			var st = {};
+			abr_try(function () { st.font = cr.font; });
+			abr_try(function () { st.fontSize = cr.fontSize; });
+			abr_try(function () { st.fillColor = cr.fillColor; });
+			abr_try(function () { st.applyFill = cr.applyFill; });
+			abr_try(function () { st.tracking = cr.tracking; });
+			abr_try(function () { st.leading = cr.autoLeading ? null : cr.leading; });
+			abr_try(function () { st.applyStroke = cr.applyStroke; });
+			abr_try(function () { st.strokeColor = cr.strokeColor; });
+			abr_try(function () { st.strokeWidth = cr.strokeWidth; });
+			out.push(st);
+		}
+	} catch (e) { return null; }
+	return out;
+}
+
+function abr_sameChar(a, b) {
+	return a.font === b.font && Math.abs((a.fontSize || 0) - (b.fontSize || 0)) < 0.001 && String(a.fillColor) === String(b.fillColor) &&
+		a.tracking === b.tracking && a.applyStroke === b.applyStroke && String(a.strokeColor) === String(b.strokeColor);
+}
+
+function abr_applyChar(target, st) {
+	if (st.font) abr_try(function () { target.font = st.font; });
+	if (st.fontSize) abr_try(function () { target.fontSize = st.fontSize; });
+	if (st.applyFill !== undefined) abr_try(function () { target.applyFill = st.applyFill; });
+	if (st.fillColor) abr_try(function () { target.fillColor = st.fillColor; });
+	if (st.tracking !== undefined) abr_try(function () { target.tracking = st.tracking; });
+	if (st.applyStroke !== undefined) abr_try(function () { target.applyStroke = st.applyStroke; });
+	if (st.applyStroke && st.strokeColor) abr_try(function () { target.strokeColor = st.strokeColor; });
+	if (st.applyStroke && st.strokeWidth) abr_try(function () { target.strokeWidth = st.strokeWidth; });
+}
+
+// estilo da camada inteira (quando não há characterRange)
+function abr_docStyle(td) {
+	var st = {};
+	abr_try(function () { st.font = td.font; });
+	abr_try(function () { st.fontSize = td.fontSize; });
+	abr_try(function () { st.fillColor = td.fillColor; });
+	abr_try(function () { st.applyFill = td.applyFill; });
+	abr_try(function () { st.tracking = td.tracking; });
+	abr_try(function () { st.applyStroke = td.applyStroke; });
+	abr_try(function () { st.strokeColor = td.strokeColor; });
+	abr_try(function () { st.strokeWidth = td.strokeWidth; });
+	return st;
+}
+
+// quebra em linhas medindo com uma camada temporária (quando o AE não informa as linhas compostas)
+function abr_measureWrap(layer, td, text, boxW) {
+	var comp = layer.containingComp;
+	var tmp = comp.layers.addText('x');
+	var tp = abr_textProp(tmp);
+	var base = tp.value;
+	abr_applyChar(base, abr_docStyle(td));
+	var t = layer.inPoint;
+	function width(str) {
+		var d = tp.value;
+		d.text = str || ' ';
+		tp.setValue(d);
+		return tmp.sourceRectAtTime(t, false).width;
+	}
+	tp.setValue(base);
+	var out = [];
+	var pos = 0;
+	var paras = text.split(/[\r\n\u0003]/);
+	for (var p = 0; p < paras.length; p++) {
+		var words = paras[p].split(' ');
+		var line = '', lineStart = pos, cursor = pos;
+		for (var w = 0; w < words.length; w++) {
+			var cand = line ? line + ' ' + words[w] : words[w];
+			if (line && width(cand) > boxW) {
+				out.push({ s: lineStart, e: lineStart + line.length });
+				lineStart = cursor;
+				line = words[w];
+			} else {
+				line = cand;
+			}
+			cursor += words[w].length + 1;
+		}
+		out.push({ s: lineStart, e: lineStart + line.length });
+		pos += paras[p].length + 1;
+	}
+	tmp.remove();
+	return out;
+}
+
+// intervalos de caracteres de cada linha
+function abr_lineRanges(layer, td, text, isBox) {
+	var lines = [], i;
+	if (isBox) {
+		try {
+			if (typeof td.composedLineRange === 'function' && td.composedLineCount > 0) {
+				for (i = 0; i < td.composedLineCount; i++) {
+					var r = td.composedLineRange(i, i + 1);
+					if (typeof r.characterStart !== 'number') throw new Error('sem linhas compostas');
+					lines.push({ s: r.characterStart, e: r.characterEnd });
+				}
+			}
+		} catch (e) { lines = []; }
+		if (!lines.length) {
+			var bw = 0;
+			try { bw = td.boxTextSize[0]; } catch (e2) { bw = 0; }
+			lines = bw ? abr_measureWrap(layer, td, text, bw) : [];
+		}
+	}
+	if (!lines.length) {
+		var start = 0;
+		for (i = 0; i <= text.length; i++) {
+			var ch = text.charAt(i);
+			if (i === text.length || ch === '\r' || ch === '\n' || ch === '\u0003') {
+				lines.push({ s: start, e: i });
+				start = i + 1;
+			}
+		}
+	}
+	// remove quebras e espaços das pontas (linhas vazias continuam na lista: ocupam altura)
+	for (i = 0; i < lines.length; i++) {
+		var L = lines[i];
+		L.start = L.s;
+		while (L.e > L.s && /[\r\n\u0003 \t]/.test(text.charAt(L.e - 1))) L.e--;
+		while (L.s < L.e && /[\r\n\u0003 \t]/.test(text.charAt(L.s))) L.s++;
+		L.empty = L.e <= L.s;
+	}
+	return lines;
+}
+
+// alinhamento do parágrafo de um caractere
+function abr_justAt(td, c, paraIndex) {
+	var j = null;
+	if (typeof td.paragraphRange === 'function') {
+		try { j = td.paragraphRange(paraIndex, paraIndex + 1).justification; } catch (e) { j = null; }
+	}
+	if (j === null || j === undefined) {
+		try { j = td.justification; } catch (e2) { j = ParagraphJustification.LEFT_JUSTIFY; }
+	}
+	return j;
+}
+
+function abr_alignName(j) {
+	if (j === ParagraphJustification.CENTER_JUSTIFY) return 'center';
+	if (j === ParagraphJustification.RIGHT_JUSTIFY) return 'right';
+	return 'left';
+}
+
+function abr_paraIndex(text, c) {
+	var n = 0;
+	for (var i = 0; i < c; i++) if (text.charAt(i) === '\r') n++;
+	return n;
+}
+
+// posição (espaço da camada) da origem de cada linha: [x, y da linha de base]
+function abr_linePositions(layer, td, text, lines, isBox, meta) {
+	var out = [], i;
+	var lay = meta && meta.lay;
+
+	// 1) caixa criada pelo ABRIDOR: modelo de linhas do PowerPoint
+	if (isBox && lay && lay.p && lay.p.length) {
+		var y = 0, prev = -1, ys = [], pis = [];
+		for (i = 0; i < lines.length; i++) {
+			var pi = 0;
+			for (var k = 0; k < lay.ps.length; k++) if (lay.ps[k] <= lines[i].start) pi = k;
+			var P = lay.p[pi];
+			if (i > 0 && pi !== prev) y += lay.p[prev][3] + P[2];
+			ys.push(y + P[1]);
+			pis.push(pi);
+			y += P[0];
+			prev = pi;
+		}
+		var off = 0;
+		if (lay.v === 'middle') off = (lay.h - y) / 2;
+		else if (lay.v === 'bottom') off = lay.h - y;
+		for (i = 0; i < lines.length; i++) {
+			var al = lay.p[pis[i]][4];
+			var x = al === 'center' ? lay.x + lay.w / 2 : (al === 'right' ? lay.x + lay.w : lay.x);
+			out.push({ x: x, y: lay.y + off + ys[i], align: al === 'justify' ? 'left' : al });
+		}
+		return out;
+	}
+
+	// 2) linhas de base calculadas pelo AE
+	var locs = null;
+	try { locs = td.baselineLocs; } catch (e) { locs = null; }
+	if (isBox && locs && locs.length >= lines.length * 4) {
+		for (i = 0; i < lines.length; i++) {
+			var j = abr_justAt(td, lines[i].s, abr_paraIndex(text, lines[i].s));
+			var name = abr_alignName(j);
+			var x0 = locs[i * 4], y0 = locs[i * 4 + 1], x1 = locs[i * 4 + 2];
+			out.push({ x: name === 'center' ? (x0 + x1) / 2 : (name === 'right' ? x1 : x0), y: y0, align: name });
+		}
+		return out;
+	}
+
+	// 3) texto de ponto: todas as linhas saem da origem, uma entrelinha abaixo da outra
+	var lead = 0;
+	try { lead = td.autoLeading ? td.fontSize * 1.2 : td.leading; } catch (e3) { lead = 0; }
+	if (!lead) lead = (td.fontSize || 40) * 1.2;
+	var yy = 0;
+	for (i = 0; i < lines.length; i++) {
+		var j2 = abr_justAt(td, lines[i].s, abr_paraIndex(text, lines[i].s));
+		if (isBox) {
+			// sem informação do AE: estimativa a partir do topo da caixa
+			var bp = [0, 0], bs = [0, 0];
+			try { bp = td.boxTextPos; bs = td.boxTextSize; } catch (e4) { }
+			var nm = abr_alignName(j2);
+			out.push({ x: nm === 'center' ? bp[0] + bs[0] / 2 : (nm === 'right' ? bp[0] + bs[0] : bp[0]), y: bp[1] + td.fontSize * 1.0 + yy, align: nm });
+		} else {
+			out.push({ x: 0, y: yy, align: abr_alignName(j2) });
+		}
+		yy += lead;
+	}
+	return out;
+}
+
+function abr_splitLayer(layer, log) {
+	var prop = abr_textProp(layer);
+	if (prop.numKeys > 0 || prop.expressionEnabled) {
+		log.push('"' + layer.name + '" tem keyframes ou express\u00e3o no texto: n\u00e3o foi dividida');
+		return { created: 0 };
+	}
+	var td = prop.value;
+	var text = td.text;
+	var isBox = false;
+	try { isBox = !!td.boxText; } catch (e) { isBox = false; }
+	var meta = abr_layerMeta(layer);
+	var lines = abr_lineRanges(layer, td, text, isBox);
+	var filled = 0;
+	for (var f0 = 0; f0 < lines.length; f0++) if (!lines[f0].empty) filled++;
+	if (!filled) return { created: 0 };
+
+	var tr = layer.property('ADBE Transform Group');
+	var rot = tr.property('ADBE Rotate Z').value;
+	var sc = tr.property('ADBE Scale').value;
+	var opacity = tr.property('ADBE Opacity');
+
+	// camada de ponto com uma linha só: apenas zera o anchor sem mover o texto
+	if (!isBox && filled === 1 && lines.length === 1 && lines[0].s === 0 && lines[0].e === text.length) {
+		var ap = tr.property('ADBE Anchor Point');
+		if (ap.numKeys === 0 && tr.property('ADBE Position').numKeys === 0) {
+			var p0 = abr_toParent(layer, [0, 0]);
+			ap.setValue([0, 0, 0]);
+			tr.property('ADBE Position').setValue(p0);
+		}
+		return { created: 1, kept: true };
+	}
+
+	var styles = abr_readStyles(td, text.length);
+	var docSt = abr_docStyle(td);
+	var pos = abr_linePositions(layer, td, text, lines, isBox, meta);
+	var comp = layer.containingComp;
+	var made = [];
+
+	for (var i = 0; i < lines.length; i++) {
+		var L = lines[i];
+		if (L.empty) continue;
+		var str = text.substring(L.s, L.e);
+		var nl = comp.layers.addText(str);
+		var np = abr_textProp(nl);
+		var nd = np.value;
+		abr_try(function () { nd.resetCharStyle(); });
+		abr_try(function () { nd.resetParagraphStyle(); });
+		nd.text = str;
+		abr_applyChar(nd, styles ? styles[L.s] : docSt);
+		abr_try(function () { nd.justification = abr_just(pos[i].align); });
+		np.setValue(nd);
+
+		// trechos com estilos diferentes dentro da linha
+		if (styles) {
+			var mixed = false;
+			for (var c = L.s + 1; c < L.e; c++) if (!abr_sameChar(styles[c], styles[L.s])) { mixed = true; break; }
+			if (mixed) {
+				abr_try(function () {
+					nd = np.value;
+					var rs = L.s;
+					for (var c2 = L.s + 1; c2 <= L.e; c2++) {
+						if (c2 === L.e || !abr_sameChar(styles[c2], styles[rs])) {
+							abr_applyChar(nd.characterRange(rs - L.s, c2 - L.s), styles[rs]);
+							rs = c2;
+						}
+					}
+					np.setValue(nd);
+				});
+			}
+		}
+
+		var ntr = nl.property('ADBE Transform Group');
+		ntr.property('ADBE Anchor Point').setValue([0, 0, 0]);
+		ntr.property('ADBE Position').setValue(abr_toParent(layer, [pos[i].x, pos[i].y]));
+		ntr.property('ADBE Rotate Z').setValue(rot);
+		ntr.property('ADBE Scale').setValue(sc);
+		if (opacity.numKeys === 0) ntr.property('ADBE Opacity').setValue(opacity.value);
+
+		abr_try(function () { nl.parent = layer.parent; });
+		abr_try(function () { nl.startTime = layer.startTime; nl.inPoint = layer.inPoint; nl.outPoint = layer.outPoint; });
+		abr_try(function () { nl.label = layer.label; });
+		abr_try(function () { nl.threeDLayer = layer.threeDLayer; });
+		nl.name = abr_layerName(str);
+
+		// metadados da linha (para a troca de fontes continuar funcionando)
+		if (meta) {
+			var lm = { v: 1, k: meta.k, sz: meta.sz, sc: meta.sc, runs: [] };
+			if (meta.runs && meta.runs.length) {
+				var best = 0;
+				for (var r = 0; r < meta.runs.length; r++) {
+					var a = Math.max(meta.runs[r][0], L.s), b = Math.min(meta.runs[r][1], L.e);
+					if (b > a) {
+						lm.runs.push([a - L.s, b - L.s, meta.runs[r][2], meta.runs[r][3]]);
+						if (b - a > best) { best = b - a; lm.k = meta.runs[r][2]; lm.sz = meta.runs[r][3]; }
+					}
+				}
+				if (lm.runs.length < 2) lm.runs = [];
+			}
+			nl.comment = ABRIDOR_TAG + abr_stringify(lm);
+		}
+		made.push(nl);
+	}
+
+	// mantém a ordem: 1ª linha em cima, todas no lugar da camada original
+	for (i = 0; i < made.length; i++) made[i].moveBefore(layer);
+	layer.remove();
+	return { created: made.length };
+}
+
+// passo extra para comps já criadas: camadas de texto selecionadas na comp ativa,
+// ou todas as camadas de texto das comps selecionadas no painel Project
+function abridor_splitLines() {
+	try {
+		var targets = [], i, j;
+		var active = app.project.activeItem;
+		if (active instanceof CompItem) {
+			var sel = active.selectedLayers;
+			for (i = 0; i < sel.length; i++) if (sel[i] instanceof TextLayer) targets.push(sel[i]);
+		}
+		var from = 'camadas selecionadas';
+		if (!targets.length) {
+			var comps = abr_compsInScope('selected');
+			for (i = 0; i < comps.length; i++) {
+				for (j = 1; j <= comps[i].numLayers; j++) {
+					if (comps[i].layer(j) instanceof TextLayer) targets.push(comps[i].layer(j));
+				}
+			}
+			from = comps.length + ' comp' + (comps.length === 1 ? '' : 's');
+		}
+		if (!targets.length) return abr_stringify({ ok: true, layers: 0, lines: 0, from: '' });
+
+		var log = [], lines = 0, done = 0;
+		app.beginUndoGroup('ABRIDOR - dividir em linhas');
+		try {
+			for (i = 0; i < targets.length; i++) {
+				var lk = targets[i].locked;
+				if (lk) { log.push('"' + targets[i].name + '" est\u00e1 travada'); continue; }
+				try {
+					var res = abr_splitLayer(targets[i], log);
+					if (res.created) { done++; lines += res.created; }
+				} catch (e) {
+					log.push('"' + targets[i].name + '": ' + e.message);
+				}
+			}
+		} finally {
+			app.endUndoGroup();
+		}
+		return abr_stringify({ ok: true, layers: done, lines: lines, from: from, log: log });
 	} catch (e) {
 		return abr_error(e);
 	}

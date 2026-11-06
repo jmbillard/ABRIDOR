@@ -219,9 +219,10 @@ no **PDF** (à direita):
 1. **formato** → `4K` (3840 × 2160), `1080` (1920 × 1080), `720` (1280 × 720) ou `···` para um tamanho personalizado.
 2. **frame rate** → padrão **29,97**.
 3. **duração por página** → `−` / `+` de 0,5 s (ou digite; `↑` `↓` também funcionam). ao lado, o timecode e os frames.
-4. **nome das comps** → `O SOM DO MAR 01`, `O SOM DO MAR 02`, …
-5. **comp master** → todas as páginas em sequência, com um marcador por página.<br>**referência** → imagem da página como **camada guia** travada; ao ligar, aparece a opacidade.
-6. **ajustes finos** → opções avançadas (abaixo).
+4. **camadas de texto**:
+   - **uma por linha** (padrão) → cada linha vira uma camada de **texto de ponto**, com o **anchor point em [0, 0] na linha de base**, no ponto de alinhamento (início, centro ou fim da linha). nada é cortado se a fonte nova for mais larga.
+   - **por bloco** → uma camada por caixa de texto do PowerPoint (*paragraph text*) ou por parágrafo do PDF.
+5. **dividir camadas já criadas em linhas** → o mesmo resultado do modo *uma por linha*, aplicado depois (ver [passo 7.4](#7--criar-as-comps)).
 
 o rodapé resume tudo: quantidade de comps, duração total, formato e frame rate.
 
@@ -229,17 +230,18 @@ o rodapé resume tudo: quantidade de comps, duração total, formato e frame rat
   </tr>
 </table>
 
-**5.2** em **ajustes finos**:
+**5.2** mais abaixo e em **ajustes finos**:
 
 <table>
   <tr>
     <td width="400"><img src="docs/img/21-ajustes.png" width="380"></td>
     <td>
 
-1. abre / fecha os ajustes.
+1. abre / fecha os ajustes finos.
 2. **encaixe da página** → *ajustar* (página inteira visível) ou *preencher* (corta as bordas) quando a proporção do documento for diferente da comp.
-3. **redução automática** (PPTX) → mantém o encolhimento de texto que o PowerPoint aplica quando o texto não cabe na caixa.<br>em PDF, aqui aparece **textos do PDF**: *parágrafos* ou *uma por linha*.
-4. **fonte reserva** → nome PostScript usado quando uma fonte não estiver associada (padrão `ArialMT`).
+3. **comp master** → todas as páginas em sequência, com um marcador por página.<br>**referência** → imagem da página como **camada guia** travada; ao ligar, aparece a opacidade.
+4. **redução automática** (PPTX) → mantém o encolhimento de texto que o PowerPoint aplica quando o texto não cabe na caixa.
+5. **fonte reserva** → nome PostScript usado quando uma fonte não estiver associada (padrão `ArialMT`).
 
   </td>
   </tr>
@@ -352,6 +354,13 @@ avisos comuns:
 
 em cada comp de página: as **camadas de texto**, com o nome do próprio texto, e por baixo a **REF**, a camada guia travada com a imagem da página (veja a [ilustração no topo](#-abridor)).
 
+**7.4** para dividir em linhas camadas que já existem (criadas *por bloco*, por uma versão anterior do ABRIDOR ou até digitadas à mão):
+
+1. selecione as **camadas de texto** na comp ativa — ou selecione **comps** no painel *Project* para dividir todas as camadas de texto delas;
+2. na aba **comps**, clique em **dividir camadas já criadas em linhas**.
+
+cada linha vira uma camada de texto de ponto com o anchor point zerado na linha de base, no mesmo lugar, com as mesmas cores, fontes, escala, rotação, pai e tempo. camadas com keyframes ou expressão no texto são puladas (aparecem nos avisos). `Edit` > `Undo` desfaz tudo de uma vez.
+
 > 🚩 *obs:*\
 > • as imagens de referência são salvas numa pasta `<nome do documento>_ABRIDOR` ao lado do documento (ou na pasta temporária, se não for possível gravar lá ou se o arquivo foi arrastado sem caminho conhecido).\
 > • cada etapa pode ser desfeita com `Edit` > `Undo`.\
@@ -446,10 +455,10 @@ o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática
 
 | | **PPTX** | **PDF** |
 | --- | --- | --- |
-| tipo de camada | caixa de texto (*paragraph text*) do tamanho da caixa do PowerPoint, sem as margens internas | texto de ponto ancorado na **linha de base** exata da 1ª linha |
+| tipo de camada | *uma por linha*: texto de ponto por linha, anchor na linha de base · *por bloco*: caixa de texto do tamanho da caixa do PowerPoint | *uma por linha*: texto de ponto por linha · *por bloco*: texto de ponto por parágrafo; anchor sempre na **linha de base** exata |
 | alinhamento | horizontal (esq. / centro / dir. / justificado) e vertical (topo / meio / base) | detectado pela geometria das linhas |
 | fonte / tamanho / cor | herdados de slide → layout → mestre → tema | nome PostScript embutido, tamanho e cor exata do PDF |
-| entrelinha | espaçamento de linha do PowerPoint (incl. redução automática) | distância medida entre as linhas |
+| entrelinha | modelo do PowerPoint: 1,2 × tamanho × espaçamento, 1ª linha de base a (entrelinha − 0,2 × tamanho) do topo, espaço antes/depois de parágrafo, alinhamento vertical da caixa (incl. redução automática) | distância medida entre as linhas |
 | outros | rotação, grupos, tabelas, placeholders, maiúsculas, espaçamento entre letras | rotação, trechos com cores / fontes diferentes |
 
 <br>

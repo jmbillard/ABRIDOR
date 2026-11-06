@@ -8,6 +8,7 @@ const vm = require('vm');
 const jobPath = path.resolve(process.argv[2]);
 const outDir = path.resolve(process.argv[3]);
 const job = JSON.parse(fs.readFileSync(jobPath, 'utf8'));
+if (process.env.LINES) { job.settings.lines = process.env.LINES === '1'; fs.writeFileSync(jobPath, JSON.stringify(job)); }
 let nextId = 1;
 
 class Prop {
@@ -26,7 +27,19 @@ class TextDocument {
 		if (box) { this.boxText = true; this.boxTextSize = box; this.boxTextPos = [-box[0] / 2, -box[1] / 2]; }
 	}
 	resetCharStyle() { } resetParagraphStyle() { }
-	characterRange(a, b) { const r = { a, b }; this.ranges.push(r); return r; }
+	characterRange(a, b) {
+		// como no AE: lê o estilo atual do trecho (doc + trechos aplicados) e grava alterações
+		const doc = this, r = { a, b };
+		const props = ['font', 'fontSize', 'fillColor', 'tracking', 'leading', 'autoLeading', 'applyFill'];
+		props.forEach((p) => {
+			let v = doc[p];
+			doc.ranges.forEach((x) => { if (!x.para && x.a <= a && a < x.b && x['_' + p] !== undefined) v = x['_' + p]; });
+			r['_' + p] = undefined;
+			Object.defineProperty(r, p, { get() { return r['_' + p] !== undefined ? r['_' + p] : v; }, set(nv) { r['_' + p] = nv; }, enumerable: true });
+		});
+		this.ranges.push(r);
+		return r;
+	}
 	paragraphRange(a, b) { const r = { a, b, para: true }; this.ranges.push(r); return r; }
 	get baselineLocs() {
 		if (!this.boxText) throw new Error('n/a');
@@ -62,9 +75,16 @@ class Layer {
 			this.__proto__ = TextLayer.prototype;
 		}
 		this.selected = false;
+		this.parent = null; this.label = 0; this.threeDLayer = false; this.startTime = 0; this.outPoint = 10;
 	}
 	property(n) { return n === 'ADBE Transform Group' ? this.tr : this.text; }
+	get containingComp() { return this.comp; }
+	get inPoint() { return 0; }
 	moveToEnd() { const L = this.comp._layers; L.splice(L.indexOf(this), 1); L.push(this); }
+	moveBefore(o) { const L = this.comp._layers; L.splice(L.indexOf(this), 1); L.splice(L.indexOf(o), 0, this); }
+	remove() { const L = this.comp._layers; L.splice(L.indexOf(this), 1); }
+	// largura aproximada: 0,5 x tamanho por caractere
+	sourceRectAtTime() { const td = this.text.property('ADBE Text Document').value; return { left: 0, top: -td.fontSize, width: td.text.length * td.fontSize * 0.5, height: td.fontSize }; }
 }
 class TextLayer extends Layer { }
 class CompItem {
@@ -95,7 +115,8 @@ const project = {
 		addComp(...a) { const c = new CompItem(...a); items.push(c); return c; }
 	},
 	importFile(opt) { const f = { name: path.basename(opt.file.path), width: job.settings.width, height: job.settings.height, id: nextId++, file: opt.file.path }; items.push(f); return f; },
-	selection: []
+	selection: [],
+	activeItem: null
 };
 class File {
 	constructor(p) { this.path = p; }
@@ -128,6 +149,11 @@ job.pages.forEach((p, i) => {
 	if (r.log.length) console.log(p.compName, r.log);
 });
 console.log(call(`abridor_finish(${jp})`));
+// passo extra: dividir em linhas as comps selecionadas no painel Project
+if (process.env.SPLIT) {
+	project.selection = items.filter((i) => i instanceof CompItem && !/MASTER/.test(i.name));
+	console.log('splitLines', call('abridor_splitLines()'));
+}
 
 // SVG de conferência (antes da troca de fontes não guardamos; usa o estado atual)
 const comps = items.filter(i => i instanceof CompItem && !/MASTER/.test(i.name));

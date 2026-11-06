@@ -89,7 +89,7 @@ async function tab(page, t) {
 
 (async () => {
 	const browser = await chromium.launch();
-	const ctx = await browser.newContext({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2 });
+	const ctx = await browser.newContext({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2, colorScheme: 'dark' });
 	const page = await ctx.newPage();
 	page.on('pageerror', (e) => console.log('[pageerror]', e.message));
 
@@ -212,9 +212,8 @@ async function tab(page, t) {
 		{ sel: '#resSeg', n: 1, side: 'right', pad: 2 },
 		{ sel: '#fpsSeg', n: 2, side: 'right', pad: 2 },
 		{ sel: '.stepper', n: 3, side: 'right', pad: 3 },
-		{ sel: '.name-field', n: 4, side: 'right', pad: 2 },
-		{ sel: '#master', n: 5, side: 'right', pad: 3, target: '.switch-row' },
-		{ sel: '#advBtn', n: 6, side: 'right', pad: 1 }
+		{ sel: '#layerSeg', n: 4, side: 'right', pad: 2 },
+		{ sel: '#btnSplit', n: 5, side: 'right', pad: 1 }
 	]);
 
 	// 21 · ajustes finos abertos
@@ -226,8 +225,9 @@ async function tab(page, t) {
 	await shot(page, '21-ajustes.png', [
 		{ sel: '#advBtn', n: 1, side: 'right', pad: 1 },
 		{ sel: '#fitSeg', n: 2, side: 'right', pad: 2 },
-		{ sel: '#keepAutofit', n: 3, side: 'right', pad: 3, target: '.switch-row' },
-		{ sel: '#fallbackFont', n: 4, side: 'right', pad: 2 }
+		{ sel: '#master', n: 3, side: 'right', pad: 3, target: '.switch-row' },
+		{ sel: '#keepAutofit', n: 4, side: 'right', pad: 3, target: '.switch-row' },
+		{ sel: '#fallbackFont', n: 5, side: 'right', pad: 2 }
 	]);
 	await page.click('#advBtn');
 

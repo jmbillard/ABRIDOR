@@ -100,6 +100,18 @@
 			</div>
 
 			<div class="block">
+				<div class="block-title"><i data-icon="type"></i>camadas de texto</div>
+				<div class="seg small" id="layerSeg">
+					<button data-value="lines" title="uma camada de texto de ponto por linha, com o anchor point na linha de base"><i data-icon="line"></i>uma por linha</button>
+					<button data-value="blocks" title="uma camada por caixa de texto / parágrafo"><i data-icon="para"></i>por bloco</button>
+				</div>
+				<div class="hint-row" id="layerHint"></div>
+				<button class="link-btn" id="btnSplit" title="divide as camadas de texto selecionadas na comp ativa (ou todas as das comps selecionadas no painel Project) em uma camada de ponto por linha">
+					<i data-icon="split"></i><span>dividir camadas já criadas em linhas</span>
+				</button>
+			</div>
+
+			<div class="block">
 				<div class="block-title"><i data-icon="tag"></i>nome das comps</div>
 				<div class="name-field">
 					<input type="text" id="prefix" value="LAYOUT" spellcheck="false">
@@ -134,13 +146,6 @@
 						<div class="seg small" id="fitSeg">
 							<button data-value="fit"><i data-icon="fit"></i>ajustar</button>
 							<button data-value="fill"><i data-icon="fill"></i>preencher</button>
-						</div>
-					</div>
-					<div class="field pdf-only">
-						<span class="field-label">textos do PDF</span>
-						<div class="seg small" id="groupSeg">
-							<button data-value="paragraph"><i data-icon="para"></i>parágrafos</button>
-							<button data-value="line"><i data-icon="line"></i>uma por linha</button>
 						</div>
 					</div>
 					<label class="switch-row pptx-only compact">

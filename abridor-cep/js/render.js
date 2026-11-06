@@ -144,7 +144,7 @@
 		var yy = top;
 		all.forEach(function (L) {
 			yy += L.before;
-			L.baseline = yy + L.lead - L.size * s * 0.3;
+			L.baseline = yy + L.lead - L.size * s * 0.2;
 			yy += L.lead;
 		});
 		withRotation(ctx, ox + item.cx * s, oy + item.cy * s, item.rotation, function () {

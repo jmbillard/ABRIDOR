@@ -33,7 +33,7 @@
 	var DEFAULTS = {
 		res: '1920x1080', w: 1920, h: 1080, fps: '29.97', fit: 'fit', duration: 5,
 		master: true, refImages: true, refOpacity: 50, groupMode: 'paragraph', keepAutofit: true,
-		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false, theme: 'auto'
+		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false, theme: 'auto', layerMode: 'lines'
 	};
 	var S = {};
 
@@ -270,7 +270,7 @@
 		};
 		var bytes = state.bytes.slice(); // pdf.js pode transferir o buffer
 		var p = isPdf
-			? ABR.parsePDF(bytes, { groupMode: S.groupMode }, onProgress)
+			? ABR.parsePDF(bytes, { groupMode: 'paragraph' }, onProgress)
 			: ABR.parsePPTX(bytes, { ignoreAutofit: !S.keepAutofit }, onProgress);
 
 		p.then(function (doc) {
@@ -804,6 +804,29 @@
 		});
 	}
 
+	// passo extra: divide em linhas as camadas de texto já criadas
+	function splitExisting() {
+		if (state.busy) return;
+		var btn = $('btnSplit');
+		setBusy(true);
+		btn.classList.add('busy');
+		ABR.callHostJSON('abridor_splitLines').then(function (res) {
+			if (!res.layers) {
+				status('selecione camadas de texto na comp ativa, ou comps no painel Project.', 'info');
+			} else {
+				status(res.layers + ' camada' + (res.layers === 1 ? '' : 's') + ' (' + res.from + ') → ' + res.lines + ' linhas.', 'ok');
+				UI.replay(btn, 'done');
+				setTimeout(function () { btn.classList.remove('done'); }, 1600);
+			}
+			if (res.log && res.log.length) setLog(res.log);
+		}).catch(function (e) {
+			status('erro: ' + e.message, 'error');
+		}).then(function () {
+			btn.classList.remove('busy');
+			setBusy(false);
+		});
+	}
+
 	function showApply(on) {
 		state.hasLayers = on;
 		UI.collapse($('applyBox'), on);
@@ -879,7 +902,8 @@
 				width: st.width, height: st.height, par: 1, fps: st.fps, fit: st.fit,
 				master: st.master, masterName: st.prefix + ' MASTER',
 				refImages: st.refImages, refOpacity: st.refOpacity,
-				fallbackFont: st.fallbackFont
+				fallbackFont: st.fallbackFont,
+				lines: S.layerMode === 'lines'
 			},
 			fontMap: fontMapForHost(),
 			pages: []
@@ -1144,8 +1168,19 @@
 		};
 		var fit = UI.seg($('fitSeg'), function (v) { S.fit = v; saveSettings(); });
 		fit.set(S.fit, true);
-		var grp = UI.seg($('groupSeg'), function (v) { S.groupMode = v; saveSettings(); if (state.doc && state.doc.type === 'pdf') parseDocument(false); });
-		grp.set(S.groupMode, true);
+		var LAYER_HINT = {
+			lines: 'texto de ponto, anchor point na linha de base de cada linha',
+			blocks: 'PPTX: caixa de parágrafo · PDF: texto de ponto com várias linhas'
+		};
+		var layerSeg = UI.seg($('layerSeg'), function (v) {
+			S.layerMode = v;
+			saveSettings();
+			$('layerHint').textContent = LAYER_HINT[v];
+			UI.replay($('layerHint'), 'swap');
+		});
+		layerSeg.set(S.layerMode, true);
+		$('layerHint').textContent = LAYER_HINT[S.layerMode];
+		$('btnSplit').onclick = splitExisting;
 		bindSwitch('keepAutofit', 'keepAutofit', function () { if (state.doc && state.doc.type === 'pptx') parseDocument(false); });
 		$('fallbackFont').value = S.fallbackFont;
 		$('fallbackFont').onchange = function () { S.fallbackFont = this.value.trim() || 'ArialMT'; saveSettings(); };

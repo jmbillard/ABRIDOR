@@ -760,6 +760,8 @@
 			paragraphs.push({
 				align: { l: 'left', ctr: 'center', r: 'right', just: 'justify', dist: 'justify' }[algn] || 'left',
 				leading: Math.round(leading * 100) / 100,
+				// linha de base a partir do topo da linha (PowerPoint: entrelinha - 0,2 x tamanho)
+				base: Math.round((leading - maxSize * 0.2) * 100) / 100,
 				spaceBefore: sp(spcBef),
 				spaceAfter: sp(spcAft),
 				emptySize: endProps.size,
@@ -845,11 +847,12 @@
 			paragraphs: paragraphs
 		};
 
-		if (wrap === 'none') toPointItem(item);
+		if (wrap === 'none') { item.nowrap = true; toPointItem(item); }
 		return item;
 	};
 
-	// texto sem quebra automática: vira texto de ponto (linha de base calculada)
+	// texto sem quebra automática: vira texto de ponto (linha de base calculada).
+	// pode ser chamado de novo depois que a entrelinha for recalculada.
 	function toPointItem(item) {
 		var ps = item.paragraphs;
 		var align = ps[0].align === 'justify' ? 'left' : ps[0].align;
@@ -861,7 +864,8 @@
 			total += p.leading * lines;
 		});
 		var firstSize = ps[0].runs.reduce(function (m, r) { return Math.max(m, r.size); }, 0);
-		var ascent = ps[0].leading - firstSize * 0.3; // aproximação: descendente ~ 25% + entrelinha
+		// distância do topo da linha até a linha de base
+		var ascent = ps[0].base !== undefined ? ps[0].base : ps[0].leading - firstSize * 0.3;
 		var top = item.y;
 		if (item.vAlign === 'middle') top = item.y + (item.h - total) / 2;
 		else if (item.vAlign === 'bottom') top = item.y + item.h - total;
@@ -978,6 +982,6 @@
 	};
 
 	// exporta utilitários para testes
-	ABR._pptx = { kids: kids, kid: kid, resolvePath: resolvePath };
+	ABR._pptx = { kids: kids, kid: kid, resolvePath: resolvePath, toPointItem: toPointItem };
 
 })(window);

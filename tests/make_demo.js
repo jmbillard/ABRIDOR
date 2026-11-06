@@ -16,7 +16,7 @@ fam('Liberation Sans', [['Regular', 'LiberationSans'], ['Bold', 'LiberationSans-
 
 (async () => {
 	const browser = await chromium.launch();
-	const ctx = await browser.newContext({ viewport: { width: 400, height: 720 }, recordVideo: { dir: TMP, size: { width: 400, height: 720 } } });
+	const ctx = await browser.newContext({ viewport: { width: 400, height: 720 }, recordVideo: { dir: TMP, size: { width: 400, height: 720 } }, colorScheme: 'dark' });
 	const page = await ctx.newPage();
 	const b64 = fs.readFileSync(PPTX).toString('base64');
 	await page.addInitScript(({ b64, PPTX, FONTS }) => {
