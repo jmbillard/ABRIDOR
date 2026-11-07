@@ -1094,6 +1094,7 @@ footer {
 
 .cta:hover:not(:disabled) { box-shadow: 0 8px 26px rgba(120, 130, 255, .4); filter: brightness(1.08); }
 
+.ico-sparkle, .ico-sparkle path { fill: currentColor; stroke: none; }
 .cta-label .ico > path { transform-box: fill-box; transform-origin: center; }
 .cta:hover:not(:disabled):not(.working) .cta-label .ico > path { animation: star-pop .55s var(--spring); }
 .cta:hover:not(:disabled):not(.working) .cta-label .ico > path:nth-child(2) { animation-delay: .09s; }
