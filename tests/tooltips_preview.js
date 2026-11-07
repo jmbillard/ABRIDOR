@@ -18,7 +18,7 @@ const FONTS = [['Inter', 'Bold', 'Inter-Bold'], ['Inter', 'Light', 'Inter-Light'
 				writeText() { }, writeDataURL() { },
 				callHost: (fn) => fn === 'abridor_getFonts' ? JSON.stringify({ fonts: FONTS }) : JSON.stringify({ ok: true })
 			};
-			try { localStorage.clear(); } catch (e) { }
+			try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 		}, { b64, PPTX, FONTS });
 		await p.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
 		await p.waitForTimeout(500);

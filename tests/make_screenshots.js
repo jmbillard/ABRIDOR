@@ -138,7 +138,7 @@ async function tab(page, t) {
 				return JSON.stringify({ ok: true });
 			}
 		};
-		try { localStorage.clear(); } catch (e) { }
+		try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 	}, { b64, FONTS });
 
 	const hideToast = () => page.evaluate(() => ABR.ui.hideToast());
@@ -361,7 +361,7 @@ async function tab(page, t) {
 				writeText() { }, writeDataURL() { },
 				callHost: (fn) => fn === 'abridor_getFonts' ? JSON.stringify({ fonts: FONTS }) : JSON.stringify({ ok: true })
 			};
-			try { localStorage.clear(); } catch (e) { }
+			try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 		}, { b64, FONTS, PPTX });
 		await lp.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
 		await lp.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));

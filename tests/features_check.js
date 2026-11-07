@@ -37,7 +37,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 		};
 		if (!sessionStorage.getItem('seeded')) {
 			sessionStorage.setItem('seeded', '1');
-			localStorage.clear();
+			localStorage.clear(); localStorage.setItem('abridor.tourDone', '1');
 			localStorage.setItem('abridor.recents', JSON.stringify([
 				{ path: PPTX, name: 'exemplo_creditos.pptx', type: 'pptx', pages: 6, t: Date.now() - 26 * 3600e3 },
 				{ path: '/x/Template Dramaturgia Curta.pdf', name: 'Template Dramaturgia Curta.pdf', type: 'pdf', pages: 14, t: Date.now() - 3 * 864e5 },

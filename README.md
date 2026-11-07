@@ -105,7 +105,16 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
   <sub>o painel em ação: seleção de páginas, duração, formato, fontes e criação.</sub>
 </p>
 
-**2.3** passe o mouse sobre qualquer botão para ver o **tooltip**: o que ele faz e, quando houver, o atalho de teclado. nas miniaturas, o tooltip lista os textos encontrados na página.
+**2.3** na primeira vez que você abre um documento, o painel oferece um **tour guiado** de 5 passos, usando o próprio documento: páginas, duração, formato, fontes e o botão de criar. `→` / `Enter` avançam, `←` volta, `Esc` pula. para rever depois, clique no **?** no topo.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/img/46-tour-boas-vindas.png" width="380"><br><sub>boas-vindas</sub></td>
+    <td align="center"><img src="docs/img/47-tour-passo.png" width="380"><br><sub>passo 4: as fontes que faltam neste documento</sub></td>
+  </tr>
+</table>
+
+**2.4** passe o mouse sobre qualquer botão para ver o **tooltip**: o que ele faz e, quando houver, o atalho de teclado. nas miniaturas, o tooltip lista os textos encontrados na página.
 
 <p align="center">
   <img src="docs/img/18-tooltip.png" width="380">
@@ -113,7 +122,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 atalhos: `Ctrl/⌘ + O` abre um documento · `1` `2` `3` trocam de aba · `Ctrl/⌘ + Enter` cria as comps · `↑` `↓` mudam a duração.
 
-**2.4** o painel tem **tema claro e escuro**. o botão no canto superior direito alterna entre:
+**2.5** o painel tem **tema claro e escuro**. o botão no canto superior direito alterna entre:
 
 <p align="center">
   <img src="docs/img/17-tema-botao.png" width="300">
@@ -566,6 +575,7 @@ abridor-cep/
 - testes fora do After Effects (Node + Playwright):
   - `node tests/run_panel.js <arquivo.pptx|pdf> <saída>` → abre o painel no Chromium com o AE simulado, extrai e gera o job.
   - `node tests/host_mock.js <saída>/job.json <saída>/host` → executa o `host.jsx` contra um mock do After Effects e desenha as camadas sobre a referência.
+  - `node tests/tour_check.js <saída>` → verifica o tour guiado: primeira vez, passos, teclado, botão **?** e tour sem documento (com `--docs`, grava os prints do README).
   - `node tests/features_check.js <saída>` → verifica no painel a checagem antes de criar, o seletor de fontes, a troca da família, o shift+clique, as ações no fim e os recentes (com `--docs`, grava os prints do README).
   - `MODES=new,texts,side,replace node tests/host_mock.js …` → roda os modos de criação em sequência no mock do After Effects.
   - `node tests/installer_mock.js <pasta temporária>` → executa o instalador com File/Folder/ScriptUI simulados (instala e remove).

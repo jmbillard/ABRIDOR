@@ -54,6 +54,7 @@
 		info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
 		arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
 		split: '<path d="M4 6h16"/><path d="M4 12h10"/><path d="M4 18h13"/><path d="m18 10 3 2-3 2"/>',
+		help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6M12 17h.01"/>',
 		sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
 		moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
 		themeAuto: '<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor" stroke="none"/>'

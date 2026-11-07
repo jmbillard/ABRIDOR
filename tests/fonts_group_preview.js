@@ -12,7 +12,7 @@ const FONTS = [['Inter', 'Bold', 'Inter-Bold'], ['Inter', 'Light', 'Inter-Light'
 	const b64 = fs.readFileSync(PPTX).toString('base64');
 	await p.addInitScript(({ b64, PPTX, FONTS }) => {
 		window.ABR_MOCK = { openFile: () => PPTX, readBinary: () => { const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }, writeText() { }, writeDataURL() { }, callHost: (fn) => fn === 'abridor_getFonts' ? JSON.stringify({ fonts: FONTS }) : JSON.stringify({ ok: true }) };
-		try { localStorage.clear(); } catch (e) { }
+		try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 	}, { b64, PPTX, FONTS });
 	await p.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
 	await p.waitForTimeout(400);

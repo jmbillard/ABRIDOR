@@ -27,6 +27,7 @@ fam('DejaVu Sans', [['Book', 'DejaVuSans'], ['Bold', 'DejaVuSans-Bold']]);
 		const files = {};
 		files[docPath] = b64;
 		window.__hostCalls = [];
+		try { localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 		window.__written = {};
 		window.ABR_MOCK = {
 			openFile: () => docPath,

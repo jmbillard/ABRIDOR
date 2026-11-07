@@ -32,7 +32,7 @@ fam('Liberation Sans', [['Regular', 'LiberationSans'], ['Bold', 'LiberationSans-
 				return JSON.stringify({ ok: true });
 			}
 		};
-		try { localStorage.clear(); } catch (e) { }
+		try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 	}, { b64, PPTX, FONTS });
 
 	const w = (ms) => page.waitForTimeout(ms);

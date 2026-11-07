@@ -7,7 +7,7 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.3.0';
+	var VERSION = '1.4.0';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -341,12 +341,14 @@
 			$('docMeta').textContent = doc.pages.length + ' páginas · ' + nTexts + ' textos';
 			$('docChip').title = ABR.fs.basename(state.path) + '\n' + Math.round(doc.width) + ' × ' + Math.round(doc.height) + ' pt\n\nclique para abrir outro documento';
 			if (fresh) addRecent(doc);
+			var tourAfter = fresh;
 			collectFonts();
 			renderGrid();
 			renderFonts();
 			updateCompsInfo();
 			setTimeout(placeTabInk, 350);
 			status('documento carregado. desmarque as páginas que não devem ser processadas.', 'ok');
+			if (tourAfter && ABR.tour) ABR.tour.documentReady();
 		}).catch(function (e) {
 			console.error(e);
 			if (!state.doc) { document.body.classList.add('is-empty'); $('grid').innerHTML = ''; }
@@ -1729,6 +1731,7 @@
 		// rodapé
 		$('btnBuild').onclick = requestBuild;
 		$('preChip').onclick = goToMissing;
+		$('helpBtn').onclick = function () { if (ABR.tour && !state.busy) ABR.tour.start(false); };
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
 		$('toast').onclick = UI.hideToast;
 
