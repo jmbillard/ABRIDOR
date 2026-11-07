@@ -35,7 +35,7 @@ RULES = [
     ('clock', 'path', 'view', 'mi-hands .8s var(--ease)'),
     ('wand', 'path:nth-child(-n+2)', 'view', 'mi-wave .6s var(--spring)'),
     ('wand', 'path:nth-child(3)', 'fill', 'mi-twinkle .6s ease'),
-    ('refresh', '', 'view', 'mi-spin-half .6s var(--spring)'),
+    ('refresh', '', 'view', 'mi-spin-back .6s var(--spring)'),
     ('search', '', 'view', 'mi-seek .6s var(--spring)'),
     ('type', 'path', 'fill', 'mi-stretch .5s var(--spring)'),
     ('autofit', 'path:nth-child(2)', 'fill', 'mi-down .5s var(--spring)'),
@@ -86,6 +86,7 @@ KEYFRAMES = """
 @keyframes mi-wave { 30% { transform: rotate(-16deg); } 65% { transform: rotate(8deg); } }
 @keyframes mi-twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: .2; transform: scale(.4); } 70% { opacity: 1; transform: scale(1.3); } }
 @keyframes mi-spin-half { to { transform: rotate(180deg); } }
+@keyframes mi-spin-back { to { transform: rotate(-180deg); } }
 @keyframes mi-seek { 30% { transform: translate(-1.5px, -1.5px) scale(1.1); } 65% { transform: translate(1px, 1px); } }
 @keyframes mi-stretch { 40% { transform: scaleX(1.18); } 70% { transform: scaleX(.95); } }
 @keyframes mi-drop { 30% { transform: translateY(2.5px); } 55% { transform: translateY(-1px); } 75% { transform: translateY(1.5px); } }

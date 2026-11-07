@@ -9,12 +9,12 @@
 <body class="is-empty">
 	<!-- ============================================================ TOPO -->
 	<header class="top">
-		<div class="logo" title="ABRIDOR&#10;layouts de PPTX e PDF no After Effects">
+		<button class="logo" id="logoBtn" title="ABRIDOR · layouts de PPTX e PDF no AE&#10;abrir a documentação no GitHub">
 			<span class="logo-mark" id="logoMark">
 				<svg class="opener" viewBox="0 0 24 24" aria-hidden="true"><g class="opener-bar" transform="rotate(-40 12 12)"><path fill="currentColor" fill-rule="evenodd" d="M9.6 1.2h4.8a2.6 2.6 0 0 1 2.6 2.6v16.4a2.6 2.6 0 0 1-2.6 2.6H9.6A2.6 2.6 0 0 1 7 20.2V3.8a2.6 2.6 0 0 1 2.6-2.6z M10.2 3.9h3.6a1 1 0 0 1 1 1v4.6h-1.9V8.1h-1.8v1.4H9.2V4.9a1 1 0 0 1 1-1z M12 17.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2z"/></g></svg>
 			</span>
 			<span class="logo-name">ABRIDOR</span>
-		</div>
+		</button>
 		<button id="docChip" class="doc-chip" data-kbd="mod+O" title="abrir outro documento">
 			<span id="docType" class="doc-type">PDF</span>
 			<span class="doc-text"><b id="docName"></b><small id="docMeta"></small></span>
@@ -58,7 +58,7 @@
 				</span>
 				<span class="range" id="rangeBox">
 					<button class="icon-btn" id="rangeBtn" title="selecionar por intervalo&#10;1-3, 5 · 8- até o fim · -4 do início"><i data-icon="range"></i></button>
-					<input type="text" id="selRange" placeholder="1-3, 5, 8-" spellcheck="false">
+					<span class="clear-field"><input type="text" id="selRange" placeholder="1-3, 5, 8-" spellcheck="false"><button class="clear-btn" data-clear="selRange" title="apagar o intervalo"><i data-icon="x"></i></button></span>
 				</span>
 				<span class="spacer"></span>
 				<button class="icon-btn toggle on" id="showBoxes" title="textos detectados&#10;azul = caixa de texto · laranja = texto de ponto"><i data-icon="boxes"></i></button>

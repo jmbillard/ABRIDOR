@@ -219,11 +219,12 @@ segure **shift** e clique em outra miniatura para marcar ou desmarcar **todo o i
     <td width="400"><img src="docs/img/13-intervalo.png" width="380"></td>
     <td>
 
-1. clique no `#` e digite as páginas, depois `Enter`:
+1. clique no `#` e digite as páginas, depois `Enter` (ou só clique fora do campo):
    - `1-3, 5` → páginas 1, 2, 3 e 5
    - `8-` → da 8 até o fim
    - `-4` → da 1 até a 4
 2. ficam selecionadas **somente** essas páginas.
+3. o **×** no fim do campo apaga o texto.
 
   </td>
   </tr>

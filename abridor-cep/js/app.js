@@ -7,7 +7,7 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.4.1';
+	var VERSION = '1.4.2';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -1546,6 +1546,12 @@
 	}
 
 	function expander(field, btn, input, onEnter) {
+		var applied = null;
+		function commit() {
+			if (!onEnter || !input.value.trim() || input.value === applied) return;
+			applied = input.value;
+			onEnter();
+		}
 		btn.onclick = function () {
 			var open = !field.classList.contains('open');
 			field.classList.toggle('open', open);
@@ -1553,10 +1559,11 @@
 			else { input.blur(); }
 		};
 		input.onkeydown = function (e) {
-			if (e.key === 'Enter' && onEnter) onEnter();
+			if (e.key === 'Enter' && onEnter) { applied = input.value; onEnter(); }
 			if (e.key === 'Escape') { field.classList.remove('open'); input.blur(); }
 		};
-		input.onblur = function () { if (!input.value) field.classList.remove('open'); };
+		input.addEventListener('input', function () { if (!input.value) applied = null; });
+		input.onblur = function () { commit(); if (!input.value) field.classList.remove('open'); };
 	}
 
 	function bind() {
@@ -1746,6 +1753,7 @@
 			};
 			sync();
 		});
+		$('logoBtn').onclick = function () { ABR.openURL('https://github.com/jmbillard/ABRIDOR#readme'); };
 		$('helpBtn').onclick = function () { if (ABR.tour && !state.busy) ABR.tour.start(false); };
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
 		$('toast').onclick = UI.hideToast;
