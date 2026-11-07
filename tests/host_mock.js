@@ -52,7 +52,7 @@ class TextDocument {
 		return out;
 	}
 }
-const INSTALLED = ['ArialMT', 'Arial-BoldMT', 'Georgia', 'Calibri', 'Calibri-Bold'];
+const INSTALLED = ['ArialMT', 'Arial-BoldMT', 'Georgia', 'Calibri', 'Calibri-Bold'].concat((process.env.FONTS || '').split(',').filter(Boolean));
 class Layer {
 	constructor(comp, type, arg) {
 		this.comp = comp; this.type = type; this.name = ''; this.comment = ''; this.locked = false;
@@ -171,6 +171,14 @@ function runJob(mode) {
 const MODES = (process.env.MODES || 'new').split(',');
 MODES.forEach((m) => {
 	const r = runJob(m);
+	if (process.env.SHOWFONTS) {
+		const c = items.find((i) => i instanceof CompItem && /02( \(\d+\))?$/.test(i.name));
+		c._layers.filter((l) => l instanceof TextLayer).forEach((l) => {
+			const d = l.text.property('ADBE Text Document').value;
+			const rs = (d.ranges || []).filter((x) => x._font !== undefined).map((x) => x.a + '-' + x.b + ':' + x._font);
+			console.log('   [' + m + '] "' + d.text + '" → font ' + d.font + (rs.length ? ' | trechos ' + rs.join(' ') : ''));
+		});
+	}
 	const comps = items.filter((i) => i instanceof CompItem).length;
 	const folders = items.filter((i) => i instanceof FolderItem && i.parentFolder && i.parentFolder.name === 'ABRIDOR').map((f) => f.name);
 	console.log('modo', m.padEnd(7), '| comps novas', r.isNew, '| atualizadas', r.updated, '| acrescentadas', r.added, '| sobraram', r.left, '| master', r.master, r.reused ? '(mantida)' : '', '| total comps no projeto', comps, '| pastas', folders.join(' / '));
