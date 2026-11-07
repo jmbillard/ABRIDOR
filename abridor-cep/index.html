@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 	<title>ABRIDOR</title>
 	<link rel="stylesheet" href="css/style.css">
+	<link rel="stylesheet" href="css/micro.css">
 </head>
 <body class="is-empty">
 	<!-- ============================================================ TOPO -->
@@ -171,7 +172,7 @@
 			<div class="bar">
 				<span class="search" id="searchBox">
 					<button class="icon-btn" id="searchBtn" title="filtrar fontes&#10;pelo nome da fonte do documento"><i data-icon="search"></i></button>
-					<input type="search" id="fontFilter" placeholder="filtrar fontes" spellcheck="false">
+					<span class="clear-field"><input type="search" id="fontFilter" placeholder="filtrar fontes" spellcheck="false"><button class="clear-btn" data-clear="fontFilter" title="limpar o filtro"><i data-icon="x"></i></button></span>
 				</span>
 				<span class="spacer"></span>
 				<button class="icon-btn toggle" id="previewBtn" title="preview&#10;texto e tamanho usados nas prévias"><i data-icon="type"></i></button>
@@ -181,7 +182,7 @@
 			</div>
 			<div class="collapse" id="previewBox">
 				<div class="preview-opts">
-					<input type="text" id="sampleText" placeholder="texto do preview — vazio usa o do documento">
+					<span class="clear-field"><input type="text" id="sampleText" placeholder="texto do preview — vazio usa o do documento"><button class="clear-btn" data-clear="sampleText" title="apagar o texto"><i data-icon="x"></i></button></span>
 					<input type="range" id="previewSize" min="12" max="44" value="22" title="tamanho do preview">
 				</div>
 			</div>

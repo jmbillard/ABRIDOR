@@ -7,7 +7,7 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.4.0';
+	var VERSION = '1.4.1';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -1731,6 +1731,21 @@
 		// rodapé
 		$('btnBuild').onclick = requestBuild;
 		$('preChip').onclick = goToMissing;
+		// campos com botão de apagar
+		each(document.querySelectorAll('.clear-btn'), function (btn) {
+			var input = $(btn.dataset.clear);
+			var wrap = btn.parentNode;
+			var sync = function () { wrap.classList.toggle('has-value', !!input.value); };
+			input.addEventListener('input', sync);
+			btn.onmousedown = function (e) { e.preventDefault(); };
+			btn.onclick = function () {
+				input.value = '';
+				input.dispatchEvent(new Event('input'));
+				sync();
+				input.focus();
+			};
+			sync();
+		});
 		$('helpBtn').onclick = function () { if (ABR.tour && !state.busy) ABR.tour.start(false); };
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
 		$('toast').onclick = UI.hideToast;
