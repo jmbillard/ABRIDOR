@@ -1,0 +1,90 @@
+/* gerado por tests/make_micro_css.py: micro-interações dos ícones no hover */
+.ico > * { transform-box: fill-box; transform-origin: center; }
+.ico { transform-origin: center; }
+@keyframes mi-slide-r { 40% { transform: translateX(3px); } }
+@keyframes mi-slide-l { 40% { transform: translateX(-3px); } }
+@keyframes mi-up { 40% { transform: translateY(-2.5px); } }
+@keyframes mi-down { 40% { transform: translateY(2.5px); } }
+@keyframes mi-pop { 0% { transform: scale(1); } 35% { transform: scale(.72); } 70% { transform: scale(1.1); } }
+@keyframes mi-hop { 35% { transform: translateY(-2.5px); } 65% { transform: translateY(.5px); } }
+@keyframes mi-draw { 0% { stroke-dasharray: 20; stroke-dashoffset: 20; } 100% { stroke-dasharray: 20; stroke-dashoffset: 0; } }
+@keyframes mi-turn { 100% { transform: rotate(90deg); } }
+@keyframes mi-tilt { 30% { transform: rotate(-14deg); } 65% { transform: rotate(8deg); } }
+@keyframes mi-march { to { stroke-dashoffset: -7.2; } }
+@keyframes mi-rise { 45% { transform: translateY(-3px) scale(1.15); } }
+@keyframes mi-blink { 45% { transform: scaleY(.15); } }
+@keyframes mi-hands { to { transform: rotate(360deg); } }
+@keyframes mi-wave { 30% { transform: rotate(-16deg); } 65% { transform: rotate(8deg); } }
+@keyframes mi-twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 40% { opacity: .2; transform: scale(.4); } 70% { opacity: 1; transform: scale(1.3); } }
+@keyframes mi-spin-half { to { transform: rotate(180deg); } }
+@keyframes mi-spin-back { to { transform: rotate(-180deg); } }
+@keyframes mi-seek { 30% { transform: translate(-1.5px, -1.5px) scale(1.1); } 65% { transform: translate(1px, 1px); } }
+@keyframes mi-stretch { 40% { transform: scaleX(1.18); } 70% { transform: scaleX(.95); } }
+@keyframes mi-drop { 30% { transform: translateY(2.5px); } 55% { transform: translateY(-1px); } 75% { transform: translateY(1.5px); } }
+@keyframes mi-shake { 20%, 60% { transform: rotate(-12deg); } 40%, 80% { transform: rotate(12deg); } }
+@keyframes mi-nudge-r { 45% { transform: translateX(3px); } }
+@keyframes mi-squash { 45% { transform: scaleX(.55); } }
+@keyframes mi-swing { 30% { transform: rotate(-18deg); } 65% { transform: rotate(10deg); } }
+@keyframes mi-grow { 0% { transform: scale(.5); } 70% { transform: scale(1.08); } }
+@keyframes mi-type { 0% { transform: scaleX(0); } }
+@keyframes mi-bob { 35% { transform: translateY(-2.5px) rotate(-8deg); } 70% { transform: translateY(.5px) rotate(4deg); } }
+@keyframes mi-rays { to { transform: rotate(90deg); } }
+
+button:hover .ico-swap path:nth-child(1), label:hover .ico-swap path:nth-child(1), .hov .ico-swap path:nth-child(1) { animation: mi-slide-r .6s var(--spring); }
+button:hover .ico-swap path:nth-child(2), label:hover .ico-swap path:nth-child(2), .hov .ico-swap path:nth-child(2) { animation: mi-slide-l .6s var(--spring); }
+button:hover .ico-pages rect:nth-child(1), label:hover .ico-pages rect:nth-child(1), .hov .ico-pages rect:nth-child(1) { animation: mi-pop .45s var(--spring); }
+button:hover .ico-pages rect:nth-child(2), label:hover .ico-pages rect:nth-child(2), .hov .ico-pages rect:nth-child(2) { animation: mi-pop .45s var(--spring) .06s; }
+button:hover .ico-pages rect:nth-child(4), label:hover .ico-pages rect:nth-child(4), .hov .ico-pages rect:nth-child(4) { animation: mi-pop .45s var(--spring) .12s; }
+button:hover .ico-pages rect:nth-child(3), label:hover .ico-pages rect:nth-child(3), .hov .ico-pages rect:nth-child(3) { animation: mi-pop .45s var(--spring) .18s; }
+button:hover .ico-comps path:nth-child(1), label:hover .ico-comps path:nth-child(1), .hov .ico-comps path:nth-child(1) { animation: mi-up .55s var(--spring); }
+button:hover .ico-comps path:nth-child(3), label:hover .ico-comps path:nth-child(3), .hov .ico-comps path:nth-child(3) { animation: mi-down .55s var(--spring); }
+button:hover .ico-layers path:nth-child(1), label:hover .ico-layers path:nth-child(1), .hov .ico-layers path:nth-child(1) { animation: mi-up .55s var(--spring); }
+button:hover .ico-fonts path:nth-child(-n+3), label:hover .ico-fonts path:nth-child(-n+3), .hov .ico-fonts path:nth-child(-n+3) { animation: mi-hop .5s var(--spring); }
+button:hover .ico-fonts path:nth-child(n+4), label:hover .ico-fonts path:nth-child(n+4), .hov .ico-fonts path:nth-child(n+4) { animation: mi-hop .5s var(--spring) .1s; }
+button:hover .ico-all path, label:hover .ico-all path, .hov .ico-all path { animation: mi-draw .5s var(--ease); }
+button:hover .ico-none rect, label:hover .ico-none rect, .hov .ico-none rect { animation: mi-pop .45s var(--spring); }
+button:hover .ico-invert, label:hover .ico-invert, .hov .ico-invert { animation: mi-turn .55s var(--spring); }
+button:hover .ico-range, label:hover .ico-range, .hov .ico-range { animation: mi-tilt .55s var(--spring); }
+button:hover .ico-boxes rect:nth-child(n+2), label:hover .ico-boxes rect:nth-child(n+2), .hov .ico-boxes rect:nth-child(n+2) { animation: mi-march .9s linear infinite; }
+button:hover .ico-image circle, label:hover .ico-image circle, .hov .ico-image circle { animation: mi-rise .6s var(--spring); }
+button:hover .ico-image path, label:hover .ico-image path, .hov .ico-image path { animation: mi-hop .6s var(--spring) .08s; }
+button:hover .ico-eye, label:hover .ico-eye, .hov .ico-eye { animation: mi-blink .4s ease; }
+button:hover .ico-eyeOff, label:hover .ico-eyeOff, .hov .ico-eyeOff { animation: mi-blink .4s ease; }
+button:hover .ico-clock path, label:hover .ico-clock path, .hov .ico-clock path { animation: mi-hands .8s var(--ease); transform-box: view-box; transform-origin: 12px 12px; }
+button:hover .ico-wand path:nth-child(-n+2), label:hover .ico-wand path:nth-child(-n+2), .hov .ico-wand path:nth-child(-n+2) { animation: mi-wave .6s var(--spring); transform-box: view-box; transform-origin: 12px 12px; }
+button:hover .ico-wand path:nth-child(3), label:hover .ico-wand path:nth-child(3), .hov .ico-wand path:nth-child(3) { animation: mi-twinkle .6s ease; }
+button:hover .ico-refresh, label:hover .ico-refresh, .hov .ico-refresh { animation: mi-spin-back .6s var(--spring); }
+button:hover .ico-search, label:hover .ico-search, .hov .ico-search { animation: mi-seek .6s var(--spring); }
+button:hover .ico-type path, label:hover .ico-type path, .hov .ico-type path { animation: mi-stretch .5s var(--spring); }
+button:hover .ico-autofit path:nth-child(2), label:hover .ico-autofit path:nth-child(2), .hov .ico-autofit path:nth-child(2) { animation: mi-down .5s var(--spring); }
+button:hover .ico-project path:nth-child(2), label:hover .ico-project path:nth-child(2), .hov .ico-project path:nth-child(2) { animation: mi-drop .7s var(--spring); }
+button:hover .ico-master rect:nth-child(1), label:hover .ico-master rect:nth-child(1), .hov .ico-master rect:nth-child(1) { animation: mi-slide-l .5s var(--spring); }
+button:hover .ico-master rect:nth-child(3), label:hover .ico-master rect:nth-child(3), .hov .ico-master rect:nth-child(3) { animation: mi-slide-r .5s var(--spring); }
+button:hover .ico-alert, label:hover .ico-alert, .hov .ico-alert { animation: mi-shake .5s ease; }
+button:hover .ico-arrow, label:hover .ico-arrow, .hov .ico-arrow { animation: mi-nudge-r .5s var(--spring); }
+button:hover .ico-x, label:hover .ico-x, .hov .ico-x { animation: mi-turn .45s var(--spring); }
+button:hover .ico-plus, label:hover .ico-plus, .hov .ico-plus { animation: mi-turn .45s var(--spring); }
+button:hover .ico-minus, label:hover .ico-minus, .hov .ico-minus { animation: mi-squash .4s var(--spring); }
+button:hover .ico-monitor rect, label:hover .ico-monitor rect, .hov .ico-monitor rect { animation: mi-pop .45s var(--spring); }
+button:hover .ico-tag, label:hover .ico-tag, .hov .ico-tag { animation: mi-swing .6s var(--spring); }
+button:hover .ico-tune circle:nth-of-type(1), label:hover .ico-tune circle:nth-of-type(1), .hov .ico-tune circle:nth-of-type(1) { animation: mi-slide-l .55s var(--spring); }
+button:hover .ico-tune circle:nth-of-type(2), label:hover .ico-tune circle:nth-of-type(2), .hov .ico-tune circle:nth-of-type(2) { animation: mi-slide-r .55s var(--spring); }
+button:hover .ico-tune circle:nth-of-type(3), label:hover .ico-tune circle:nth-of-type(3), .hov .ico-tune circle:nth-of-type(3) { animation: mi-slide-l .55s var(--spring) .05s; }
+button:hover .ico-fit rect:nth-child(2), label:hover .ico-fit rect:nth-child(2), .hov .ico-fit rect:nth-child(2) { animation: mi-pop .45s var(--spring); }
+button:hover .ico-fill rect:nth-of-type(2), label:hover .ico-fill rect:nth-of-type(2), .hov .ico-fill rect:nth-of-type(2) { animation: mi-grow .5s var(--spring); }
+button:hover .ico-para path:nth-child(1), label:hover .ico-para path:nth-child(1), .hov .ico-para path:nth-child(1) { animation: mi-type .5s var(--ease); }
+button:hover .ico-para path:nth-child(2), label:hover .ico-para path:nth-child(2), .hov .ico-para path:nth-child(2) { animation: mi-type .5s var(--ease) .1s; }
+button:hover .ico-line path:nth-child(1), label:hover .ico-line path:nth-child(1), .hov .ico-line path:nth-child(1) { animation: mi-type .45s var(--ease); }
+button:hover .ico-line path:nth-child(2), label:hover .ico-line path:nth-child(2), .hov .ico-line path:nth-child(2) { animation: mi-type .45s var(--ease) .08s; }
+button:hover .ico-line path:nth-child(3), label:hover .ico-line path:nth-child(3), .hov .ico-line path:nth-child(3) { animation: mi-type .45s var(--ease) .16s; }
+button:hover .ico-split path:nth-child(4), label:hover .ico-split path:nth-child(4), .hov .ico-split path:nth-child(4) { animation: mi-nudge-r .55s var(--spring); }
+button:hover .ico-split path:nth-child(2), label:hover .ico-split path:nth-child(2), .hov .ico-split path:nth-child(2) { animation: mi-type .45s var(--ease); }
+button:hover .ico-help, label:hover .ico-help, .hov .ico-help { animation: mi-bob .6s var(--spring); }
+button:hover .ico-info path, label:hover .ico-info path, .hov .ico-info path { animation: mi-hop .5s var(--spring); }
+button:hover .ico-sun path, label:hover .ico-sun path, .hov .ico-sun path { animation: mi-rays .7s var(--spring); transform-box: view-box; transform-origin: 12px 12px; }
+button:hover .ico-moon, label:hover .ico-moon, .hov .ico-moon { animation: mi-swing .7s var(--spring); }
+button:hover .ico-themeAuto path, label:hover .ico-themeAuto path, .hov .ico-themeAuto path { animation: mi-spin-half .6s var(--spring); transform-box: view-box; transform-origin: 12px 12px; }
+button:hover .ico-open path:nth-child(n+3), label:hover .ico-open path:nth-child(n+3), .hov .ico-open path:nth-child(n+3) { animation: mi-up .55s var(--spring); }
+
+.icon-btn.busy .ico, .btn.busy .ico { animation: spin .9s linear infinite !important; }
+@media (prefers-reduced-motion: reduce) { .ico, .ico > * { animation: none !important; } }
