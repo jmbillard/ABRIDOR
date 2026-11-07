@@ -1753,6 +1753,7 @@
 			};
 			sync();
 		});
+		$('logoBtn').setAttribute('title', 'ABRIDOR v' + VERSION + '\nabrir a documentação no GitHub');
 		$('logoBtn').onclick = function () { ABR.openURL('https://github.com/jmbillard/ABRIDOR#readme'); };
 		$('helpBtn').onclick = function () { if (ABR.tour && !state.busy) ABR.tour.start(false); };
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
