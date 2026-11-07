@@ -28,8 +28,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 > • **INSTALAR O ABRIDOR.jsx** → instalador (roda dentro do After Effects).\
 > • **abridor-cep/** → a extensão (painel CEP).\
 > • **instalar_windows.bat** / **instalar_mac.command** → instaladores alternativos, sem abrir o After Effects.\
-> • **test files/exemplo_creditos.pptx** → PPTX de exemplo para testar (é o usado nos prints abaixo).\
-> • **ABRIDOR 0.2b.jsxbin** → versão anterior (script que dependia do JSON do site da Adobe).
+> • **test files/exemplo_creditos.pptx** → PPTX de exemplo para testar (é o usado nos prints abaixo).
 
 <br>
 
@@ -586,13 +585,3 @@ abridor-cep/
   - `node tests/make_demo.js` → grava a animação `docs/img/demo.gif` (precisa do `ffmpeg`).
   - `node tests/make_banner.js` → gera o banner do instalador (com o logo) e grava a string ExtendScript no instalador.
 - `js/lib/pdf.js` e `pdf.worker.js` têm uma alteração: `isNodeJS = false`, porque o CEP expõe `process` e o pdf.js tentaria usar APIs do Node.
-
-<br>
-
----
-
-<br>
-
-## 🕰 versão anterior (v0.2b)
-
-o script `ABRIDOR 0.2b.jsxbin` (`File` > `Scripts` > `Run Script File...`) cria o layout a partir do arquivo **JSON** exportado pelo site *Adobe PDF Extract*. ele continua no repositório (com os prints antigos em `images/`), mas a extensão substitui esse fluxo.
