@@ -42,7 +42,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 **1.1** no After Effects, abra `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx** direto da pasta do ABRIDOR (a pasta que tem a `abridor-cep` dentro). o instalador abre com as boas-vindas — clique em **começar**.
 
-**1.2** o instalador confere o que é necessário. bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**.
+**1.2** o instalador confere o que é necessário. se estiver tudo certo, essa etapa é pulada e você vai direto para **instalar / atualizar** (com o aviso *✓ tudo certo nas verificações*). se algo precisar de atenção, a checagem aparece: bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**.
 
 <table>
   <tr>

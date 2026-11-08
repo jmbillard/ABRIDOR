@@ -302,6 +302,11 @@ Instalar / atualizar:
 
 	text(p2, actionMsg, 34);
 
+	var checksOkText = p2.add('statictext', undefined, '\u2713 tudo certo nas verifica\u00e7\u00f5es do computador.');
+
+	setColor(checksOkText, STATE_COLORS.ok);
+	checksOkText.visible = false;
+
 	var radios = p2.add('group');
 
 	radios.orientation = 'row';
@@ -359,6 +364,16 @@ Instalar / atualizar:
 
 	var current = 0;
 	var allPages = [p0, p1, p2, p3];
+	var skippedChecks = false; // tudo passou: a checagem é pulada
+
+	// true quando todas as verificações (inclusive as opcionais) passam
+	function allChecksPass() {
+		for (var i = 0; i < checks.length; i++) {
+			if (!checks[i].test()) return false;
+		}
+
+		return true;
+	}
 
 	function runChecks() {
 		var ok = true;
@@ -463,7 +478,7 @@ Instalar / atualizar:
 	};
 
 	backBtn.onClick = function () {
-		showPage(current - 1);
+		showPage(current === 2 && skippedChecks ? 0 : current - 1);
 	};
 
 	nextBtn.onClick = function () {
@@ -476,6 +491,13 @@ Instalar / atualizar:
 			else doInstall();
 
 			return;
+		}
+
+		// tudo certo nas verificações: vai direto para instalar / atualizar
+		if (current === 0) {
+			skippedChecks = allChecksPass();
+			checksOkText.visible = skippedChecks;
+			if (skippedChecks) return showPage(2);
 		}
 
 		showPage(current + 1);
