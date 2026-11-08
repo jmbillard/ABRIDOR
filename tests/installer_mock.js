@@ -55,16 +55,16 @@ const nextText = () => Object.values(buttons).filter(b => b.type === 'button' &&
 ctx.app.version = '23.0.0'; buttons = {}; run(); next();
 console.log('AE 23, após começar:', nextText() === 'próximo' ? 'checagem (com aviso)' : nextText());
 
-// tudo certo: pula direto para instalar
+// tudo certo: boas-vindas e instalar na mesma página
 ctx.app.version = '25.1.0'; buttons = {}; run(); console.log('janela:', win.text);
-next(); console.log('AE 25, após começar:', nextText() === 'instalar' ? 'instalar (checagem pulada)' : nextText());
+console.log('AE 25, ao abrir:', nextText() === 'instalar' ? 'instalar (boas-vindas + ação juntas)' : nextText());
 next();
 console.log('resultado:', result().split('\n')[0]);
 const dest = path.join(userData, 'Adobe/CEP/extensions/com.abridor.panel');
 console.log('arquivos copiados:', fs.readdirSync(dest).join(', '), '| lib:', fs.readdirSync(path.join(dest, 'js/lib')).length);
 console.log('debug mode:', calls.filter(c => /PlayerDebugMode/.test(c)).length, 'comandos');
 
-buttons = {}; run(); next();
+buttons = {}; run();
 console.log('2ª execução, opção:', buttons['reinstalar'] ? 'reinstalar' : buttons['atualizar'] ? 'atualizar' : '?');
 buttons['instalar'] = undefined; buttons['remover'].value = true; buttons['reinstalar'].value = false;
 next(); console.log('resultado:', result().split('\n')[0], '| existe:', fs.existsSync(dest));

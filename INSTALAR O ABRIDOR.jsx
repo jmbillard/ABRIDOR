@@ -291,8 +291,23 @@ Instalar / atualizar:
 	});
 
 	// 2 · ação
+	// com todas as verificações ok, as boas-vindas e a ação ficam na mesma página
+	var allOk = allChecksPass();
 	var p2 = page();
-	var actionMsg = 'tudo pronto! o que você quer fazer?';
+	var actionMsg = 'o que você quer fazer?';
+
+	if (allOk) {
+		text(
+			p2,
+			'olá! a extensão será copiada para este computador: depois de instalada ela não depende ' +
+				'mais desta pasta. para atualizar, rode o instalador da versão nova.',
+			48
+		);
+
+		var checksOkText = p2.add('statictext', undefined, '\u2713 tudo certo com este computador!');
+
+		setColor(checksOkText, STATE_COLORS.ok);
+	}
 
 	if (installed) {
 		actionMsg = 'o ABRIDOR' + (oldVersion ? ' v' + oldVersion : '') + ' já está instalado neste computador';
@@ -300,12 +315,7 @@ Instalar / atualizar:
 		actionMsg += '. o que você quer fazer?';
 	}
 
-	text(p2, actionMsg, 34);
-
-	var checksOkText = p2.add('statictext', undefined, '\u2713 tudo certo nas verifica\u00e7\u00f5es do computador.');
-
-	setColor(checksOkText, STATE_COLORS.ok);
-	checksOkText.visible = false;
+	text(p2, actionMsg, installed ? 34 : 18);
 
 	var radios = p2.add('group');
 
@@ -364,7 +374,6 @@ Instalar / atualizar:
 
 	var current = 0;
 	var allPages = [p0, p1, p2, p3];
-	var skippedChecks = false; // tudo passou: a checagem é pulada
 
 	// true quando todas as verificações (inclusive as opcionais) passam
 	function allChecksPass() {
@@ -406,7 +415,7 @@ Instalar / atualizar:
 		}
 
 		current = n;
-		backBtn.visible = n === 1 || n === 2;
+		backBtn.visible = n === 1 || (n === 2 && !allOk);
 		cancelBtn.visible = n < 3;
 		progressLab.visible = progressBar.visible = n === 3;
 		nextBtn.enabled = true;
@@ -478,7 +487,7 @@ Instalar / atualizar:
 	};
 
 	backBtn.onClick = function () {
-		showPage(current === 2 && skippedChecks ? 0 : current - 1);
+		showPage(current - 1);
 	};
 
 	nextBtn.onClick = function () {
@@ -493,13 +502,6 @@ Instalar / atualizar:
 			return;
 		}
 
-		// tudo certo nas verificações: vai direto para instalar / atualizar
-		if (current === 0) {
-			skippedChecks = allChecksPass();
-			checksOkText.visible = skippedChecks;
-			if (skippedChecks) return showPage(2);
-		}
-
 		showPage(current + 1);
 	};
 
@@ -507,7 +509,7 @@ Instalar / atualizar:
 		nextBtn.text = removeRdo.value ? 'remover' : installRdo.text;
 	};
 
-	showPage(0);
+	showPage(allOk ? 2 : 0);
 	win.center();
 	win.show();
 })();

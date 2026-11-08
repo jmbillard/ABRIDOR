@@ -40,24 +40,29 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 > ✅ **requisitos:** After Effects **2020 (17.0)** ou mais novo. recomendado o **2024 (24.3)** ou mais novo — veja a [tabela de versões](#-versões-do-after-effects).
 
-**1.1** no After Effects, abra `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx** direto da pasta do ABRIDOR (a pasta que tem a `abridor-cep` dentro). o instalador abre com as boas-vindas — clique em **começar**.
+**1.1** no After Effects, abra `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx** direto da pasta do ABRIDOR (a pasta que tem a `abridor-cep` dentro).
 
-**1.2** o instalador confere o que é necessário. se estiver tudo certo, essa etapa é pulada e você vai direto para **instalar / atualizar** (com o aviso *✓ tudo certo nas verificações*). se algo precisar de atenção, a checagem aparece: bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**.
+**1.2** o instalador confere sozinho o que é necessário. **se estiver tudo certo**, ele já abre com as boas-vindas, o aviso *✓ tudo certo!* e o botão **instalar** (ou **atualizar** / **reinstalar**, se já houver uma versão no computador; **remover** desinstala). a tela mostra de onde a extensão vai ser copiada e para onde.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/img/01-instalador-boas-vindas.png" width="380"><br><sub>1.1 · boas-vindas</sub></td>
-    <td align="center"><img src="docs/img/02-instalador-checagem.png" width="380"><br><sub>1.2 · checagem</sub></td>
+    <td align="center"><img src="docs/img/03-instalador-acao.png" width="380"><br><sub>1.2 · tudo certo: é só instalar</sub></td>
   </tr>
 </table>
 
-**1.3** escolha **instalar** (ou **atualizar** / **reinstalar**, se já houver uma versão no computador; **remover** desinstala). a tela mostra de onde a extensão vai ser copiada e para onde.
+**1.3** se algo precisar de atenção, o instalador abre com as boas-vindas — clique em **começar** — e mostra a checagem: bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**. depois, **próximo** leva à mesma escolha de instalar / atualizar.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/img/01-instalador-boas-vindas.png" width="380"><br><sub>1.3 · boas-vindas</sub></td>
+    <td align="center"><img src="docs/img/02-instalador-checagem.png" width="380"><br><sub>1.3 · checagem</sub></td>
+  </tr>
+</table>
 
 **1.4** pronto! **reinicie o After Effects**.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/img/03-instalador-acao.png" width="380"><br><sub>1.3 · ação</sub></td>
     <td align="center"><img src="docs/img/04-instalador-concluido.png" width="380"><br><sub>1.4 · concluído</sub></td>
   </tr>
 </table>
