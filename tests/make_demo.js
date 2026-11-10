@@ -1,6 +1,6 @@
 // Grava um vídeo curto das animações do painel e converte em GIF (docs/img/demo.gif).
 // uso: node tests/make_demo.js
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');

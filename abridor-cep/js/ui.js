@@ -297,6 +297,9 @@
 		});
 		document.addEventListener('focusout', hide);
 
+		// idioma trocado: a dica aberta teria o texto antigo
+		if (ABR.i18n) ABR.i18n.onChange(hide);
+
 		UI.tip = { show: show, hide: hide };
 	};
 

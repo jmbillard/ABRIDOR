@@ -1,6 +1,6 @@
 // Gera os prints do README (docs/img) com o painel real rodando no Chromium e o After Effects simulado.
 // uso: node tests/make_screenshots.js
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 

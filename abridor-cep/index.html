@@ -9,18 +9,19 @@
 <body class="is-empty">
 	<!-- ============================================================ TOPO -->
 	<header class="top">
-		<button class="logo" id="logoBtn" title="ABRIDOR&#10;abrir a documentação no GitHub">
+		<button class="logo" id="logoBtn" data-i18n-title="panel.logo.tip" title="ABRIDOR&#10;abrir a documentação no GitHub">
 			<span class="logo-mark" id="logoMark">
 				<svg class="opener" viewBox="0 0 24 24" aria-hidden="true"><g class="opener-bar" transform="rotate(-40 12 12)"><path fill="currentColor" fill-rule="evenodd" d="M9.6 1.2h4.8a2.6 2.6 0 0 1 2.6 2.6v16.4a2.6 2.6 0 0 1-2.6 2.6H9.6A2.6 2.6 0 0 1 7 20.2V3.8a2.6 2.6 0 0 1 2.6-2.6z M10.2 3.9h3.6a1 1 0 0 1 1 1v4.6h-1.9V8.1h-1.8v1.4H9.2V4.9a1 1 0 0 1 1-1z M12 17.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2z"/></g></svg>
 			</span>
 			<span class="logo-name">ABRIDOR</span>
 		</button>
-		<button id="docChip" class="doc-chip" data-kbd="mod+O" title="abrir outro documento">
+		<button id="docChip" class="doc-chip" data-kbd="mod+O" data-i18n-title="panel.docchip.tip" title="abrir outro documento">
 			<span id="docType" class="doc-type">PDF</span>
 			<span class="doc-text"><b id="docName"></b><small id="docMeta"></small></span>
 			<i data-icon="swap" class="doc-swap"></i>
 		</button>
-		<button id="helpBtn" class="icon-btn help-btn" title="tour guiado&#10;mostra onde fica cada coisa no painel"><i data-icon="help"></i></button>
+		<button id="helpBtn" class="icon-btn help-btn" data-i18n-title="panel.help.tip" title="tour guiado&#10;mostra onde fica cada coisa no painel"><i data-icon="help"></i></button>
+		<button id="langBtn" class="icon-btn lang-btn" title="idioma"><span>PT</span></button>
 		<button id="themeBtn" class="icon-btn theme-btn" data-mode="auto" title="tema">
 			<i data-icon="themeAuto"></i><i data-icon="sun"></i><i data-icon="moon"></i>
 		</button>
@@ -28,9 +29,9 @@
 
 	<nav class="tabs" role="tablist">
 		<span class="tab-ink"></span>
-		<button class="tab active" data-tab="pages" role="tab" data-kbd="1" title="páginas&#10;escolha o que vira comp"><i data-icon="pages"></i><span>páginas</span><b id="pagesBadge" class="pill hidden"></b></button>
-		<button class="tab" data-tab="comps" role="tab" data-kbd="2" title="comps&#10;formato, duração e camadas"><i data-icon="comps"></i><span>comps</span></button>
-		<button class="tab" data-tab="fonts" role="tab" data-kbd="3" title="fontes&#10;associe as fontes do documento"><i data-icon="fonts"></i><span>fontes</span><b id="fontBadge" class="pill warn hidden"></b></button>
+		<button class="tab active" data-tab="pages" role="tab" data-kbd="1" data-i18n-title="panel.tab.pages.tip" title="páginas&#10;escolha o que vira comp"><i data-icon="pages"></i><span data-i18n="panel.tab.pages">páginas</span><b id="pagesBadge" class="pill hidden"></b></button>
+		<button class="tab" data-tab="comps" role="tab" data-kbd="2" data-i18n-title="panel.tab.comps.tip" title="comps&#10;formato, duração e camadas"><i data-icon="comps"></i><span data-i18n="panel.tab.comps">comps</span></button>
+		<button class="tab" data-tab="fonts" role="tab" data-kbd="3" data-i18n-title="panel.tab.fonts.tip" title="fontes&#10;associe as fontes do documento"><i data-icon="fonts"></i><span data-i18n="panel.tab.fonts">fontes</span><b id="fontBadge" class="pill warn hidden"></b></button>
 	</nav>
 
 	<main>
@@ -43,26 +44,26 @@
 					<span class="sheet s2"></span>
 					<span class="sheet s1"><i data-icon="open"></i></span>
 				</div>
-				<b>abrir PPTX ou PDF</b>
-				<small>clique ou arraste o arquivo aqui</small>
+				<b data-i18n="panel.drop.title">abrir PPTX ou PDF</b>
+				<small data-i18n="panel.drop.sub">clique ou arraste o arquivo aqui</small>
 			</div>
 
 			<div id="recent" class="recent hidden"></div>
 
 			<div id="pagesTools" class="bar">
-				<span class="sel-count" title="páginas selecionadas&#10;selecionadas / total do documento"><b id="selN">0</b><span>/<span id="selT">0</span></span></span>
+				<span class="sel-count" data-i18n-title="panel.selcount.tip" title="páginas selecionadas&#10;selecionadas / total do documento"><b id="selN">0</b><span>/<span id="selT">0</span></span></span>
 				<span class="iconbar">
-					<button class="icon-btn" id="selAll" title="selecionar todas"><i data-icon="all"></i></button>
-					<button class="icon-btn" id="selNone" title="limpar seleção&#10;desmarca todas as páginas"><i data-icon="none"></i></button>
-					<button class="icon-btn" id="selInvert" title="inverter seleção&#10;marca as desmarcadas e vice-versa"><i data-icon="invert"></i></button>
+					<button class="icon-btn" id="selAll" data-i18n-title="panel.selall.tip" title="selecionar todas"><i data-icon="all"></i></button>
+					<button class="icon-btn" id="selNone" data-i18n-title="panel.selnone.tip" title="limpar seleção&#10;desmarca todas as páginas"><i data-icon="none"></i></button>
+					<button class="icon-btn" id="selInvert" data-i18n-title="panel.selinvert.tip" title="inverter seleção&#10;marca as desmarcadas e vice-versa"><i data-icon="invert"></i></button>
 				</span>
 				<span class="range" id="rangeBox">
-					<button class="icon-btn" id="rangeBtn" title="selecionar por intervalo&#10;1-3, 5 · 8- até o fim · -4 do início"><i data-icon="range"></i></button>
-					<span class="clear-field"><input type="text" id="selRange" placeholder="1-3, 5, 8-" spellcheck="false"><button class="clear-btn" data-clear="selRange" title="apagar o intervalo"><i data-icon="x"></i></button></span>
+					<button class="icon-btn" id="rangeBtn" data-i18n-title="panel.range.tip" title="selecionar por intervalo&#10;1-3, 5 · 8- até o fim · -4 do início"><i data-icon="range"></i></button>
+					<span class="clear-field"><input type="text" id="selRange" placeholder="1-3, 5, 8-" spellcheck="false"><button class="clear-btn" data-clear="selRange" data-i18n-title="panel.range.clear" title="apagar o intervalo"><i data-icon="x"></i></button></span>
 				</span>
 				<span class="spacer"></span>
-				<button class="icon-btn toggle on" id="showBoxes" title="textos detectados&#10;azul = caixa de texto · laranja = texto de ponto"><i data-icon="boxes"></i></button>
-				<button class="icon-btn toggle" id="btnExtImages" title="imagens externas&#10;usa PNG/JPG exportados do PowerPoint como referência, na ordem dos arquivos"><i data-icon="image"></i></button>
+				<button class="icon-btn toggle on" id="showBoxes" data-i18n-title="panel.boxes.tip" title="textos detectados&#10;azul = caixa de texto · laranja = texto de ponto"><i data-icon="boxes"></i></button>
+				<button class="icon-btn toggle" id="btnExtImages" data-i18n-title="panel.extimages.tip" title="imagens externas&#10;usa PNG/JPG exportados do PowerPoint como referência, na ordem dos arquivos"><i data-icon="image"></i></button>
 			</div>
 
 			<div id="grid" class="grid"></div>
@@ -71,12 +72,12 @@
 		<!-- ======================================================= COMPS -->
 		<section id="tab-comps" class="panel">
 			<div class="block">
-				<div class="block-title"><i data-icon="monitor"></i>formato</div>
+				<div class="block-title"><i data-icon="monitor"></i><span data-i18n="panel.format">formato</span></div>
 				<div class="seg" id="resSeg">
 					<button data-value="3840x2160" title="UHD 4K&#10;3840 × 2160"><b>4K</b><small>UHD</small></button>
 					<button data-value="1920x1080" title="Full HD&#10;1920 × 1080"><b>1080</b><small>Full HD</small></button>
 					<button data-value="1280x720" title="HD&#10;1280 × 720"><b>720</b><small>HD</small></button>
-					<button data-value="custom" title="tamanho personalizado&#10;digite largura e altura em pixels"><b>···</b><small>outro</small></button>
+					<button data-value="custom" data-i18n-title="panel.custom.tip" title="tamanho personalizado&#10;digite largura e altura em pixels"><b>···</b><small data-i18n="panel.custom">outro</small></button>
 				</div>
 				<div class="collapse" id="customBox">
 					<div class="inline-fields">
@@ -84,41 +85,41 @@
 					</div>
 				</div>
 				<div class="seg small grid4" id="fpsSeg">
-					<button data-value="23.976" title="23,976 fps&#10;cinema em TV (NTSC)">23,976</button>
+					<button data-value="23.976" data-i18n-title="panel.fps23.tip" title="23,976 fps&#10;cinema em TV (NTSC)"><span data-i18n="panel.fps23">23,976</span></button>
 					<button data-value="24">24</button>
 					<button data-value="25" title="25 fps&#10;PAL">25</button>
-					<button data-value="29.97" title="29,97 fps&#10;TV NTSC (padrão)">29,97</button>
+					<button data-value="29.97" data-i18n-title="panel.fps29.tip" title="29,97 fps&#10;TV NTSC (padrão)"><span data-i18n="panel.fps29">29,97</span></button>
 					<button data-value="30">30</button>
 					<button data-value="50">50</button>
-					<button data-value="59.94" title="59,94 fps&#10;NTSC progressivo">59,94</button>
+					<button data-value="59.94" data-i18n-title="panel.fps59.tip" title="59,94 fps&#10;NTSC progressivo"><span data-i18n="panel.fps59">59,94</span></button>
 					<button data-value="60">60</button>
 				</div>
 			</div>
 
 			<div class="block">
-				<div class="block-title"><i data-icon="clock"></i>duração por página</div>
+				<div class="block-title"><i data-icon="clock"></i><span data-i18n="panel.duration">duração por página</span></div>
 				<div class="stepper">
-					<button class="icon-btn" id="durMinus" data-kbd="↓" title="menos 0,5 s"><i data-icon="minus"></i></button>
+					<button class="icon-btn" id="durMinus" data-kbd="↓" data-i18n-title="panel.durminus.tip" title="menos 0,5 s"><i data-icon="minus"></i></button>
 					<label class="step-val"><input type="text" id="duration" value="5" inputmode="decimal" spellcheck="false"><span>s</span></label>
-					<button class="icon-btn" id="durPlus" data-kbd="↑" title="mais 0,5 s"><i data-icon="plus"></i></button>
+					<button class="icon-btn" id="durPlus" data-kbd="↑" data-i18n-title="panel.durplus.tip" title="mais 0,5 s"><i data-icon="plus"></i></button>
 					<span id="durTC" class="tc"></span>
 				</div>
 			</div>
 
 			<div class="block">
-				<div class="block-title"><i data-icon="type"></i>camadas de texto</div>
+				<div class="block-title"><i data-icon="type"></i><span data-i18n="panel.textlayers">camadas de texto</span></div>
 				<div class="seg small" id="layerSeg">
-					<button data-value="lines" title="uma camada por linha&#10;texto de ponto com o anchor point na linha de base; nada é cortado se a fonte for mais larga"><i data-icon="line"></i>uma por linha</button>
-					<button data-value="blocks" title="uma camada por bloco&#10;PPTX: caixa de parágrafo · PDF: parágrafo com várias linhas"><i data-icon="para"></i>por bloco</button>
+					<button data-value="lines" data-i18n-title="panel.lines.tip" title="uma camada por linha&#10;texto de ponto com o anchor point na linha de base; nada é cortado se a fonte for mais larga"><i data-icon="line"></i><span data-i18n="panel.lines">uma por linha</span></button>
+					<button data-value="blocks" data-i18n-title="panel.blocks.tip" title="uma camada por bloco&#10;PPTX: caixa de parágrafo · PDF: parágrafo com várias linhas"><i data-icon="para"></i><span data-i18n="panel.blocks">por bloco</span></button>
 				</div>
 				<div class="hint-row" id="layerHint"></div>
-				<button class="link-btn" id="btnSplit" title="dividir em linhas&#10;camadas de texto selecionadas na comp ativa, ou todas as das comps selecionadas no painel Project">
-					<i data-icon="split"></i><span>dividir camadas já criadas em linhas</span>
+				<button class="link-btn" id="btnSplit" data-i18n-title="panel.split.tip" title="dividir em linhas&#10;camadas de texto selecionadas na comp ativa, ou todas as das comps selecionadas no painel Project">
+					<i data-icon="split"></i><span data-i18n="panel.split">dividir camadas já criadas em linhas</span>
 				</button>
 			</div>
 
 			<div class="block">
-				<div class="block-title"><i data-icon="tag"></i>nome das comps</div>
+				<div class="block-title"><i data-icon="tag"></i><span data-i18n="panel.compname">nome das comps</span></div>
 				<div class="name-field">
 					<input type="text" id="prefix" value="LAYOUT" spellcheck="false">
 					<span class="name-suffix" id="nameSuffix">01</span>
@@ -128,12 +129,12 @@
 			<div class="block">
 				<label class="switch-row">
 					<i data-icon="master"></i>
-					<span><b>comp master</b><small>todas as páginas em sequência</small></span>
+					<span><b data-i18n="panel.master">comp master</b><small data-i18n="panel.master.sub">todas as páginas em sequência</small></span>
 					<input type="checkbox" id="master" checked><span class="switch"></span>
 				</label>
 				<label class="switch-row">
 					<i data-icon="image"></i>
-					<span><b>referência</b><small>imagem da página como camada guia</small></span>
+					<span><b data-i18n="panel.ref">referência</b><small data-i18n="panel.ref.sub">imagem da página como camada guia</small></span>
 					<input type="checkbox" id="refImages" checked><span class="switch"></span>
 				</label>
 				<div class="collapse" id="refBox">
@@ -144,24 +145,24 @@
 				</div>
 			</div>
 
-			<button class="disclosure" id="advBtn" title="ajustes finos&#10;encaixe, redução automática e fonte reserva"><i data-icon="tune"></i><span>ajustes finos</span><i data-icon="chevron" class="chev"></i></button>
+			<button class="disclosure" id="advBtn" data-i18n-title="panel.adv.tip" title="ajustes finos&#10;encaixe, redução automática e fonte reserva"><i data-icon="tune"></i><span data-i18n="panel.adv">ajustes finos</span><i data-icon="chevron" class="chev"></i></button>
 			<div class="collapse" id="advBox">
 				<div class="block flat block-adv">
 					<div class="field">
-						<span class="field-label">encaixe da página</span>
+						<span class="field-label" data-i18n="panel.fit">encaixe da página</span>
 						<div class="seg small" id="fitSeg">
-							<button data-value="fit" title="ajustar&#10;a página inteira fica visível"><i data-icon="fit"></i>ajustar</button>
-							<button data-value="fill" title="preencher&#10;cobre a comp toda; corta as bordas"><i data-icon="fill"></i>preencher</button>
+							<button data-value="fit" data-i18n-title="panel.fit.fit.tip" title="ajustar&#10;a página inteira fica visível"><i data-icon="fit"></i><span data-i18n="panel.fit.fit">ajustar</span></button>
+							<button data-value="fill" data-i18n-title="panel.fit.fill.tip" title="preencher&#10;cobre a comp toda; corta as bordas"><i data-icon="fill"></i><span data-i18n="panel.fit.fill">preencher</span></button>
 						</div>
 					</div>
 					<label class="switch-row pptx-only compact">
 						<i data-icon="autofit"></i>
-						<span><b>redução automática</b><small>manter o encolhimento de texto do PowerPoint</small></span>
+						<span><b data-i18n="panel.autofit">redução automática</b><small data-i18n="panel.autofit.sub">manter o encolhimento de texto do PowerPoint</small></span>
 						<input type="checkbox" id="keepAutofit" checked><span class="switch"></span>
 					</label>
 					<div class="field">
-						<span class="field-label">fonte reserva</span>
-						<input type="text" id="fallbackFont" value="ArialMT" spellcheck="false" title="fonte reserva&#10;nome PostScript usado quando uma fonte não estiver associada">
+						<span class="field-label" data-i18n="panel.fallback">fonte reserva</span>
+						<input type="text" id="fallbackFont" value="ArialMT" spellcheck="false" data-i18n-title="panel.fallback.tip" title="fonte reserva&#10;nome PostScript usado quando uma fonte não estiver associada">
 					</div>
 				</div>
 			</div>
@@ -171,19 +172,19 @@
 		<section id="tab-fonts" class="panel">
 			<div class="bar">
 				<span class="search" id="searchBox">
-					<button class="icon-btn" id="searchBtn" title="filtrar fontes&#10;pelo nome da fonte do documento"><i data-icon="search"></i></button>
-					<span class="clear-field"><input type="search" id="fontFilter" placeholder="filtrar fontes" spellcheck="false"><button class="clear-btn" data-clear="fontFilter" title="limpar o filtro"><i data-icon="x"></i></button></span>
+					<button class="icon-btn" id="searchBtn" data-i18n-title="panel.search.tip" title="filtrar fontes&#10;pelo nome da fonte do documento"><i data-icon="search"></i></button>
+					<span class="clear-field"><input type="search" id="fontFilter" data-i18n-placeholder="panel.search.ph" placeholder="filtrar fontes" spellcheck="false"><button class="clear-btn" data-clear="fontFilter" data-i18n-title="panel.search.clear" title="limpar o filtro"><i data-icon="x"></i></button></span>
 				</span>
 				<span class="spacer"></span>
-				<button class="icon-btn toggle" id="previewBtn" title="preview&#10;texto e tamanho usados nas prévias"><i data-icon="type"></i></button>
-				<button class="icon-btn" id="btnAuto" title="associar automaticamente&#10;refaz as associações pelo nome (as manuais são substituídas)"><i data-icon="wand"></i></button>
-				<button class="icon-btn" id="btnScan" title="ler do projeto&#10;fontes das camadas criadas pelo ABRIDOR neste projeto"><i data-icon="project"></i></button>
-				<button class="icon-btn" id="btnReloadFonts" title="recarregar fontes&#10;útil depois de ativar uma fonte no Adobe Fonts"><i data-icon="refresh"></i></button>
+				<button class="icon-btn toggle" id="previewBtn" data-i18n-title="panel.preview.tip" title="preview&#10;texto e tamanho usados nas prévias"><i data-icon="type"></i></button>
+				<button class="icon-btn" id="btnAuto" data-i18n-title="panel.auto.tip" title="associar automaticamente&#10;refaz as associações pelo nome (as manuais são substituídas)"><i data-icon="wand"></i></button>
+				<button class="icon-btn" id="btnScan" data-i18n-title="panel.scan.tip" title="ler do projeto&#10;fontes das camadas criadas pelo ABRIDOR neste projeto"><i data-icon="project"></i></button>
+				<button class="icon-btn" id="btnReloadFonts" data-i18n-title="panel.reload.tip" title="recarregar fontes&#10;útil depois de ativar uma fonte no Adobe Fonts"><i data-icon="refresh"></i></button>
 			</div>
 			<div class="collapse" id="previewBox">
 				<div class="preview-opts">
-					<span class="clear-field"><input type="text" id="sampleText" placeholder="texto do preview — vazio usa o do documento"><button class="clear-btn" data-clear="sampleText" title="apagar o texto"><i data-icon="x"></i></button></span>
-					<input type="range" id="previewSize" min="12" max="44" value="22" title="tamanho do preview">
+					<span class="clear-field"><input type="text" id="sampleText" data-i18n-placeholder="panel.sample.ph" placeholder="texto do preview — vazio usa o do documento"><button class="clear-btn" data-clear="sampleText" data-i18n-title="panel.sample.clear" title="apagar o texto"><i data-icon="x"></i></button></span>
+					<input type="range" id="previewSize" min="12" max="44" value="22" data-i18n-title="panel.previewsize.tip" title="tamanho do preview">
 				</div>
 			</div>
 
@@ -191,10 +192,10 @@
 
 			<div class="collapse" id="applyBox"><div class="apply-bar">
 				<div class="seg small" id="scopeSeg">
-					<button data-value="all" title="todas as comps do projeto"><i data-icon="project"></i>projeto</button>
-					<button data-value="selected" title="só as comps selecionadas&#10;no painel Project"><i data-icon="layers"></i>selecionadas</button>
+					<button data-value="all" data-i18n-title="panel.scope.all.tip" title="todas as comps do projeto"><i data-icon="project"></i><span data-i18n="panel.scope.all">projeto</span></button>
+					<button data-value="selected" data-i18n-title="panel.scope.sel.tip" title="só as comps selecionadas&#10;no painel Project"><i data-icon="layers"></i><span data-i18n="panel.scope.sel">selecionadas</span></button>
 				</div>
-				<button class="btn" id="btnApplyFonts" title="aplicar fontes&#10;troca as fontes nas comps já criadas"><i data-icon="refresh"></i>aplicar<span class="btn-done"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>
+				<button class="btn" id="btnApplyFonts" data-i18n-title="panel.apply.tip" title="aplicar fontes&#10;troca as fontes nas comps já criadas"><i data-icon="refresh"></i><span data-i18n="panel.apply">aplicar</span><span class="btn-done"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></span></button>
 			</div></div>
 		</section>
 	</main>
@@ -203,8 +204,8 @@
 	<footer>
 		<div class="summary">
 			<span id="summary"></span>
-			<button id="preChip" class="pre-chip hidden" title="fontes sem associação&#10;as camadas sairiam na fonte reserva; clique para associar"><i data-icon="alert"></i><span></span></button>
-			<button id="btnLog" class="warn-chip hidden" title="avisos da última operação"><i data-icon="alert"></i><b id="logCount">0</b></button>
+			<button id="preChip" class="pre-chip hidden" data-i18n-title="panel.prechip.tip" title="fontes sem associação&#10;as camadas sairiam na fonte reserva; clique para associar"><i data-icon="alert"></i><span></span></button>
+			<button id="btnLog" class="warn-chip hidden" data-i18n-title="panel.log.tip" title="avisos da última operação"><i data-icon="alert"></i><b id="logCount">0</b></button>
 		</div>
 		<div id="logBox" class="collapse"><pre id="log" class="log"></pre></div>
 		<button id="btnBuild" class="cta" data-kbd="mod+Enter" disabled>
@@ -231,6 +232,7 @@
 		if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'js/lib/pdf.worker.js';
 	</script>
 
+	<script src="js/i18n.js"></script>
 	<script src="js/cep.js"></script>
 	<script src="js/ui.js"></script>
 	<script src="js/pptx-parser.js"></script>

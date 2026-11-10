@@ -1,6 +1,6 @@
 // Verifica o tour guiado no painel real (AE simulado) e grava os prints.
 // uso: node tests/tour_check.js <saída> [--docs]
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2] || 'out');
 const DOCS = process.argv[3] === '--docs';

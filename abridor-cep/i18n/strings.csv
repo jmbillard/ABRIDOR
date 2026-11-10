@@ -1,0 +1,332 @@
+key,pt,en,es
+# ---------- painel (index.html),,,
+panel.logo.tip,ABRIDOR\nabrir a documentação no GitHub,ABRIDOR\nopen the documentation on GitHub,ABRIDOR\nabrir la documentación en GitHub
+panel.docchip.tip,abrir outro documento,open another document,abrir otro documento
+panel.help.tip,tour guiado\nmostra onde fica cada coisa no painel,guided tour\nshows where everything is in the panel,recorrido guiado\nmuestra dónde está cada cosa en el panel
+panel.tab.pages.tip,páginas\nescolha o que vira comp,pages\nchoose what becomes a comp,páginas\nelige qué se convierte en comp
+panel.tab.comps.tip,"comps\nformato, duração e camadas","comps\nformat, duration and layers","comps\nformato, duración y capas"
+panel.tab.fonts.tip,fontes\nassocie as fontes do documento,fonts\nmatch the document fonts,fuentes\nasocia las fuentes del documento
+panel.tab.pages,páginas,pages,páginas
+panel.tab.comps,comps,comps,comps
+panel.tab.fonts,fontes,fonts,fuentes
+panel.drop.title,abrir PPTX ou PDF,open a PPTX or PDF,abrir PPTX o PDF
+panel.drop.sub,clique ou arraste o arquivo aqui,click or drop the file here,haz clic o arrastra el archivo aquí
+panel.selcount.tip,páginas selecionadas\nselecionadas / total do documento,selected pages\nselected / document total,páginas seleccionadas\nseleccionadas / total del documento
+panel.selall.tip,selecionar todas,select all,seleccionar todas
+panel.selnone.tip,limpar seleção\ndesmarca todas as páginas,clear selection\nunchecks every page,limpiar selección\ndesmarca todas las páginas
+panel.selinvert.tip,inverter seleção\nmarca as desmarcadas e vice-versa,invert selection\nchecks the unchecked ones and vice versa,invertir selección\nmarca las desmarcadas y viceversa
+panel.range.tip,"selecionar por intervalo\n1-3, 5 · 8- até o fim · -4 do início","select by range\n1-3, 5 · 8- to the end · -4 from the start","seleccionar por intervalo\n1-3, 5 · 8- hasta el final · -4 desde el inicio"
+panel.range.clear,apagar o intervalo,clear the range,borrar el intervalo
+panel.boxes.tip,textos detectados\nazul = caixa de texto · laranja = texto de ponto,detected texts\nblue = text box · orange = point text,textos detectados\nazul = cuadro de texto · naranja = texto de punto
+panel.extimages.tip,"imagens externas\nusa PNG/JPG exportados do PowerPoint como referência, na ordem dos arquivos","external images\nuses PNG/JPG exported from PowerPoint as reference, in file order","imágenes externas\nusa PNG/JPG exportados de PowerPoint como referencia, en el orden de los archivos"
+panel.format,formato,format,formato
+panel.custom.tip,tamanho personalizado\ndigite largura e altura em pixels,custom size\ntype width and height in pixels,tamaño personalizado\nescribe ancho y alto en píxeles
+panel.custom,outro,other,otro
+panel.fps23.tip,"23,976 fps\ncinema em TV (NTSC)",23.976 fps\nfilm on TV (NTSC),"23,976 fps\ncine en TV (NTSC)"
+panel.fps29.tip,"29,97 fps\nTV NTSC (padrão)",29.97 fps\nNTSC TV (default),"29,97 fps\nTV NTSC (predeterminado)"
+panel.fps59.tip,"59,94 fps\nNTSC progressivo",59.94 fps\nprogressive NTSC,"59,94 fps\nNTSC progresivo"
+panel.fps23,"23,976",23.976,"23,976"
+panel.fps29,"29,97",29.97,"29,97"
+panel.fps59,"59,94",59.94,"59,94"
+panel.duration,duração por página,duration per page,duración por página
+panel.durminus.tip,"menos 0,5 s",0.5 s less,"0,5 s menos"
+panel.durplus.tip,"mais 0,5 s",0.5 s more,"0,5 s más"
+panel.textlayers,camadas de texto,text layers,capas de texto
+panel.lines.tip,uma camada por linha\ntexto de ponto com o anchor point na linha de base; nada é cortado se a fonte for mais larga,one layer per line\npoint text with the anchor point on the baseline; nothing gets cut if the font is wider,una capa por línea\ntexto de punto con el anchor point en la línea de base; nada se corta si la fuente es más ancha
+panel.lines,uma por linha,one per line,una por línea
+panel.blocks.tip,uma camada por bloco\nPPTX: caixa de parágrafo · PDF: parágrafo com várias linhas,one layer per block\nPPTX: paragraph box · PDF: multi-line paragraph,una capa por bloque\nPPTX: cuadro de párrafo · PDF: párrafo de varias líneas
+panel.blocks,por bloco,per block,por bloque
+panel.split.tip,"dividir em linhas\ncamadas de texto selecionadas na comp ativa, ou todas as das comps selecionadas no painel Project","split into lines\nselected text layers in the active comp, or all of them in the comps selected in the Project panel","dividir en líneas\ncapas de texto seleccionadas en la comp activa, o todas las de las comps seleccionadas en el panel Project"
+panel.split,dividir camadas já criadas em linhas,split existing layers into lines,dividir capas ya creadas en líneas
+panel.compname,nome das comps,comp names,nombre de las comps
+panel.master,comp master,master comp,comp master
+panel.master.sub,todas as páginas em sequência,every page in sequence,todas las páginas en secuencia
+panel.ref,referência,reference,referencia
+panel.ref.sub,imagem da página como camada guia,page image as a guide layer,imagen de la página como capa guía
+panel.adv.tip,"ajustes finos\nencaixe, redução automática e fonte reserva","fine-tuning\nfit, autofit and fallback font","ajustes finos\nencaje, reducción automática y fuente de reserva"
+panel.adv,ajustes finos,fine-tuning,ajustes finos
+panel.fit,encaixe da página,page fit,encaje de la página
+panel.fit.fit.tip,ajustar\na página inteira fica visível,fit\nthe whole page stays visible,ajustar\nla página entera queda visible
+panel.fit.fit,ajustar,fit,ajustar
+panel.fit.fill.tip,preencher\ncobre a comp toda; corta as bordas,fill\ncovers the whole comp; crops the edges,rellenar\ncubre toda la comp; recorta los bordes
+panel.fit.fill,preencher,fill,rellenar
+panel.autofit,redução automática,autofit,reducción automática
+panel.autofit.sub,manter o encolhimento de texto do PowerPoint,keep PowerPoint's text shrinking,mantener la reducción de texto de PowerPoint
+panel.fallback,fonte reserva,fallback font,fuente de reserva
+panel.fallback.tip,fonte reserva\nnome PostScript usado quando uma fonte não estiver associada,fallback font\nPostScript name used when a font is not matched,fuente de reserva\nnombre PostScript usado cuando una fuente no está asociada
+panel.search.tip,filtrar fontes\npelo nome da fonte do documento,filter fonts\nby the document font name,filtrar fuentes\npor el nombre de la fuente del documento
+panel.search.ph,filtrar fontes,filter fonts,filtrar fuentes
+panel.search.clear,limpar o filtro,clear the filter,limpiar el filtro
+panel.preview.tip,preview\ntexto e tamanho usados nas prévias,preview\ntext and size used in the previews,vista previa\ntexto y tamaño usados en las vistas previas
+panel.auto.tip,associar automaticamente\nrefaz as associações pelo nome (as manuais são substituídas),match automatically\nredoes the matches by name (manual ones are replaced),asociar automáticamente\nrehace las asociaciones por nombre (las manuales se reemplazan)
+panel.scan.tip,ler do projeto\nfontes das camadas criadas pelo ABRIDOR neste projeto,read from project\nfonts of the layers ABRIDOR created in this project,leer del proyecto\nfuentes de las capas creadas por ABRIDOR en este proyecto
+panel.reload.tip,recarregar fontes\nútil depois de ativar uma fonte no Adobe Fonts,reload fonts\nhandy after activating a font in Adobe Fonts,recargar fuentes\nútil después de activar una fuente en Adobe Fonts
+panel.sample.ph,texto do preview — vazio usa o do documento,preview text — empty uses the document text,texto de vista previa — vacío usa el del documento
+panel.sample.clear,apagar o texto,clear the text,borrar el texto
+panel.previewsize.tip,tamanho do preview,preview size,tamaño de la vista previa
+panel.scope.all.tip,todas as comps do projeto,every comp in the project,todas las comps del proyecto
+panel.scope.all,projeto,project,proyecto
+panel.scope.sel.tip,só as comps selecionadas\nno painel Project,only the selected comps\nin the Project panel,solo las comps seleccionadas\nen el panel Project
+panel.scope.sel,selecionadas,selected,seleccionadas
+panel.apply.tip,aplicar fontes\ntroca as fontes nas comps já criadas,apply fonts\nswaps the fonts in comps already created,aplicar fuentes\ncambia las fuentes en las comps ya creadas
+panel.apply,aplicar,apply,aplicar
+panel.prechip.tip,fontes sem associação\nas camadas sairiam na fonte reserva; clique para associar,unmatched fonts\nthe layers would use the fallback font; click to match,fuentes sin asociar\nlas capas saldrían con la fuente de reserva; haz clic para asociar
+panel.log.tip,avisos da última operação,warnings from the last operation,avisos de la última operación
+# ---------- painel (app.js),,,
+app.summary.comps.one,{b} comp,{b} comp,{b} comp
+app.summary.comps.other,{b} comps,{b} comps,{b} comps
+app.summary.empty,abra um documento para começar,open a document to get started,abre un documento para empezar
+app.cta.create.one,criar {n} comp,create {n} comp,crear {n} comp
+app.cta.create.other,criar {n} comps,create {n} comps,crear {n} comps
+app.cta.createAll,criar comps,create comps,crear comps
+app.frames,frames,frames,cuadros
+app.decimal,",",.,","
+app.theme.auto,tema automático (segue o After Effects),automatic theme (follows After Effects),tema automático (sigue a After Effects)
+app.theme.light,tema claro,light theme,tema claro
+app.theme.dark,tema escuro,dark theme,tema oscuro
+app.clickToChange,clique para trocar,click to change,haz clic para cambiar
+app.readFail,não foi possível ler o arquivo: {msg},couldn't read the file: {msg},no se pudo leer el archivo: {msg}
+app.wrongType,use um arquivo .pptx ou .pdf,use a .pptx or .pdf file,usa un archivo .pptx o .pdf
+app.readFail2,não foi possível ler o arquivo.,couldn't read the file.,no se pudo leer el archivo.
+app.reading,lendo…,reading…,leyendo…
+app.recent,recentes,recent,recientes
+app.recent.clear,limpar,clear,limpiar
+app.recent.clear.tip,limpar a lista\nos arquivos não são apagados,clear the list\nthe files are not deleted,limpiar la lista\nlos archivos no se borran
+app.notFound,arquivo não encontrado,file not found,archivo no encontrado
+app.pages.one,{n} página,{n} page,{n} página
+app.pages.other,{n} páginas,{n} pages,{n} páginas
+app.readingDoc,lendo {type}…,reading {type}…,leyendo {type}…
+app.readingPage,lendo página {i} de {n}…,reading page {i} of {n}…,leyendo página {i} de {n}…
+app.texts.one,{n} texto,{n} text,{n} texto
+app.texts.other,{n} textos,{n} texts,{n} textos
+app.docchip.tip,clique para abrir outro documento,click to open another document,haz clic para abrir otro documento
+app.loaded,documento carregado. desmarque as páginas que não devem ser processadas.,document loaded. uncheck the pages that shouldn't be processed.,documento cargado. desmarca las páginas que no deben procesarse.
+app.docError,erro ao ler o documento: {msg},error reading the document: {msg},error al leer el documento: {msg}
+app.hiddenSlide,slide oculto\nestava oculto no PowerPoint; por isso veio desmarcado,"hidden slide\nit was hidden in PowerPoint, so it came unchecked",diapositiva oculta\nestaba oculta en PowerPoint; por eso vino desmarcada
+app.pageTexts,textos detectados nesta página,texts detected on this page,textos detectados en esta página
+app.pageDur,duração desta página\nclique para mudar · vazio volta ao padrão,duration of this page\nclick to change · empty goes back to default,duración de esta página\nhaz clic para cambiar · vacío vuelve al predeterminado
+app.clickToggle,clique para incluir/excluir,click to include/exclude,haz clic para incluir/excluir
+app.noTexts,nenhum texto encontrado (texto em imagem?),no text found (text in an image?),no se encontró texto (¿texto en imagen?)
+app.shiftCheck,<kbd>shift</kbd> + clique: marcar páginas {a}–{b},<kbd>shift</kbd> + click: check pages {a}–{b},<kbd>shift</kbd> + clic: marcar páginas {a}–{b}
+app.shiftUncheck,<kbd>shift</kbd> + clique: desmarcar páginas {a}–{b},<kbd>shift</kbd> + click: uncheck pages {a}–{b},<kbd>shift</kbd> + clic: desmarcar páginas {a}–{b}
+app.uses.project,camadas no projeto,layers in the project,capas en el proyecto
+app.uses.pages,usos nas páginas selecionadas,uses in the selected pages,usos en las páginas seleccionadas
+app.unmatched.one,{n} fonte sem associação,{n} unmatched font,{n} fuente sin asociar
+app.unmatched.other,{n} fontes sem associação,{n} unmatched fonts,{n} fuentes sin asociar
+app.noFontWith,nenhuma fonte com “{q}”,no font with “{q}”,ninguna fuente con “{q}”
+app.fonts.empty,nenhuma fonte ainda,no fonts yet,todavía no hay fuentes
+app.fonts.empty.sub,"abra um documento, ou leia as fontes<br>das comps já criadas neste projeto.","open a document, or read the fonts<br>of the comps already created in this project.","abre un documento, o lee las fuentes<br>de las comps ya creadas en este proyecto."
+app.readProject,ler do projeto,read from project,leer del proyecto
+app.unused.tip,não usadas nas páginas selecionadas\nsó aparecem em páginas desmarcadas; as associações ficam guardadas,not used in the selected pages\nthey only appear in unchecked pages; the matches are kept,no usadas en las páginas seleccionadas\nsolo aparecen en páginas desmarcadas; las asociaciones se guardan
+app.unused,não usadas nas páginas selecionadas,not used in the selected pages,no usadas en las páginas seleccionadas
+app.srcFont,fonte usada no documento,font used in the document,fuente usada en el documento
+app.family.tip,família\nclique para buscar entre as fontes instaladas,family\nclick to search the installed fonts,familia\nhaz clic para buscar entre las fuentes instaladas
+app.psName,nome PostScript (ex: Montserrat-Bold),PostScript name (e.g. Montserrat-Bold),nombre PostScript (ej.: Montserrat-Bold)
+app.orig,original,original,original
+app.orig.tip,"original\no texto na fonte do documento, se ela estiver instalada","original\nthe text in the document's font, if it's installed","original\nel texto en la fuente del documento, si está instalada"
+app.scale.tip,escala do tamanho\npassos de 5%; útil quando a fonte nova é maior ou menor,size scale\n5% steps; handy when the new font is bigger or smaller,escala del tamaño\npasos de 5%; útil cuando la fuente nueva es más grande o más pequeña
+app.chooseFont,escolher fonte…,choose a font…,elegir fuente…
+app.noFont,sem fonte,no font,sin fuente
+app.notInstalled,não instalada,not installed,no instalada
+app.noFont.tip,sem fonte\nas camadas vão usar a fonte reserva ({font}),no font\nthe layers will use the fallback font ({font}),sin fuente\nlas capas usarán la fuente de reserva ({font})
+app.dot.ok,automático\nencontrada pelo nome,automatic\nfound by name,automático\nencontrada por nombre
+app.dot.manual,manual\nescolhida por você,manual\nchosen by you,manual\nelegida por ti
+app.dot.missing,sem fonte\nescolha uma família abaixo,no font\nchoose a family below,sin fuente\nelige una familia abajo
+app.family.offer,trocar também os outros estilos de {family}?,also swap the other styles of {family}?,¿cambiar también los otros estilos de {family}?
+app.family.apply,aplicar,apply,aplicar
+app.family.applyN,aplicar nos {n},apply to all {n},aplicar a los {n}
+app.family.no,agora não,not now,ahora no
+app.family.done.one,{n} estilo de {src} trocado para {dst}.,{n} style of {src} swapped to {dst}.,{n} estilo de {src} cambiado a {dst}.
+app.family.done.other,{n} estilos de {src} trocados para {dst}.,{n} styles of {src} swapped to {dst}.,{n} estilos de {src} cambiados a {dst}.
+app.picker.search,buscar fonte…,search fonts…,buscar fuente…
+app.styles.one,{n} estilo,{n} style,{n} estilo
+app.styles.other,{n} estilos,{n} styles,{n} estilos
+app.picker.suggest,sugestão,suggestion,sugerencia
+app.picker.metric,medidas iguais à {family},same metrics as {family},mismas medidas que {family}
+app.picker.all,todas,all,todas
+app.picker.results.one,{n} resultado,{n} result,{n} resultado
+app.picker.results.other,{n} resultados,{n} results,{n} resultados
+app.picker.more,e mais {n} — continue digitando,and {n} more — keep typing,y {n} más — sigue escribiendo
+app.noFontList,esta versão do After Effects não lista as fontes (necessário AE 2024+). digite os nomes PostScript.,this After Effects version doesn't list fonts (AE 2024+ required). type the PostScript names.,esta versión de After Effects no lista las fuentes (requiere AE 2024+). escribe los nombres PostScript.
+app.fontsFail,não foi possível ler as fontes do After Effects: {msg},couldn't read the After Effects fonts: {msg},no se pudieron leer las fuentes de After Effects: {msg}
+app.scanning,lendo fontes das camadas do projeto…,reading fonts from the project layers…,leyendo fuentes de las capas del proyecto…
+app.scanFound.one,{n} fonte encontrada nas camadas do projeto.,{n} font found in the project layers.,{n} fuente encontrada en las capas del proyecto.
+app.scanFound.other,{n} fontes encontradas nas camadas do projeto.,{n} fonts found in the project layers.,{n} fuentes encontradas en las capas del proyecto.
+app.scanNone,nenhuma camada criada pelo ABRIDOR no projeto.,no layers created by ABRIDOR in the project.,ninguna capa creada por ABRIDOR en el proyecto.
+app.error,erro: {msg},error: {msg},error: {msg}
+app.tempFail,erro ao gravar arquivo temporário: {msg},error writing temporary file: {msg},error al guardar el archivo temporal: {msg}
+app.applying,aplicando fontes…,applying fonts…,aplicando fuentes…
+app.applied,{layers} camadas atualizadas em {comps} comps.,{layers} layers updated in {comps} comps.,{layers} capas actualizadas en {comps} comps.
+app.applyFailed,{n} camadas não puderam ser atualizadas. veja os avisos.,{n} layers couldn't be updated. see the warnings.,{n} capas no se pudieron actualizar. mira los avisos.
+app.split.select,"selecione camadas de texto na comp ativa, ou comps no painel Project.","select text layers in the active comp, or comps in the Project panel.","selecciona capas de texto en la comp activa, o comps en el panel Project."
+app.split.done.one,{n} camada ({from}) → {lines} linhas.,{n} layer ({from}) → {lines} lines.,{n} capa ({from}) → {lines} líneas.
+app.split.done.other,{n} camadas ({from}) → {lines} linhas.,{n} layers ({from}) → {lines} lines.,{n} capas ({from}) → {lines} líneas.
+app.time.now,agora,now,ahora
+app.time.mins,há {n} min,{n} min ago,hace {n} min
+app.time.today,hoje às {hm},today at {hm},hoy a las {hm}
+app.time.yesterday,"ontem, {hm}","yesterday, {hm}","ayer, {hm}"
+app.time.days,há {n} dias,{n} days ago,hace {n} días
+app.pre.title.one,antes de criar {n} comp,before creating {n} comp,antes de crear {n} comp
+app.pre.title.other,antes de criar {n} comps,before creating {n} comps,antes de crear {n} comps
+app.andMore,e mais {n},and {n} more,y {n} más
+app.pre.fallback,{names} — vão sair em {font},{names} — will come out in {font},{names} — saldrán en {font}
+app.pre.match,associar,match,asociar
+app.pre.mixed,trechos com fontes diferentes na mesma linha recebem um estilo só (precisa do 2024.3),runs with different fonts on the same line get a single style (needs 2024.3),fragmentos con fuentes diferentes en la misma línea reciben un solo estilo (requiere 2024.3)
+app.pre.exists,“{name}” já existe no projeto,“{name}” already exists in the project,“{name}” ya existe en el proyecto
+app.comps.one,{n} comp,{n} comp,{n} comp
+app.comps.other,{n} comps,{n} comps,{n} comps
+app.pre.created,criadas {when},created {when},creadas {when}
+app.pre.replace,substituir,replace,reemplazar
+app.pre.replace.sub,apaga e cria de novo,deletes and recreates,borra y crea de nuevo
+app.pre.replace.tip,substituir\napaga a pasta e as comps antigas do documento e cria de novo,replace\ndeletes the document's old folder and comps and creates them again,reemplazar\nborra la carpeta y las comps antiguas del documento y las crea de nuevo
+app.pre.side,criar ao lado,create alongside,crear al lado
+app.pre.side.sub,as novas ganham “{next}”,new ones get “{next}”,las nuevas reciben “{next}”
+app.pre.side.tip,criar ao lado\nmantém as antigas; as novas vão para “{folder}”,create alongside\nkeeps the old ones; new ones go to “{folder}”,crear al lado\nmantiene las antiguas; las nuevas van a “{folder}”
+app.pre.texts,só os textos,texts only,solo los textos
+app.pre.texts.sub,mantém animações,keeps animations,mantiene animaciones
+app.pre.texts.tip,"só os textos\nmantém as comps, posições, animações e efeitos; troca só o conteúdo das camadas de texto","texts only\nkeeps comps, positions, animations and effects; only swaps the content of the text layers","solo los textos\nmantiene las comps, posiciones, animaciones y efectos; cambia solo el contenido de las capas de texto"
+app.back,voltar,back,volver
+app.pre.updateTexts,atualizar os textos,update the texts,actualizar los textos
+app.noPages,nenhuma página selecionada.,no page selected.,ninguna página seleccionada.
+app.genRef,gerando referência {i} de {n}…,generating reference {i} of {n}…,generando referencia {i} de {n}…
+app.refsProgress,referências {i}/{n},references {i}/{n},referencias {i}/{n}
+app.preparing,preparando o projeto…,preparing the project…,preparando el proyecto…
+app.creatingComp,criando {name} ({i}/{n})…,creating {name} ({i}/{n})…,creando {name} ({i}/{n})…
+app.creatingProgress,criando {i}/{n},creating {i}/{n},creando {i}/{n}
+app.done.updated.one,{n} camada de texto atualizada,{n} text layer updated,{n} capa de texto actualizada
+app.done.updated.other,{n} camadas de texto atualizadas,{n} text layers updated,{n} capas de texto actualizadas
+app.done.added.one,{n} nova,{n} new,{n} nueva
+app.done.added.other,{n} novas,{n} new,{n} nuevas
+app.done.left,{n} sem correspondente,{n} without a match,{n} sin correspondencia
+app.done.comps.one,{n} comp criada,{n} comp created,{n} comp creada
+app.done.comps.other,{n} comps criadas,{n} comps created,{n} comps creadas
+app.seeWarnings,veja os avisos.,see the warnings.,mira los avisos.
+app.openMaster,abrir master,open master,abrir master
+app.showInProject,mostrar no projeto,show in project,mostrar en el proyecto
+app.ext.off,voltando a usar a referência gerada pelo ABRIDOR.,back to using the reference generated by ABRIDOR.,volviendo a usar la referencia generada por ABRIDOR.
+app.ext.none,nenhuma imagem PNG/JPG na pasta.,no PNG/JPG images in the folder.,ninguna imagen PNG/JPG en la carpeta.
+app.ext.mismatch,{n} imagens para {pages} páginas (associadas pela ordem).,{n} images for {pages} pages (matched by order).,{n} imágenes para {pages} páginas (asociadas por orden).
+app.ext.ok.one,{n} imagem associada às páginas.,{n} image matched to the pages.,{n} imagen asociada a las páginas.
+app.ext.ok.other,{n} imagens associadas às páginas.,{n} images matched to the pages.,{n} imágenes asociadas a las páginas.
+app.badRange,"intervalo inválido. ex: 1-3, 5, 8-","invalid range. e.g. 1-3, 5, 8-","intervalo no válido. ej.: 1-3, 5, 8-"
+app.hint.lines,"texto de ponto, anchor point na linha de base de cada linha","point text, anchor point on the baseline of each line","texto de punto, anchor point en la línea de base de cada línea"
+app.hint.blocks,PPTX: caixa de parágrafo · PDF: texto de ponto com várias linhas,PPTX: paragraph box · PDF: multi-line point text,PPTX: cuadro de párrafo · PDF: texto de punto de varias líneas
+app.autoDone,fontes associadas automaticamente.,fonts matched automatically.,fuentes asociadas automáticamente.
+app.installed.one,{n} fonte instalada.,{n} font installed.,{n} fuente instalada.
+app.installed.other,{n} fontes instaladas.,{n} fonts installed.,{n} fuentes instaladas.
+app.logo.tip,abrir a documentação no GitHub,open the documentation on GitHub,abrir la documentación en GitHub
+app.noHost,abra este painel pelo After Effects (Window > Extensions > ABRIDOR).,open this panel from After Effects (Window > Extensions > ABRIDOR).,abre este panel desde After Effects (Window > Extensions > ABRIDOR).
+app.ready,pronto — {n} fontes instaladas.,ready — {n} fonts installed.,listo — {n} fuentes instaladas.
+app.noPagesFound,nenhuma página encontrada.,no pages found.,no se encontraron páginas.
+app.ext.pick,pasta com as imagens exportadas dos slides,folder with the images exported from the slides,carpeta con las imágenes exportadas de las diapositivas
+app.lang.tip,"idioma: {name}\nclique para trocar (português, English, español)","language: {name}\nclick to change (português, English, español)","idioma: {name}\nhaz clic para cambiar (português, English, español)"
+app.lang.changed,idioma: {name},language: {name},idioma: {name}
+"# ---------- tour, erros e leitores",,,
+tour.start.title,comece por aqui,start here,empieza aquí
+tour.start.text,abra um <b>PPTX</b> ou <b>PDF</b> (ou arraste o arquivo). o tour continua com o documento aberto.,open a <b>PPTX</b> or <b>PDF</b> (or drag the file in). the tour continues once the document is open.,abre un <b>PPTX</b> o <b>PDF</b> (o arrastra el archivo). el tour continúa con el documento abierto.
+tour.pages.title,escolha as páginas,choose the pages,elige las páginas
+tour.pages.count.one,{n} página,{n} page,{n} página
+tour.pages.count.other,{n} páginas,{n} pages,{n} páginas
+tour.pages.text,"este documento tem <b>{pages}</b>. cada miniatura vira uma comp: <b>clique</b> para tirar as que não precisa. com <kbd>shift</kbd>, marca um intervalo.",this document has <b>{pages}</b>. each thumbnail becomes a comp: <b>click</b> to drop the ones you don't need. hold <kbd>shift</kbd> to select a range.,"este documento tiene <b>{pages}</b>. cada miniatura se convierte en una comp: <b>haz clic</b> para quitar las que no necesitas. con <kbd>shift</kbd>, marcas un intervalo."
+tour.dur.title,duração por página,duration per page,duración por página
+tour.dur.text,o relógio muda a duração <b>só desta página</b>. a duração padrão fica na aba comps.,the clock changes the duration of <b>this page only</b>. the default duration is in the comps tab.,el reloj cambia la duración <b>solo de esta página</b>. la duración predeterminada está en la pestaña comps.
+tour.comps.title,formato das comps,comp format,formato de las comps
+tour.comps.text,"resolução e frame rate. o padrão é <b>Full HD 29,97</b>; 4K está a um clique.",resolution and frame rate. the default is <b>Full HD 29.97</b>; 4K is one click away.,"resolución y frame rate. el predeterminado es <b>Full HD 29,97</b>; 4K está a un clic."
+tour.missing.more,{names} e mais {n},{names} and {n} more,{names} y {n} más
+tour.missing.title.one,{n} fonte não instalada,{n} font not installed,{n} fuente no instalada
+tour.missing.title.other,{n} fontes não instaladas,{n} fonts not installed,{n} fuentes no instaladas
+tour.missing.text.one,<b>{names}</b> não está neste computador. clique numa fonte para escolher a substituta.,<b>{names}</b> isn't on this computer. click a font to pick a replacement.,<b>{names}</b> no está en esta computadora. haz clic en una fuente para elegir la sustituta.
+tour.missing.text.other,<b>{names}</b> não estão neste computador. clique numa fonte para escolher a substituta.,<b>{names}</b> aren't on this computer. click a font to pick a replacement.,<b>{names}</b> no están en esta computadora. haz clic en una fuente para elegir la sustituta.
+tour.fontsOk.title,fontes encontradas,fonts found,fuentes encontradas
+tour.fontsOk.text,todas as fontes do documento foram associadas. clique numa fonte para trocar por outra.,all fonts in the document were matched. click a font to swap it for another.,todas las fuentes del documento fueron asociadas. haz clic en una fuente para cambiarla por otra.
+tour.done.title,tudo pronto,all set,todo listo
+tour.done.text,"crie as comps aqui. as fontes podem ser trocadas depois, mesmo com as comps prontas. para rever este tour, use o <b>?</b> lá em cima.","create the comps here. fonts can be swapped later, even after the comps are made. to see this tour again, use the <b>?</b> at the top.","crea las comps aquí. las fuentes se pueden cambiar después, incluso con las comps ya creadas. para volver a ver este tour, usa el <b>?</b> de arriba."
+tour.step,passo {n} de {total},step {n} of {total},paso {n} de {total}
+tour.tour,tour,tour,tour
+tour.close,fechar,close,cerrar
+tour.skip,pular tour,skip tour,saltar tour
+tour.back,voltar,back,atrás
+tour.next,próximo,next,siguiente
+tour.finish,concluir,finish,terminar
+tour.gotIt,entendi,got it,entendido
+tour.welcome.title,bem-vindo ao ABRIDOR,welcome to ABRIDOR,bienvenido a ABRIDOR
+tour.welcome.steps.one,{n} passo rápido,{n} quick step,{n} paso rápido
+tour.welcome.steps.other,{n} passos rápidos,{n} quick steps,{n} pasos rápidos
+tour.welcome.text,"em <b>{steps}</b> você vê onde fica cada coisa, usando o documento que acabou de abrir.","in <b>{steps}</b> you'll see where everything is, using the document you just opened.","en <b>{steps}</b> ves dónde está cada cosa, usando el documento que acabas de abrir."
+tour.welcome.later,agora não,not now,ahora no
+tour.welcome.start,começar o tour,start the tour,empezar el tour
+err.extendscript,Erro no ExtendScript: {call},ExtendScript error: {call},Error en ExtendScript: {call}
+err.noHost,After Effects não encontrado (painel fora do CEP).,After Effects not found (panel running outside CEP).,After Effects no encontrado (panel fuera de CEP).
+err.badResponse,Resposta inválida do After Effects: {res},Invalid response from After Effects: {res},Respuesta inválida de After Effects: {res}
+err.noFs,Sem acesso ao sistema de arquivos.,No access to the file system.,Sin acceso al sistema de archivos.
+err.pptxInvalid,Arquivo PPTX inválido (ppt/presentation.xml não encontrado).,Invalid PPTX file (ppt/presentation.xml not found).,Archivo PPTX inválido (ppt/presentation.xml no encontrado).
+parser.pageName,Página {n},Page {n},Página {n}
+parser.slideName,Slide {n},Slide {n},Diapositiva {n}
+# ---------- After Effects (host.jsx) e instalador,,,
+host.file_not_found,arquivo não encontrado: {path},file not found: {path},archivo no encontrado: {path}
+host.at_line,{msg} (linha {line}),{msg} (line {line}),{msg} (línea {line})
+host.font_unavailable,"fonte ""{font}"" indisponível ({key}) → {used}","font ""{font}"" unavailable ({key}) → {used}","fuente ""{font}"" no disponible ({key}) → {used}"
+host.ranges_unsupported,"estilos por trecho não suportados nesta versão do AE (camada ""{layer}"")","per-run styles not supported in this AE version (layer ""{layer}"")","estilos por fragmento no compatibles con esta versión de AE (capa ""{layer}"")"
+host.mixed_simplified,"estilos mistos simplificados (AE sem characterRange): ""{layer}""","mixed styles simplified (AE without characterRange): ""{layer}""","estilos mixtos simplificados (AE sin characterRange): ""{layer}"""
+host.text_error,erro no texto {n}: {msg},error in text {n}: {msg},error en el texto {n}: {msg}
+host.kept_new_layer,"""{layer}"": {msg} (mantida a camada nova)","""{layer}"": {msg} (kept the new layer)","""{layer}"": {msg} (se mantuvo la capa nueva)"
+host.no_match,"""{layer}"" não tem mais texto correspondente no documento (mantida)","""{layer}"" no longer has matching text in the document (kept)","""{layer}"" ya no tiene texto correspondiente en el documento (se mantuvo)"
+host.ref_missing,imagem de referência não encontrada: {path},reference image not found: {path},imagen de referencia no encontrada: {path}
+host.ref_error,erro na imagem de referência: {msg},error in reference image: {msg},error en la imagen de referencia: {msg}
+host.item_not_found,item não encontrado no projeto,item not found in the project,elemento no encontrado en el proyecto
+host.split_keyframes,"""{layer}"" tem keyframes ou expressão no texto: não foi dividida","""{layer}"" has keyframes or an expression on its text: not split","""{layer}"" tiene keyframes o una expresión en el texto: no se dividió"
+host.layer_locked,"""{layer}"" está travada","""{layer}"" is locked","""{layer}"" está bloqueada"
+host.layer_error,"""{layer}"": {msg}","""{layer}"": {msg}","""{layer}"": {msg}"
+host.from_selected,camadas selecionadas,selected layers,capas seleccionadas
+host.from_comps.one,{n} comp,{n} comp,{n} comp
+host.from_comps.other,{n} comps,{n} comps,{n} comps
+host.undo_prepare,ABRIDOR - preparar,ABRIDOR - prepare,ABRIDOR - preparar
+host.undo_master,ABRIDOR - master,ABRIDOR - master,ABRIDOR - master
+host.undo_fonts,ABRIDOR - trocar fontes,ABRIDOR - replace fonts,ABRIDOR - cambiar fuentes
+host.undo_split,ABRIDOR - dividir em linhas,ABRIDOR - split into lines,ABRIDOR - dividir en líneas
+inst.title,instalador,installer,instalador
+inst.welcome,"olá! vamos instalar o ABRIDOR no After Effects.\n\na extensão será copiada para este computador: depois de instalada ela não depende mais desta pasta. para atualizar, rode o instalador da versão nova.","hi! let's install ABRIDOR in After Effects.\n\nthe extension will be copied to this computer: once installed it no longer depends on this folder. to update, run the installer of the new version.","¡hola! vamos a instalar ABRIDOR en After Effects.\n\nla extensión se copiará a esta computadora: una vez instalada ya no depende de esta carpeta. para actualizar, ejecuta el instalador de la versión nueva."
+inst.checking,conferindo o que o ABRIDOR precisa:,checking what ABRIDOR needs:,revisando lo que ABRIDOR necesita:
+inst.check_ae,After Effects 2020 ou mais novo,After Effects 2020 or newer,After Effects 2020 o más reciente
+inst.check_ae_help,o ABRIDOR precisa do After Effects 2020 (17.0) ou mais novo.,ABRIDOR needs After Effects 2020 (17.0) or newer.,ABRIDOR necesita After Effects 2020 (17.0) o más reciente.
+inst.check_fonts,After Effects 2024 (lista e preview de fontes),After Effects 2024 (font list and preview),After Effects 2024 (fuentes y vista previa)
+inst.check_fonts_help,antes do After Effects 2024 o painel não lista as fontes instaladas: os nomes PostScript são digitados à mão.,before After Effects 2024 the panel can't list installed fonts: PostScript names are typed by hand.,antes de After Effects 2024 el panel no lista las fuentes instaladas: los nombres PostScript se escriben a mano.
+inst.check_write,acesso à rede e escrita de arquivos,network access and file writing,acceso a la red y escritura de archivos
+inst.check_write_help,"habilite ""Allow Scripts to Write Files and Access Network"" nas preferências de scripts e expressões.","turn on ""Allow Scripts to Write Files and Access Network"" in the scripting and expressions preferences.","activa ""Permitir que los scripts escriban archivos y accedan a la red"" en las preferencias de scripts y expresiones."
+inst.check_folder,"pasta ""abridor-cep"" ao lado do instalador","""abridor-cep"" folder next to the installer","carpeta ""abridor-cep"" junto al instalador"
+inst.check_folder_help,"rode o instalador direto da pasta do ABRIDOR (a que tem a pasta ""abridor-cep"").","run the installer straight from the ABRIDOR folder (the one with the ""abridor-cep"" folder).","ejecuta el instalador directamente desde la carpeta de ABRIDOR (la que tiene la carpeta ""abridor-cep"")."
+inst.prefs_link,› abrir preferências de scripts e expressões,› open scripting and expressions preferences,› abrir preferencias de scripts y expresiones
+inst.recheck,› verificar de novo,› check again,› verificar de nuevo
+inst.checks_ok,tudo certo!,all good!,¡todo listo!
+inst.welcome_short,"olá! a extensão será copiada para este computador: depois de instalada ela não depende mais desta pasta. para atualizar, rode o instalador da versão nova.","hi! the extension will be copied to this computer: once installed it no longer depends on this folder. to update, run the installer of the new version.","¡hola! la extensión se copiará a esta computadora: ya instalada, no depende de esta carpeta. para actualizar, ejecuta el instalador de la versión nueva."
+inst.all_ok,tudo certo com este computador!,this computer is all set!,¡esta computadora está lista!
+inst.action_question,o que você quer fazer?,what do you want to do?,¿qué quieres hacer?
+inst.installed_ask,o ABRIDOR{v} já está instalado neste computador{newer}. o que você quer fazer?,ABRIDOR{v} is already installed on this computer{newer}. what do you want to do?,ABRIDOR{v} ya está instalado en esta computadora{newer}. ¿qué quieres hacer?
+inst.folder_has, (esta pasta tem a v{v}), (this folder has v{v}), (esta carpeta tiene la v{v})
+inst.install,instalar,install,instalar
+inst.update,atualizar,update,actualizar
+inst.reinstall,reinstalar,reinstall,reinstalar
+inst.remove,remover,remove,eliminar
+inst.install_tip,copia a extensão para este computador.,copies the extension to this computer.,copia la extensión a esta computadora.
+inst.remove_tip,remove o ABRIDOR deste computador.,removes ABRIDOR from this computer.,elimina ABRIDOR de esta computadora.
+inst.source,origem: {path},source: {path},origen: {path}
+inst.destination,destino: {path},destination: {path},destino: {path}
+inst.cancel,cancelar,cancel,cancelar
+inst.back,anterior,back,anterior
+inst.next,próximo,next,siguiente
+inst.start,começar,start,empezar
+inst.finish,concluir,done,terminar
+inst.removing_old,removendo a cópia anterior…,removing the previous copy…,eliminando la copia anterior…
+inst.install_failed,não foi possível instalar,couldn't install,no se pudo instalar
+inst.remove_old_failed,"não foi possível remover a versão anterior em:\n{path}\n\nfeche o After Effects, apague essa pasta e rode o instalador de novo.","couldn't remove the previous version at:\n{path}\n\nclose After Effects, delete that folder and run the installer again.","no se pudo eliminar la versión anterior en:\n{path}\n\ncierra After Effects, borra esa carpeta y ejecuta el instalador de nuevo."
+inst.copying,copiando a extensão…,copying the extension…,copiando la extensión…
+inst.copy_failed,não foi possível copiar {n} arquivo(s) para:\n{path},couldn't copy {n} file(s) to:\n{path},no se pudieron copiar {n} archivo(s) a:\n{path}
+inst.unlocking,liberando extensões sem assinatura…,allowing unsigned extensions…,habilitando extensiones sin firma…
+inst.done,pronto!,done!,¡listo!
+inst.installed_ok,ABRIDOR{v} instalado! ({n} arquivos),ABRIDOR{v} installed! ({n} files),¡ABRIDOR{v} instalado! ({n} archivos)
+inst.updated_ok,ABRIDOR{v} atualizado! ({n} arquivos),ABRIDOR{v} updated! ({n} files),¡ABRIDOR{v} actualizado! ({n} archivos)
+inst.restart_open,reinicie o After Effects e abra o painel em:\nWindow > Extensions > ABRIDOR,restart After Effects and open the panel at:\nWindow > Extensions > ABRIDOR,reinicia After Effects y abre el panel en:\nVentana > Extensiones > ABRIDOR
+inst.mac_note,"se não aparecer, reinicie o computador (no macOS a liberação das extensões às vezes só vale depois disso).","if it doesn't show up, restart the computer (on macOS, allowing extensions sometimes only takes effect after that).","si no aparece, reinicia la computadora (en macOS la habilitación de extensiones a veces solo funciona después de eso)."
+inst.removing,removendo…,removing…,eliminando…
+inst.removed,o ABRIDOR foi removido deste computador.\n\nreinicie o After Effects.,ABRIDOR was removed from this computer.\n\nrestart After Effects.,ABRIDOR se eliminó de esta computadora.\n\nreinicia After Effects.
+inst.remove_failed,não foi possível remover:\n{path}\n\nfeche o After Effects e apague essa pasta manualmente.,couldn't remove:\n{path}\n\nclose After Effects and delete that folder manually.,no se pudo eliminar:\n{path}\n\ncierra After Effects y borra esa carpeta manualmente.

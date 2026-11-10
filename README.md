@@ -23,6 +23,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 8. [trocar as fontes depois](#8--trocar-as-fontes-depois)
 9. [dicas e problemas comuns](#-dicas-e-problemas-comuns)
 10. [como os textos são recriados](#-como-os-textos-são-recriados)
+11. [idiomas e traduções](#-idiomas-e-traduções)
 
 > 📂 **arquivos:**\
 > • **INSTALAR O ABRIDOR.jsx** → instalador (roda dentro do After Effects).\
@@ -557,6 +558,37 @@ o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática
 
 <br>
 
+## 🌐 idiomas e traduções
+
+o painel, as mensagens do After Effects e o instalador estão em **português**, **English** e **español**.
+
+- **no painel:** o botão **PT / EN / ES** no topo troca o idioma na hora, sem perder o documento aberto. a escolha fica guardada. na primeira vez, o painel usa o idioma do After Effects (se não for nenhum dos três, usa o inglês).
+- **no instalador:** segue o idioma do After Effects.
+
+todos os textos ficam num arquivo só: **`abridor-cep/i18n/strings.csv`** — uma linha por texto, uma coluna por idioma. dá para abrir no Excel, no Google Sheets ou num editor de texto:
+
+```
+key,pt,en,es
+app.cta.createAll,criar comps,create comps,crear comps
+app.pages.one,{n} página,{n} page,{n} página
+app.pages.other,{n} páginas,{n} pages,{n} páginas
+```
+
+- **corrigir uma tradução:** edite a célula na pasta do ABRIDOR e rode o instalador de novo (ou edite direto o `strings.csv` da extensão instalada) e reabra o painel.
+- **novo idioma:** acrescente uma coluna com o código de 2 letras (ex.: `fr`) e preencha. ela já aparece no botão de idioma e no instalador. célula vazia usa o português.
+- `{nome}` é trocado por um valor (número de páginas, nome da fonte…) — mantenha igual em todas as colunas.
+- chaves terminadas em `.one` / `.other` são singular e plural.
+- `\n` é quebra de linha; linhas começando com `#` são comentários.
+- o separador pode ser vírgula ou ponto e vírgula (o Excel em português costuma salvar com `;`). salve sempre em **UTF-8**.
+
+> ⚠️ *obs:* os prefixos indicam onde o texto aparece: `panel.*` e `app.*` no painel, `tour.*` no tour guiado, `err.*` / `parser.*` em erros e nomes de página, `host.*` nos avisos e no histórico de desfazer do After Effects, `inst.*` no instalador.
+
+<br>
+
+---
+
+<br>
+
 ## 🛠 desenvolvimento
 
 ```
@@ -565,6 +597,7 @@ abridor-cep/
 ├── index.html            → interface
 ├── css/style.css
 ├── js/
+│   ├── i18n.js           → traduções (lê i18n/strings.csv)
 │   ├── cep.js            → ponte com o AE (evalScript) e sistema de arquivos (Node)
 │   ├── ui.js             → ícones, animações de expandir/recolher, segmentados, toasts
 │   ├── pptx-parser.js    → leitura do PPTX (zip + XML)
@@ -578,6 +611,7 @@ abridor-cep/
 
 - depuração: com o painel aberto no AE, acesse `http://localhost:8099` no Chrome (arquivo `.debug`).
 - testes fora do After Effects (Node + Playwright):
+  - todos os testes de painel aceitam `ABR_LANG=en` ou `ABR_LANG=es` (padrão `pt-BR`), ex.: `ABR_LANG=en node tests/run_panel.js …`. o `tests/pw.js` prepara o Playwright (idioma e acesso ao CSV).
   - `node tests/run_panel.js <arquivo.pptx|pdf> <saída>` → abre o painel no Chromium com o AE simulado, extrai e gera o job.
   - `node tests/host_mock.js <saída>/job.json <saída>/host` → executa o `host.jsx` contra um mock do After Effects e desenha as camadas sobre a referência.
   - `node tests/tour_check.js <saída>` → verifica o tour guiado: primeira vez, passos, teclado, botão **?** e tour sem documento (com `--docs`, grava os prints do README).

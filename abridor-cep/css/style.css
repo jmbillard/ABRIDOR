@@ -1638,3 +1638,8 @@ input[type=search]::-webkit-search-cancel-button, input[type=search]::-webkit-se
 #selRange { font-size: 12px; line-height: 16px; height: 28px; color: var(--txt); caret-color: var(--accent); -webkit-appearance: none; appearance: none; box-shadow: none; text-decoration: none; }
 #selRange::placeholder { color: var(--faint); }
 .clear-field input::selection { background: rgba(76, 157, 255, .35); color: var(--txt); }
+
+/* idioma */
+.lang-btn span { font-size: 9.5px; font-weight: 700; letter-spacing: .6px; line-height: 1; padding: 3px 4px; border-radius: 5px; border: 1.5px solid currentColor; transition: transform .35s var(--spring); }
+.lang-btn:hover span { animation: lang-flip .5s var(--spring); transform: none; }
+@keyframes lang-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg) scale(.9); } 100% { transform: rotateX(0); } }

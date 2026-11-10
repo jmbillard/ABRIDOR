@@ -47,13 +47,13 @@
 		return new Promise(function (resolve, reject) {
 			if (cep) {
 				cep.evalScript(call, function (res) {
-					if (res === 'EvalScript error.') reject(new Error('Erro no ExtendScript: ' + call));
+					if (res === 'EvalScript error.') reject(new Error(ABR.t('err.extendscript', { call: call })));
 					else resolve(res);
 				});
 			} else if (global.ABR_MOCK && global.ABR_MOCK.callHost) {
 				Promise.resolve(global.ABR_MOCK.callHost(fnName, args)).then(resolve, reject);
 			} else {
-				reject(new Error('After Effects não encontrado (painel fora do CEP).'));
+				reject(new Error(ABR.t('err.noHost')));
 			}
 		});
 	};
@@ -63,7 +63,7 @@
 		return ABR.callHost(fnName, args).then(function (res) {
 			var obj;
 			try { obj = JSON.parse(res); } catch (e) {
-				throw new Error('Resposta inválida do After Effects: ' + String(res).slice(0, 300));
+				throw new Error(ABR.t('err.badResponse', { res: String(res).slice(0, 300) }));
 			}
 			if (obj && obj.error) throw new Error(obj.error);
 			return obj;
@@ -105,7 +105,7 @@
 				return new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength);
 			}
 			if (global.ABR_MOCK && global.ABR_MOCK.readBinary) return global.ABR_MOCK.readBinary(p);
-			throw new Error('Sem acesso ao sistema de arquivos.');
+			throw new Error(ABR.t('err.noFs'));
 		},
 		writeText: function (p, text) {
 			if (fs) { fs.writeFileSync(p, text, 'utf8'); return; }

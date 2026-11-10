@@ -1,6 +1,6 @@
 // Exercita os recursos de "uso mais intuitivo" no painel real (AE simulado) e grava prints.
 // uso: node tests/features_check.js <saída>
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2] || 'out');
 fs.mkdirSync(OUT, { recursive: true });

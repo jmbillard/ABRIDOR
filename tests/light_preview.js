@@ -1,5 +1,5 @@
 // prévia rápida do tema claro: node tests/light_preview.js <saída>
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path');
 const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2]);
 fs.mkdirSync(OUT, { recursive: true });

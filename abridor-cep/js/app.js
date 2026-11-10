@@ -7,7 +7,8 @@
 	var ABR = global.ABR;
 	var UI = ABR.ui;
 	var icon = UI.icon;
-	var VERSION = '1.4.2';
+	var T = ABR.t, TN = ABR.tn;
+	var VERSION = '1.5.0';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -33,7 +34,7 @@
 	var DEFAULTS = {
 		res: '1920x1080', w: 1920, h: 1080, fps: '29.97', fit: 'fit', duration: 5,
 		master: true, refImages: true, refOpacity: 50, groupMode: 'paragraph', keepAutofit: true,
-		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false, theme: 'auto', layerMode: 'lines'
+		fallbackFont: 'ArialMT', scope: 'all', previewSize: 22, showBoxes: true, adv: false, theme: 'auto', layerMode: 'lines', lang: 'auto'
 	};
 	var S = {};
 
@@ -138,20 +139,20 @@
 	function updateCompsInfo() {
 		var st = settings();
 		var fr = Math.round(st.duration * st.fps);
-		$('durTC').innerHTML = '<b>' + timecode(st.duration, st.fps).replace(/\s+\(.*/, '') + '</b>' + fr + ' frames';
+		$('durTC').innerHTML = '<b>' + timecode(st.duration, st.fps).replace(/\s+\(.*/, '') + '</b>' + fr + ' ' + T('app.frames');
 		if (document.activeElement !== $('duration')) $('duration').value = fmtSec(S.duration);
 		$('refOpacityVal').textContent = S.refOpacity + '%';
 		$('nameSuffix').textContent = pad(1, digits());
 
 		var total = 0, n = selectedIndexes().length;
 		selectedIndexes().forEach(function (i) { total += Math.round(pageDuration(i) * st.fps); });
-		var fpsTxt = String(st.fps).replace('.', ',');
+		var fpsTxt = String(st.fps).replace('.', T('app.decimal'));
 		$('summary').innerHTML = state.doc
-			? icon('comps') + '<b>' + n + '</b> comp' + (n === 1 ? '' : 's') +
+			? icon('comps') + TN('app.summary.comps', n, { b: '<b>' + n + '</b>' }) +
 				'<span class="sep">·</span>' + timecode(total / st.fps, st.fps).replace(/\s+\(.*/, '') +
 				'<span class="sep">·</span>' + resLabel(st.width, st.height) + ' ' + fpsTxt
-			: '<span>' + icon('info') + '</span>abra um documento para começar';
-		$('ctaText').textContent = state.doc && n ? 'criar ' + n + ' comp' + (n === 1 ? '' : 's') : 'criar comps';
+			: '<span>' + icon('info') + '</span>' + T('app.summary.empty');
+		$('ctaText').textContent = state.doc && n ? TN('app.cta.create', n) : T('app.cta.createAll');
 		each(document.querySelectorAll('.dur'), function (d) {
 			var i = +d.dataset.i;
 			if (!state.durations[i]) d.querySelector('.dur-val').textContent = fmtSec(st.duration) + 's';
@@ -159,8 +160,9 @@
 	}
 
 	// ------------------------------------------------------ tema ------------
+	var LAYER_HINT = { lines: 'app.hint.lines', blocks: 'app.hint.blocks' };
 	var THEME_NEXT = { auto: 'light', light: 'dark', dark: 'auto' };
-	var THEME_LABEL = { auto: 'tema automático (segue o After Effects)', light: 'tema claro', dark: 'tema escuro' };
+	var THEME_LABEL = { auto: 'app.theme.auto', light: 'app.theme.light', dark: 'app.theme.dark' };
 
 	// claro ou escuro conforme o brilho do painel do After Effects (ou do sistema, fora do AE)
 	function hostTheme() {
@@ -182,7 +184,7 @@
 		root.dataset.theme = mode;
 		var btn = $('themeBtn');
 		btn.dataset.mode = S.theme;
-		btn.title = THEME_LABEL[S.theme] + ' — clique para trocar';
+		btn.title = T(THEME_LABEL[S.theme]) + ' — ' + T('app.clickToChange');
 	}
 
 	// ------------------------------------------------------ abas ------------
@@ -214,7 +216,7 @@
 	// ------------------------------------------------------ documento -------
 	function pickDocument() {
 		if (state.busy) return;
-		ABR.dialog.openFile('abrir PPTX ou PDF', ['pptx', 'pdf']).then(function (p) {
+		ABR.dialog.openFile(T('panel.drop.title'), ['pptx', 'pdf']).then(function (p) {
 			if (p) return loadPath(p);
 			if (!ABR.isCEP && !global.ABR_MOCK) $('filePicker').click();
 		});
@@ -225,18 +227,18 @@
 		try {
 			bytes = ABR.fs.readBinary(p);
 		} catch (e) {
-			status('não foi possível ler o arquivo: ' + e.message, 'error');
+			status(T('app.readFail', { msg: e.message }), 'error');
 			return;
 		}
 		setDocument(p, bytes, true);
 	}
 
 	function loadFile(file) {
-		if (!/\.(pptx|pdf)$/i.test(file.name)) { status('use um arquivo .pptx ou .pdf', 'error'); return; }
+		if (!/\.(pptx|pdf)$/i.test(file.name)) { status(T('app.wrongType'), 'error'); return; }
 		if (file.path && ABR.hasFS) return loadPath(file.path);
 		var reader = new FileReader();
 		reader.onload = function () { setDocument(file.name, new Uint8Array(reader.result), false); };
-		reader.onerror = function () { status('não foi possível ler o arquivo.', 'error'); };
+		reader.onerror = function () { status(T('app.readFail2'), 'error'); };
 		reader.readAsArrayBuffer(file);
 	}
 
@@ -248,7 +250,7 @@
 		state.name = ABR.fs.basename(p).replace(/\.(pptx|pdf)$/i, '');
 		state.extImages = [];
 		$('docName').textContent = ABR.fs.basename(p);
-		$('docMeta').textContent = 'lendo…';
+		$('docMeta').textContent = T('app.reading');
 		$('docType').textContent = /\.pdf$/i.test(p) ? 'PDF' : 'PPTX';
 		$('docType').classList.toggle('pptx', !/\.pdf$/i.test(p));
 		$('prefix').value = state.name.toUpperCase().replace(/[_\s]+/g, ' ').slice(0, 24).replace(/\s+$/, '') || 'LAYOUT';
@@ -269,12 +271,12 @@
 		var list = load('recents', []);
 		el.classList.toggle('hidden', !list.length);
 		if (!list.length) { el.innerHTML = ''; return; }
-		el.innerHTML = '<div class="recent-head"><span>recentes</span><button id="recentClear" title="limpar a lista\nos arquivos não são apagados">limpar</button></div>' +
+		el.innerHTML = '<div class="recent-head"><span>' + T('app.recent') + '</span><button id="recentClear" title="' + esc(T('app.recent.clear.tip')) + '">' + T('app.recent.clear') + '</button></div>' +
 			list.map(function (r, i) {
 				var ok = ABR.fs.exists(r.path);
-				return '<button class="recent-item' + (ok ? '' : ' missing') + '" data-i="' + i + '" title="' + esc(r.path) + (ok ? '' : '\narquivo não encontrado') + '">' +
+				return '<button class="recent-item' + (ok ? '' : ' missing') + '" data-i="' + i + '" title="' + esc(r.path) + (ok ? '' : '\n' + T('app.notFound')) + '">' +
 					'<span class="doc-type' + (r.type === 'pptx' ? ' pptx' : '') + '">' + r.type.toUpperCase() + '</span>' +
-					'<span class="ri-text"><b>' + esc(r.name) + '</b><small>' + (ok ? r.pages + ' páginas · ' + relTime(r.t) : 'arquivo não encontrado') + '</small></span>' +
+					'<span class="ri-text"><b>' + esc(r.name) + '</b><small>' + (ok ? TN('app.pages', r.pages) + ' · ' + relTime(r.t) : T('app.notFound')) + '</small></span>' +
 					icon(ok ? 'arrow' : 'x', 'ri-go') + '</button>';
 			}).join('');
 		$('recentClear').onclick = function (e) { e.stopPropagation(); store('recents', []); renderRecents(); };
@@ -306,9 +308,9 @@
 		$('dropZone').classList.add('loading');
 		if (!state.doc) document.body.classList.remove('is-empty');
 		skeleton(state.doc ? state.doc.pages.length : 6);
-		status('lendo ' + (isPdf ? 'PDF' : 'PPTX') + '…', 'info', true);
+		status(T('app.readingDoc', { type: isPdf ? 'PDF' : 'PPTX' }), 'info', true);
 		var onProgress = function (i, n) {
-			status('lendo página ' + (i + 1) + ' de ' + n + '…', 'info', true);
+			status(T('app.readingPage', { i: i + 1, n: n }), 'info', true);
 			if ($('grid').children.length !== n && i === 0) skeleton(n);
 		};
 		var bytes = state.bytes.slice(); // pdf.js pode transferir o buffer
@@ -318,7 +320,7 @@
 
 		p.then(function (doc) {
 			doc.name = state.name;
-			if (!doc.pages.length) throw new Error('nenhuma página encontrada.');
+			if (!doc.pages.length) throw new Error(T('app.noPagesFound'));
 			return (doc.type === 'pptx' ? makePptxThumbs(doc) : Promise.resolve()).then(function () { return doc; });
 		}).then(function (doc) {
 			var prevSel = state.selected, prevDur = state.durations;
@@ -338,8 +340,8 @@
 			type.classList.toggle('pptx', doc.type === 'pptx');
 			$('docName').textContent = ABR.fs.basename(state.path);
 			var nTexts = doc.pages.reduce(function (n, pg) { return n + pg.texts.length; }, 0);
-			$('docMeta').textContent = doc.pages.length + ' páginas · ' + nTexts + ' textos';
-			$('docChip').title = ABR.fs.basename(state.path) + '\n' + Math.round(doc.width) + ' × ' + Math.round(doc.height) + ' pt\n\nclique para abrir outro documento';
+			$('docMeta').textContent = TN('app.pages', doc.pages.length) + ' · ' + TN('app.texts', nTexts);
+			$('docChip').title = ABR.fs.basename(state.path) + '\n' + Math.round(doc.width) + ' × ' + Math.round(doc.height) + ' pt\n\n' + T('app.docchip.tip');
 			if (fresh) addRecent(doc);
 			var tourAfter = fresh;
 			collectFonts();
@@ -347,13 +349,13 @@
 			renderFonts();
 			updateCompsInfo();
 			setTimeout(placeTabInk, 350);
-			status('documento carregado. desmarque as páginas que não devem ser processadas.', 'ok');
+			status(T('app.loaded'), 'ok');
 			if (tourAfter && ABR.tour) ABR.tour.documentReady();
 		}).catch(function (e) {
 			console.error(e);
 			if (!state.doc) { document.body.classList.add('is-empty'); $('grid').innerHTML = ''; }
 			else renderGrid();
-			status('erro ao ler o documento: ' + e.message, 'error');
+			status(T('app.docError', { msg: e.message }), 'error');
 		}).then(function () {
 			$('dropZone').classList.remove('loading');
 			setBusy(false);
@@ -420,11 +422,11 @@
 			el.innerHTML =
 				'<div class="thumb"><img alt="">' +
 				'<span class="chip num">' + pad(pg.number, 2) + '</span>' +
-				(pg.hidden ? '<span class="chip flag" title="slide oculto\nestava oculto no PowerPoint; por isso veio desmarcado">' + icon('eyeOff') + '</span>' : '') +
+				(pg.hidden ? '<span class="chip flag" title="' + esc(T('app.hiddenSlide')) + '">' + icon('eyeOff') + '</span>' : '') +
 				(state.extImages[i] ? '<span class="chip flag ext" title="' + esc(state.extImages[i]) + '">' + icon('image') + '</span>' : '') +
 				'<span class="check">' + icon('check') + '</span>' +
-				'<span class="chip texts" title="textos detectados nesta página">' + icon('type') + pg.texts.length + '</span>' +
-				'<button class="dur' + (custom ? ' custom' : '') + '" data-i="' + i + '" title="duração desta página\nclique para mudar · vazio volta ao padrão">' + icon('clock') +
+				'<span class="chip texts" title="' + esc(T('app.pageTexts')) + '">' + icon('type') + pg.texts.length + '</span>' +
+				'<button class="dur' + (custom ? ' custom' : '') + '" data-i="' + i + '" title="' + esc(T('app.pageDur')) + '">' + icon('clock') +
 				'<span class="dur-val">' + fmtSec(custom || settings().duration) + 's</span>' +
 				'<input type="text" inputmode="decimal" spellcheck="false"></button>' +
 				'</div>';
@@ -440,9 +442,9 @@
 				thumb.insertBefore(c, img.nextSibling);
 			};
 			img.src = pg.thumb || '';
-			thumb.title = pg.name + '\n' + (pg.texts.length ? pg.texts.length + ' texto' + (pg.texts.length === 1 ? '' : 's') + ' · clique para incluir/excluir\n' + pg.texts.slice(0, 8).map(function (t) {
+			thumb.title = pg.name + '\n' + (pg.texts.length ? TN('app.texts', pg.texts.length) + ' · ' + T('app.clickToggle') + '\n' + pg.texts.slice(0, 8).map(function (t) {
 				return '• ' + t.paragraphs.map(function (p) { return p.runs.map(function (r) { return r.text; }).join(''); }).join(' / ').slice(0, 60);
-			}).join('\n') + (pg.texts.length > 8 ? '\n• …' : '') : 'nenhum texto encontrado (texto em imagem?)');
+			}).join('\n') + (pg.texts.length > 8 ? '\n• …' : '') : T('app.noTexts'));
 			thumb.onclick = function (e) {
 				if (e.target.closest('.dur')) return;
 				var a = state.anchor;
@@ -512,8 +514,7 @@
 			hint.className = 'range-hint';
 			document.body.appendChild(hint);
 		}
-		var verb = state.selected[h] ? 'desmarcar' : 'marcar';
-		hint.innerHTML = '<kbd>shift</kbd> + clique: ' + verb + ' páginas ' + (lo + 1) + '–' + (hi + 1);
+		hint.innerHTML = T(state.selected[h] ? 'app.shiftUncheck' : 'app.shiftCheck', { a: lo + 1, b: hi + 1 });
 		var el = $('grid').querySelector('.page[data-i="' + h + '"]');
 		if (!el) return;
 		var r = el.getBoundingClientRect();
@@ -627,14 +628,14 @@
 			if (!f) return;
 			var n = fontUseCount(f);
 			row.querySelector('.uses').textContent = n + '×';
-			row.querySelector('.uses').title = f.type === 'project' ? 'camadas no projeto' : 'usos nas páginas selecionadas';
+			row.querySelector('.uses').title = T(f.type === 'project' ? 'app.uses.project' : 'app.uses.pages');
 		});
 		for (var k in state.fonts) {
 			if (fontState(k) === 'missing' && fontUseCount(state.fonts[k])) missing++;
 		}
 		var chip = $('preChip');
 		var showChip = !!state.doc && missing > 0;
-		chip.querySelector('span').textContent = missing + ' fonte' + (missing === 1 ? '' : 's') + ' sem associação';
+		chip.querySelector('span').textContent = TN('app.unmatched', missing);
 		if (showChip && chip.classList.contains('hidden')) UI.replay(chip, 'pre-chip');
 		chip.classList.toggle('hidden', !showChip);
 		$('ctaDot').classList.toggle('hidden', !showChip);
@@ -661,9 +662,9 @@
 
 		if (!keys.length) {
 			list.innerHTML = all.length
-				? '<div class="empty-state">' + icon('search') + '<span>nenhuma fonte com “' + esc(filter) + '”</span></div>'
-				: '<div class="empty-state">' + icon('fonts') + '<b>nenhuma fonte ainda</b><span>abra um documento, ou leia as fontes<br>das comps já criadas neste projeto.</span>' +
-					'<button class="btn" id="emptyScan">' + icon('project') + 'ler do projeto</button></div>';
+				? '<div class="empty-state">' + icon('search') + '<span>' + T('app.noFontWith', { q: esc(filter) }) + '</span></div>'
+				: '<div class="empty-state">' + icon('fonts') + '<b>' + T('app.fonts.empty') + '</b><span>' + T('app.fonts.empty.sub') + '</span>' +
+					'<button class="btn" id="emptyScan">' + icon('project') + T('app.readProject') + '</button></div>';
 			var b = $('emptyScan');
 			if (b) b.onclick = scanProject;
 			updateFontCounts();
@@ -672,8 +673,8 @@
 		list.innerHTML =
 			'<div class="font-group used"></div>' +
 			'<div class="collapse unused-wrap" id="unusedWrap">' +
-			'<button class="unused-head' + (state.unusedOpen ? ' open' : '') + '" id="unusedHead" title="não usadas nas páginas selecionadas\nsó aparecem em páginas desmarcadas; as associações ficam guardadas">' +
-			icon('chevron', 'chev') + '<span>não usadas nas páginas selecionadas</span><b class="pill" id="unusedCount">0</b></button>' +
+			'<button class="unused-head' + (state.unusedOpen ? ' open' : '') + '" id="unusedHead" title="' + esc(T('app.unused.tip')) + '">' +
+			icon('chevron', 'chev') + '<span>' + T('app.unused') + '</span><b class="pill" id="unusedCount">0</b></button>' +
 			'<div class="collapse" id="unusedBox"><div class="font-group unused"></div></div>' +
 			'</div>';
 		state.fontRows = {};
@@ -772,17 +773,17 @@
 		row.innerHTML =
 			'<div class="font-head">' +
 			'<i class="dot"></i>' +
-			'<span class="font-names"><span class="src" title="' + esc(src.key) + '\nfonte usada no documento">' + esc(src.key) + '</span>' + icon('arrow') + '<span class="dst"></span></span>' +
+			'<span class="font-names"><span class="src" title="' + esc(src.key) + '\n' + esc(T('app.srcFont')) + '">' + esc(src.key) + '</span>' + icon('arrow') + '<span class="dst"></span></span>' +
 			'<span class="uses"></span>' + icon('chevron', 'chev') +
 			'</div>' +
 			'<div class="font-preview"></div>' +
 			'<div class="collapse font-edit"><div class="font-edit-inner">' +
 			'<div class="font-pick">' +
-			(supported ? '<button class="picker-field family" title="família\nclique para buscar entre as fontes instaladas"><span></span>' + icon('chevron') + '</button><select class="style"></select>' : '<input type="text" class="ps" placeholder="nome PostScript (ex: Montserrat-Bold)" spellcheck="false">') +
+			(supported ? '<button class="picker-field family" title="' + esc(T('app.family.tip')) + '"><span></span>' + icon('chevron') + '</button><select class="style"></select>' : '<input type="text" class="ps"  placeholder="' + esc(T('app.psName')) + '" spellcheck="false">') +
 			'</div>' +
 			'<div class="font-tools">' +
-			'<span class="orig" title="original\no texto na fonte do documento, se ela estiver instalada"><small>original</small><span></span></span>' +
-			'<span class="scale-step" title="escala do tamanho\npassos de 5%; útil quando a fonte nova é maior ou menor">' +
+			'<span class="orig" title="' + esc(T('app.orig.tip')) + '"><small>' + T('app.orig') + '</small><span></span></span>' +
+			'<span class="scale-step" title="' + esc(T('app.scale.tip')) + '">' +
 			'<button class="icon-btn s-minus">' + icon('minus') + '</button><span class="s-val"></span><button class="icon-btn s-plus">' + icon('plus') + '</button>' +
 			'</span></div>' +
 			'</div></div>';
@@ -815,7 +816,7 @@
 
 		function setFamilyLabel(family) {
 			fam.dataset.value = family || '';
-			fam.querySelector('span').textContent = family || 'escolher fonte…';
+			fam.querySelector('span').textContent = family || T('app.chooseFont');
 			fam.classList.toggle('empty', !family);
 		}
 
@@ -824,9 +825,9 @@
 			var st = fontState(src.key);
 			row.className = 'font ' + st + (row.classList.contains('open') ? ' open' : '');
 			var dst = row.querySelector('.dst');
-			dst.textContent = f ? f.family + ' ' + f.style : (m.ps ? m.ps : 'sem fonte');
-			dst.title = f ? f.family + ' ' + f.style + '\nPostScript: ' + f.ps : (m.ps ? 'não instalada\n' + m.ps : 'sem fonte\nas camadas vão usar a fonte reserva (' + S.fallbackFont + ')');
-			row.querySelector('.dot').title = { ok: 'automático\nencontrada pelo nome', manual: 'manual\nescolhida por você', missing: 'sem fonte\nescolha uma família abaixo' }[st];
+			dst.textContent = f ? f.family + ' ' + f.style : (m.ps ? m.ps : T('app.noFont'));
+			dst.title = f ? f.family + ' ' + f.style + '\nPostScript: ' + f.ps : (m.ps ? T('app.notInstalled') + '\n' + m.ps : T('app.noFont.tip', { font: S.fallbackFont }));
+			row.querySelector('.dot').title = T('app.dot.' + st);
 			var sample = $('sampleText').value || sampleOf(src) || src.key;
 			preview.textContent = sample;
 			preview.style.fontSize = Math.round(S.previewSize * (m.scale || 100) / 100) + 'px';
@@ -921,9 +922,9 @@
 		if (!list.length) return;
 		var h = document.createElement('div');
 		h.className = 'family-hint';
-		h.innerHTML = '<p>' + icon('wand') + 'trocar também os outros estilos de ' + esc(src.family) + '?</p><ul>' +
+		h.innerHTML = '<p>' + icon('wand') + T('app.family.offer', { family: esc(src.family) }) + '</p><ul>' +
 			list.map(function (x) { return '<li>' + esc(x.key) + ' ' + icon('arrow') + ' <b>' + esc(x.font.family + ' ' + x.font.style) + '</b></li>'; }).join('') +
-			'</ul><div class="row-btns"><button class="yes">aplicar' + (list.length > 1 ? ' nos ' + list.length : '') + '</button><button class="no">agora não</button></div>';
+			'</ul><div class="row-btns"><button class="yes">' + (list.length > 1 ? T('app.family.applyN', { n: list.length }) : T('app.family.apply')) + '</button><button class="no">' + T('app.family.no') + '</button></div>';
 		row.querySelector('.font-edit-inner').appendChild(h);
 		function dismiss() {
 			h.classList.add('out');
@@ -941,7 +942,7 @@
 			rememberMap();
 			updateFontCounts();
 			dismiss();
-			status(list.length + ' estilo' + (list.length === 1 ? '' : 's') + ' de ' + src.family + ' trocado' + (list.length === 1 ? '' : 's') + ' para ' + family + '.', 'ok');
+			status(TN('app.family.done', list.length, { src: src.family, dst: family }), 'ok');
 		};
 	}
 
@@ -971,7 +972,7 @@
 		var box = document.createElement('div');
 		box.className = 'picker';
 		box.id = 'fontPicker';
-		box.innerHTML = '<div class="picker-search">' + icon('search') + '<input type="text" spellcheck="false" placeholder="buscar fonte…"></div>' +
+		box.innerHTML = '<div class="picker-search">' + icon('search') + '<input type="text" spellcheck="false" placeholder="' + esc(T('app.picker.search')) + '"></div>' +
 			'<div class="picker-list"></div>' +
 			'<div class="picker-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navegar</span><span><kbd>Enter</kbd> escolher</span><span><kbd>Esc</kbd> fechar</span></div>';
 		document.body.appendChild(box);
@@ -988,7 +989,7 @@
 				if (p >= 0) name = esc(f.slice(0, p)) + '<mark>' + esc(f.slice(p, p + q.length)) + '</mark>' + esc(f.slice(p + q.length));
 			}
 			return '<div class="picker-item' + (f === current ? ' cur' : '') + '" data-i="' + i + '"><span class="pf" style="font-family:\'' + f.replace(/'/g, '') + '\', sans-serif">' + name + '</span>' +
-				'<span class="ps">' + (note ? esc(note) + ' · ' : '') + idx[f] + ' estilo' + (idx[f] === 1 ? '' : 's') + '</span></div>';
+				'<span class="ps">' + (note ? esc(note) + ' · ' : '') + TN('app.styles', idx[f]) + '</span></div>';
 		}
 
 		function render() {
@@ -1002,17 +1003,17 @@
 				html += '<div class="picker-sec">' + title + '</div>';
 				list.forEach(function (f) { html += itemHTML(f, items.length, q, noteFn && noteFn(f)); items.push(f); });
 			};
-			if (equiv) sec('sugestão', [equiv], function () { return 'medidas iguais à ' + src.family; });
+			if (equiv) sec(T('app.picker.suggest'), [equiv], function () { return T('app.picker.metric', { family: src.family }); });
 			sec('recentes', recents.filter(function (f) { return f !== equiv; }));
 			var rest = families.filter(function (f) { return match(f) && f !== equiv && recents.indexOf(f) < 0; });
 			if (q) rest.sort(function (a, b) { return (a.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.toLowerCase().indexOf(q) === 0 ? 0 : 1) || a.localeCompare(b); });
 			var shown = rest.slice(0, 150);
 			if (shown.length) {
-				html += '<div class="picker-sec">' + (q ? 'todas · ' + rest.length + ' resultado' + (rest.length === 1 ? '' : 's') : 'todas · ' + families.length) + '</div>';
+				html += '<div class="picker-sec">' + T('app.picker.all') + ' · ' + (q ? TN('app.picker.results', rest.length) : families.length) + '</div>';
 				shown.forEach(function (f) { html += itemHTML(f, items.length, q); items.push(f); });
-				if (rest.length > shown.length) html += '<div class="picker-empty">e mais ' + (rest.length - shown.length) + ' — continue digitando</div>';
+				if (rest.length > shown.length) html += '<div class="picker-empty">' + T('app.picker.more', { n: rest.length - shown.length }) + '</div>';
 			}
-			if (!items.length) html = '<div class="picker-empty">nenhuma fonte com “' + esc(input.value) + '”</div>';
+			if (!items.length) html = '<div class="picker-empty">' + T('app.noFontWith', { q: esc(input.value) }) + '</div>';
 			listEl.innerHTML = html;
 			hl = Math.max(0, items.indexOf(current) >= 0 && !q ? items.indexOf(current) : 0);
 			highlight(false);
@@ -1091,11 +1092,11 @@
 		ABR.fonts.previewCache = {};
 		return ABR.fonts.load().then(function () {
 			if (!ABR.fonts.supported) {
-				status('esta versão do After Effects não lista as fontes (necessário AE 2024+). digite os nomes PostScript.', 'info');
+				status(T('app.noFontList'), 'info');
 			}
 		}).catch(function (e) {
 			ABR.fonts.supported = false;
-			status('não foi possível ler as fontes do After Effects: ' + e.message, 'error');
+			status(T('app.fontsFail', { msg: e.message }), 'error');
 		});
 	}
 
@@ -1105,7 +1106,7 @@
 		var btn = $('btnScan');
 		btn.classList.add('busy');
 		showTab('fonts');
-		status('lendo fontes das camadas do projeto…', 'info', true);
+		status(T('app.scanning'), 'info', true);
 		ABR.callHostJSON('abridor_scanProject').then(function (res) {
 			var n = 0;
 			for (var k in res.fonts) {
@@ -1128,9 +1129,9 @@
 			}
 			if (n) showApply(true);
 			renderFonts();
-			status(n ? n + ' fontes encontradas nas camadas do projeto.' : 'nenhuma camada criada pelo ABRIDOR no projeto.', n ? 'ok' : 'info');
+			status(n ? TN('app.scanFound', n) : T('app.scanNone'), n ? 'ok' : 'info');
 		}).catch(function (e) {
-			status('erro: ' + e.message, 'error');
+			status(T('app.error', { msg: e.message }), 'error');
 		}).then(function () {
 			btn.classList.remove('busy');
 			setBusy(false);
@@ -1143,23 +1144,23 @@
 			ABR.fs.mkdirp(ABR.fs.tmpDir());
 			ABR.fs.writeText(path, JSON.stringify({ map: fontMapForHost() }));
 		} catch (e) {
-			status('erro ao gravar arquivo temporário: ' + e.message, 'error');
+			status(T('app.tempFail', { msg: e.message }), 'error');
 			return;
 		}
 		var btn = $('btnApplyFonts');
 		setBusy(true);
 		btn.classList.add('busy');
-		status('aplicando fontes…', 'silent');
+		status(T('app.applying'), 'silent');
 		UI.hideToast();
 		ABR.callHostJSON('abridor_applyFonts', [path, S.scope]).then(function (res) {
-			$('status').textContent = res.layers + ' camadas atualizadas em ' + res.comps + ' comps.';
+			$('status').textContent = T('app.applied', { layers: res.layers, comps: res.comps });
 			btn.title = $('status').textContent;
 			UI.replay(btn, 'done');
-			setTimeout(function () { btn.classList.remove('done'); btn.title = 'trocar as fontes nas comps já criadas'; }, 1800);
+			setTimeout(function () { btn.classList.remove('done'); btn.title = T('panel.apply.tip'); }, 1800);
 			setLog(res.failed || []);
-			if (res.failed && res.failed.length) status(res.failed.length + ' camadas não puderam ser atualizadas. veja os avisos.', 'error');
+			if (res.failed && res.failed.length) status(T('app.applyFailed', { n: res.failed.length }), 'error');
 		}).catch(function (e) {
-			status('erro: ' + e.message, 'error');
+			status(T('app.error', { msg: e.message }), 'error');
 		}).then(function () {
 			btn.classList.remove('busy');
 			setBusy(false);
@@ -1174,15 +1175,15 @@
 		btn.classList.add('busy');
 		ABR.callHostJSON('abridor_splitLines').then(function (res) {
 			if (!res.layers) {
-				status('selecione camadas de texto na comp ativa, ou comps no painel Project.', 'info');
+				status(T('app.split.select'), 'info');
 			} else {
-				status(res.layers + ' camada' + (res.layers === 1 ? '' : 's') + ' (' + res.from + ') → ' + res.lines + ' linhas.', 'ok');
+				status(TN('app.split.done', res.layers, { from: res.from, lines: res.lines }), 'ok');
 				UI.replay(btn, 'done');
 				setTimeout(function () { btn.classList.remove('done'); }, 1600);
 			}
 			if (res.log && res.log.length) setLog(res.log);
 		}).catch(function (e) {
-			status('erro: ' + e.message, 'error');
+			status(T('app.error', { msg: e.message }), 'error');
 		}).then(function () {
 			btn.classList.remove('busy');
 			setBusy(false);
@@ -1299,12 +1300,12 @@
 		if (isNaN(d)) return '';
 		var now = new Date(), hm = pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2);
 		var mins = Math.floor((now - d) / 60000);
-		if (mins < 1) return 'agora';
-		if (mins < 60) return 'há ' + mins + ' min';
+		if (mins < 1) return T('app.time.now');
+		if (mins < 60) return T('app.time.mins', { n: mins });
 		var days = Math.floor((new Date(now.toDateString()) - new Date(d.toDateString())) / 864e5);
-		if (days <= 0) return 'hoje às ' + hm;
-		if (days === 1) return 'ontem, ' + hm;
-		return 'há ' + days + ' dias';
+		if (days <= 0) return T('app.time.today', { hm: hm });
+		if (days === 1) return T('app.time.yesterday', { hm: hm });
+		return T('app.time.days', { n: days });
 	}
 
 	function openPreflight(missing, info, mixed) {
@@ -1313,27 +1314,27 @@
 		var wrap = document.createElement('div');
 		wrap.id = 'preWrap';
 		var html = '<div class="scrim"></div><div class="pre-sheet" role="dialog"><div class="sheet-grip"></div>' +
-			'<h3>' + icon('sparkle') + 'antes de criar ' + n + ' comp' + (n === 1 ? '' : 's') + '</h3>';
+			'<h3>' + icon('sparkle') + TN('app.pre.title', n) + '</h3>';
 		if (missing.length) {
-			var names = missing.slice(0, 3).join(', ') + (missing.length > 3 ? ' e mais ' + (missing.length - 3) : '');
-			html += '<div class="check-item warn">' + icon('alert') + '<div class="ci-body"><b>' + missing.length + ' fonte' + (missing.length === 1 ? '' : 's') + ' sem associação</b>' +
-				'<small>' + esc(names) + ' — vão sair em ' + esc(S.fallbackFont) + '</small></div><button class="mini-btn" data-act="fonts">associar</button></div>';
+			var names = missing.slice(0, 3).join(', ') + (missing.length > 3 ? ' ' + T('app.andMore', { n: missing.length - 3 }) : '');
+			html += '<div class="check-item warn">' + icon('alert') + '<div class="ci-body"><b>' + TN('app.unmatched', missing.length) + '</b>' +
+				'<small>' + T('app.pre.fallback', { names: esc(names), font: esc(S.fallbackFont) }) + '</small></div><button class="mini-btn" data-act="fonts">' + T('app.pre.match') + '</button></div>';
 		}
 		if (mixed) {
 			html += '<div class="check-item info">' + icon('info') + '<div class="ci-body"><b>After Effects ' + esc(String(info.version || '').replace(/x.*/, '')) + '</b>' +
-				'<small>trechos com fontes diferentes na mesma linha recebem um estilo só (precisa do 2024.3)</small></div></div>';
+				'<small>' + T('app.pre.mixed') + '</small></div></div>';
 		}
 		if (info.existing) {
 			var ex = info.existing;
-			html += '<div class="check-item folder">' + icon('project') + '<div class="ci-body"><b>“' + esc(ex.name) + '” já existe no projeto</b>' +
-				'<small>' + ex.comps + ' comp' + (ex.comps === 1 ? '' : 's') + (ex.created ? ' · criadas ' + relTime(ex.created) : '') + '</small>' +
+			html += '<div class="check-item folder">' + icon('project') + '<div class="ci-body"><b>' + T('app.pre.exists', { name: esc(ex.name) }) + '</b>' +
+				'<small>' + TN('app.comps', ex.comps) + (ex.created ? ' · ' + T('app.pre.created', { when: relTime(ex.created) }) : '') + '</small>' +
 				'<div class="choice">' +
-				'<button data-mode="replace" title="substituir\napaga a pasta e as comps antigas do documento e cria de novo">' + icon('refresh') + 'substituir<small>apaga e cria de novo</small></button>' +
-				'<button data-mode="side" title="criar ao lado\nmantém as antigas; as novas vão para “' + esc(state.name + ' ' + info.next) + '”">' + icon('plus') + 'criar ao lado<small>as novas ganham “' + info.next + '”</small></button>' +
-				'<button data-mode="texts" title="só os textos\nmantém as comps, posições, animações e efeitos; troca só o conteúdo das camadas de texto">' + icon('type') + 'só os textos<small>mantém animações</small></button>' +
+				'<button data-mode="replace" title="' + esc(T('app.pre.replace.tip')) + '">' + icon('refresh') + T('app.pre.replace') + '<small>' + T('app.pre.replace.sub') + '</small></button>' +
+				'<button data-mode="side" title="' + esc(T('app.pre.side.tip', { folder: state.name + ' ' + info.next })) + '">' + icon('plus') + T('app.pre.side') + '<small>' + T('app.pre.side.sub', { next: info.next }) + '</small></button>' +
+				'<button data-mode="texts" title="' + esc(T('app.pre.texts.tip')) + '">' + icon('type') + T('app.pre.texts') + '<small>' + T('app.pre.texts.sub') + '</small></button>' +
 				'</div></div></div>';
 		}
-		html += '<div class="sheet-actions"><button class="btn" data-act="back">voltar</button><button class="btn primary" data-act="go">' + icon('sparkle') + '<span></span></button></div></div>';
+		html += '<div class="sheet-actions"><button class="btn" data-act="back">' + T('app.back') + '</button><button class="btn primary" data-act="go">' + icon('sparkle') + '<span></span></button></div></div>';
 		wrap.innerHTML = html;
 		document.body.appendChild(wrap);
 
@@ -1341,7 +1342,7 @@
 		function setChoice(m) {
 			choice = m;
 			each(wrap.querySelectorAll('.choice button'), function (b) { b.classList.toggle('on', b.dataset.mode === m); });
-			goLabel.textContent = m === 'texts' ? 'atualizar os textos' : 'criar ' + n + ' comp' + (n === 1 ? '' : 's');
+			goLabel.textContent = m === 'texts' ? T('app.pre.updateTexts') : TN('app.cta.create', n);
 		}
 		setChoice(choice);
 		function close(cb) {
@@ -1377,7 +1378,7 @@
 		var st = settings();
 		var suffix = opts.suffix || '';
 		var idx = selectedIndexes();
-		if (!idx.length) { status('nenhuma página selecionada.', 'error'); return; }
+		if (!idx.length) { status(T('app.noPages'), 'error'); return; }
 		setBusy(true);
 		setLog([]);
 		UI.hideToast();
@@ -1408,8 +1409,8 @@
 			idx.forEach(function (i, n) {
 				chain = chain.then(function () {
 					var pg = state.doc.pages[i];
-					status('gerando referência ' + (n + 1) + ' de ' + idx.length + '…', 'silent');
-					cta.progress(n / idx.length * refShare, 'referências ' + (n + 1) + '/' + idx.length);
+					status(T('app.genRef', { i: n + 1, n: idx.length }), 'silent');
+					cta.progress(n / idx.length * refShare, T('app.refsProgress', { i: n + 1, n: idx.length }));
 					if (state.extImages[i]) return state.extImages[i];
 					var file = ABR.fs.join(dir, 'ref_' + pad(pg.number, 3) + '_' + st.width + 'x' + st.height + '.png');
 					return renderRef(pg, st).then(function (dataURL) {
@@ -1437,15 +1438,15 @@
 			});
 			ABR.fs.mkdirp(ABR.fs.tmpDir());
 			ABR.fs.writeText(jobPath, JSON.stringify(job));
-			status('preparando o projeto…', 'silent');
+			status(T('app.preparing'), 'silent');
 			cta.progress(refShare, 'preparando…');
 			return ABR.callHostJSON('abridor_begin', [jobPath]);
 		}).then(function () {
 			var c = Promise.resolve();
 			job.pages.forEach(function (pg, n) {
 				c = c.then(function () {
-					status('criando ' + pg.compName + ' (' + (n + 1) + '/' + job.pages.length + ')…', 'silent');
-					cta.progress(refShare + n / job.pages.length * (0.95 - refShare), 'criando ' + (n + 1) + '/' + job.pages.length);
+					status(T('app.creatingComp', { name: pg.compName, i: n + 1, n: job.pages.length }), 'silent');
+					cta.progress(refShare + n / job.pages.length * (0.95 - refShare), T('app.creatingProgress', { i: n + 1, n: job.pages.length }));
 					return ABR.callHostJSON('abridor_buildPage', [jobPath, n]);
 				}).then(function (res) {
 					(res.log || []).forEach(function (l) { log.push(pg.compName + ': ' + l); });
@@ -1472,22 +1473,22 @@
 			UI.replay($('logoMark'), 'pry');
 			var msg;
 			if (res.mode === 'texts') {
-				msg = totals.updated + ' camada' + (totals.updated === 1 ? '' : 's') + ' de texto atualizada' + (totals.updated === 1 ? '' : 's') +
-					(totals.added ? ', ' + totals.added + ' nova' + (totals.added === 1 ? '' : 's') : '') +
-					(totals.left ? ', ' + totals.left + ' sem correspondente' : '') + '.';
+				msg = TN('app.done.updated', totals.updated) +
+					(totals.added ? ', ' + TN('app.done.added', totals.added) : '') +
+					(totals.left ? ', ' + T('app.done.left', { n: totals.left }) : '') + '.';
 			} else {
-				msg = res.comps + ' comps criadas' + (res.master ? ' + “' + res.master + '”' : '') + '.';
+				msg = TN('app.done.comps', res.comps) + (res.master ? ' + “' + res.master + '”' : '') + '.';
 			}
-			if (log.length) msg += ' veja os avisos.';
+			if (log.length) msg += ' ' + T('app.seeWarnings');
 			var actions = [];
-			if (res.masterId) actions.push({ label: 'abrir master', icon: 'master', fn: function () { ABR.callHost('abridor_reveal', [res.masterId]); } });
-			if (res.folderId) actions.push({ label: 'mostrar no projeto', icon: 'project', fn: function () { ABR.callHost('abridor_reveal', [res.folderId]); } });
+			if (res.masterId) actions.push({ label: T('app.openMaster'), icon: 'master', fn: function () { ABR.callHost('abridor_reveal', [res.masterId]); } });
+			if (res.folderId) actions.push({ label: T('app.showInProject'), icon: 'project', fn: function () { ABR.callHost('abridor_reveal', [res.folderId]); } });
 			$('status').textContent = msg;
 			UI.toast(msg, 'ok', false, actions);
 		}).catch(function (e) {
 			console.error(e);
 			cta.finish(false);
-			status('erro: ' + e.message, 'error');
+			status(T('app.error', { msg: e.message }), 'error');
 			setLog(log);
 		}).then(function () {
 			setBusy(false);
@@ -1502,10 +1503,10 @@
 			state.extImages = [];
 			btn.classList.remove('on');
 			renderGrid();
-			status('voltando a usar a referência gerada pelo ABRIDOR.', 'info');
+			status(T('app.ext.off'), 'info');
 			return;
 		}
-		ABR.dialog.openFolder('pasta com as imagens exportadas dos slides').then(function (dir) {
+		ABR.dialog.openFolder(T('app.ext.pick')).then(function (dir) {
 			if (!dir) return;
 			var files = ABR.fs.listImages(dir);
 			files.sort(function (a, b) {
@@ -1513,13 +1514,13 @@
 				var nb = parseInt((ABR.fs.basename(b).match(/\d+/g) || ['0']).pop(), 10);
 				return na - nb || a.localeCompare(b);
 			});
-			if (!files.length) { status('nenhuma imagem PNG/JPG na pasta.', 'error'); return; }
+			if (!files.length) { status(T('app.ext.none'), 'error'); return; }
 			state.extImages = state.doc.pages.map(function (pg, i) { return files[i] || null; });
 			btn.classList.add('on');
 			if (files.length !== state.doc.pages.length) {
-				status(files.length + ' imagens para ' + state.doc.pages.length + ' páginas (associadas pela ordem).', 'error');
+				status(T('app.ext.mismatch', { n: files.length, pages: state.doc.pages.length }), 'error');
 			} else {
-				status(files.length + ' imagens associadas às páginas.', 'ok');
+				status(TN('app.ext.ok', files.length), 'ok');
 			}
 			renderGrid();
 		});
@@ -1576,7 +1577,7 @@
 			S.theme = THEME_NEXT[S.theme] || 'auto';
 			saveSettings();
 			applyTheme(true);
-			status(THEME_LABEL[S.theme], 'silent');
+			status(T(THEME_LABEL[S.theme]), 'silent');
 		};
 		ABR.onHostThemeChange(function () { if (S.theme === 'auto') applyTheme(true); });
 		if (global.matchMedia) {
@@ -1621,7 +1622,7 @@
 		expander($('rangeBox'), $('rangeBtn'), $('selRange'), function () {
 			if (!state.doc) return;
 			var r = parseRange($('selRange').value, state.doc.pages.length);
-			if (!r.length) { status('intervalo inválido. ex: 1-3, 5, 8-', 'error'); return; }
+			if (!r.length) { status(T('app.badRange'), 'error'); return; }
 			state.selected = state.doc.pages.map(function (p, i) { return r.indexOf(i) >= 0; });
 			updateSelection(true);
 			UI.replay($('rangeBox'), 'flash');
@@ -1683,18 +1684,14 @@
 		};
 		var fit = UI.seg($('fitSeg'), function (v) { S.fit = v; saveSettings(); });
 		fit.set(S.fit, true);
-		var LAYER_HINT = {
-			lines: 'texto de ponto, anchor point na linha de base de cada linha',
-			blocks: 'PPTX: caixa de parágrafo · PDF: texto de ponto com várias linhas'
-		};
 		var layerSeg = UI.seg($('layerSeg'), function (v) {
 			S.layerMode = v;
 			saveSettings();
-			$('layerHint').textContent = LAYER_HINT[v];
+			$('layerHint').textContent = T(LAYER_HINT[v]);
 			UI.replay($('layerHint'), 'swap');
 		});
 		layerSeg.set(S.layerMode, true);
-		$('layerHint').textContent = LAYER_HINT[S.layerMode];
+		$('layerHint').textContent = T(LAYER_HINT[S.layerMode]);
 		$('btnSplit').onclick = splitExisting;
 		bindSwitch('keepAutofit', 'keepAutofit', function () { if (state.doc && state.doc.type === 'pptx') parseDocument(false); });
 		$('fallbackFont').value = S.fallbackFont;
@@ -1716,7 +1713,7 @@
 			animIcon(this, 'wiggle');
 			autoMatch(true);
 			renderFonts();
-			status('fontes associadas automaticamente.', 'ok');
+			status(T('app.autoDone'), 'ok');
 		};
 		$('btnScan').onclick = scanProject;
 		$('btnReloadFonts').onclick = function () {
@@ -1727,7 +1724,7 @@
 				autoMatch(false);
 				renderFonts();
 				b.classList.remove('busy');
-				status(ABR.fonts.list.length + ' fontes instaladas.', 'ok');
+				status(TN('app.installed', ABR.fonts.list.length), 'ok');
 			});
 		};
 		var scope = UI.seg($('scopeSeg'), function (v) { S.scope = v; saveSettings(); });
@@ -1753,8 +1750,20 @@
 			};
 			sync();
 		});
-		$('logoBtn').setAttribute('title', 'ABRIDOR v' + VERSION + '\nabrir a documentação no GitHub');
+		$('logoBtn').removeAttribute('data-i18n-title');
+		var logoTip = function () { $('logoBtn').setAttribute('title', 'ABRIDOR v' + VERSION + '\n' + T('app.logo.tip')); $('logoBtn').removeAttribute('data-tip'); };
+		logoTip();
+		ABR.i18n.onChange(logoTip);
 		$('logoBtn').onclick = function () { ABR.openURL('https://github.com/jmbillard/ABRIDOR#readme'); };
+		$('langBtn').onclick = function () {
+			var list = ABR.i18n.langs;
+			var next = list[(list.indexOf(ABR.i18n.lang) + 1) % list.length];
+			S.lang = next;
+			saveSettings();
+			ABR.i18n.setLang(next);
+			UI.replay(this, 'pop');
+			status(T('app.lang.changed', { name: ABR.i18n.name(next) }), 'silent');
+		};
 		$('helpBtn').onclick = function () { if (ABR.tour && !state.busy) ABR.tour.start(false); };
 		$('btnLog').onclick = function () { UI.collapse($('logBox'), !$('logBox').classList.contains('open')); };
 		$('toast').onclick = UI.hideToast;
@@ -1777,21 +1786,58 @@
 		});
 	}
 
+	/* ---------------------------------------------------------------- idioma */
+
+	function sendHostStrings() {
+		if (!ABR.isCEP && !(global.ABR_MOCK && global.ABR_MOCK.callHost)) return;
+		ABR.callHost('abridor_setStrings', [JSON.stringify(ABR.i18n.hostStrings())]).catch(function () { });
+	}
+
+	function updateLangBtn() {
+		var btn = $('langBtn');
+		btn.querySelector('span').textContent = ABR.i18n.lang.toUpperCase();
+		btn.title = T('app.lang.tip', { name: ABR.i18n.name(ABR.i18n.lang) });
+		btn.removeAttribute('data-tip');
+	}
+
+	// tudo o que foi montado por JS volta a ser montado no idioma novo
+	function onLangChange() {
+		updateLangBtn();
+		applyTheme(false);
+		renderRecents();
+		updateCompsInfo();
+		$('layerHint').textContent = T(LAYER_HINT[S.layerMode]);
+		if (state.doc) {
+			var doc = state.doc;
+			var nTexts = doc.pages.reduce(function (n, pg) { return n + pg.texts.length; }, 0);
+			$('docMeta').textContent = TN('app.pages', doc.pages.length) + ' · ' + TN('app.texts', nTexts);
+			$('docChip').title = ABR.fs.basename(state.path) + '\n' + Math.round(doc.width) + ' × ' + Math.round(doc.height) + ' pt\n\n' + T('app.docchip.tip');
+			renderGrid();
+			updateSelection(false);
+		}
+		renderFonts();
+		sendHostStrings();
+	}
+
 	function init() {
 		var saved = load('settings2', {});
 		for (var k in DEFAULTS) S[k] = saved[k] !== undefined ? saved[k] : DEFAULTS[k];
+		ABR.i18n.setLang(S.lang === 'auto' ? null : S.lang);
 		bind();
+		updateLangBtn();
+		ABR.i18n.onChange(onLangChange);
+		sendHostStrings();
 		renderRecents();
 		renderFonts();
 		updateCompsInfo();
 		requestAnimationFrame(function () { placeTabInk(); UI.relayout(); });
 		if (!ABR.isCEP && !global.ABR_MOCK) {
-			status('abra este painel pelo After Effects (Window > Extensions > ABRIDOR).', 'error', true);
+			status(T('app.noHost'), 'error', true);
 			return;
 		}
 		loadInstalledFonts().then(function () {
 			renderFonts();
-			if (ABR.fonts.supported) status('pronto — ' + ABR.fonts.list.length + ' fontes instaladas.', 'silent');
+			if (ABR.fonts.supported) status(T('app.ready', { n: ABR.fonts.list.length }), 'silent');
 		});
 	}
 

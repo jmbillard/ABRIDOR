@@ -40,7 +40,7 @@ function ctrl(type, text) {
 const calls = [];
 const ctx = {
 	$: { os: 'Windows', fileName: script }, File, Folder, decodeURI, encodeURI,
-	app: { version: '25.1.0', preferences: { getPrefAsLong: () => 1 }, executeCommand() { } },
+	app: { version: '25.1.0', isoLanguage: 'pt_BR', preferences: { getPrefAsLong: () => 1 }, executeCommand() { } },
 	system: { callSystem: c => { calls.push(c); return ''; } },
 	Window: function (t, title) { win = ctrl('window', title); return win; }
 };
@@ -68,3 +68,14 @@ buttons = {}; run();
 console.log('2ª execução, opção:', buttons['reinstalar'] ? 'reinstalar' : buttons['atualizar'] ? 'atualizar' : '?');
 buttons['instalar'] = undefined; buttons['remover'].value = true; buttons['reinstalar'].value = false;
 next(); console.log('resultado:', result().split('\n')[0], '| existe:', fs.existsSync(dest));
+
+// outros idiomas (textos de i18n/strings.csv, chaves inst.*)
+['en_US', 'es_ES'].forEach((lang) => {
+	ctx.app.isoLanguage = lang; buttons = {}; run();
+	const btns = Object.values(buttons).filter(b => b.type === 'button').map(b => b.text);
+	const radios = Object.values(buttons).filter(b => b.type === 'radiobutton').map(b => b.text);
+	console.log(lang + ':', win.text, '| botões:', btns.join(' / '), '| opções:', radios.join(' / '));
+	const main = Object.values(buttons).filter(b => b.type === 'button').pop();
+	main.onClick(); console.log(lang + ' resultado:', result().split('\n')[0], '| botão:', main.text);
+});
+ctx.app.isoLanguage = 'pt_BR';

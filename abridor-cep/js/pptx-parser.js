@@ -950,7 +950,7 @@
 			reader = new PptxReader(zip);
 			return reader.xml('ppt/presentation.xml');
 		}).then(function (pres) {
-			if (!pres) throw new Error('Arquivo PPTX inválido (ppt/presentation.xml não encontrado).');
+			if (!pres) throw new Error(ABR.t('err.pptxInvalid'));
 			var sz = kid(pres, 'sldSz');
 			var W = numAttr(sz, 'cx', 12192000) / EMU, H = numAttr(sz, 'cy', 6858000) / EMU;
 			var defaultTextStyle = kid(pres, 'defaultTextStyle');
@@ -966,7 +966,7 @@
 						return reader.readSlide(p, { defaultTextStyle: defaultTextStyle, opts: opts });
 					}).then(function (s) {
 						pages.push({
-							index: i, number: i + 1, name: 'Slide ' + (i + 1),
+							index: i, number: i + 1, name: ABR.t('parser.slideName', { n: i + 1 }),
 							width: W, height: H,
 							hidden: s.hidden,
 							texts: s.texts,
