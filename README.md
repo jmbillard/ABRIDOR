@@ -518,7 +518,7 @@ o texto está como **imagem** ou foi convertido em **curvas** no PDF. não há c
 
 **quero uma referência idêntica ao PowerPoint.**\
 a referência de PPTX é um render aproximado (fundo, imagens, formas e textos). para ficar idêntica:
-1. no PowerPoint, `Arquivo` > `Exportar` > `PNG` (todos os slides);
+1. no PowerPoint, `Arquivo` > `Exportar` > `Alterar Tipo de Arquivo` > `PNG` (todos os slides);
 2. no ABRIDOR, aba **páginas** > **imagens externas…** e escolha a pasta dos PNGs. as imagens são associadas pela ordem numérica dos arquivos (`Slide1.png`, `Slide2.png`, …) e as páginas ganham a etiqueta **IMG**. o **×** volta para a referência interna.
 
 ou salve o PPTX como PDF e use o PDF.
@@ -530,7 +530,7 @@ a fonte substituta é mais larga que a original. ajuste a **escala** da fonte na
 aba **comps** > **textos** > *uma camada por linha*. o documento é relido na hora.
 
 **PPTX: o texto está menor que no PowerPoint.**\
-o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática*), e o ABRIDOR copia essa redução. para usar o tamanho original, marque **ignorar a redução automática de texto do PowerPoint** na aba **comps**.
+o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática*), e o ABRIDOR copia essa redução. para usar o tamanho original, desligue **redução automática** (*manter o encolhimento de texto do PowerPoint*) em **ajustes finos**, na aba **comps**.
 
 ### 📋 versões do After Effects
 
