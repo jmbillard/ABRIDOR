@@ -1,6 +1,8 @@
 # 🧾 ABRIDOR
 
-🗨️ **pt-BR** ⚡ Extensão do After Effects para agilizar a criação dos layouts de uma abertura ⚡
+🗨️ **português** · [English](README.en.md) · [español](README.es.md)
+
+⚡ Extensão do After Effects para agilizar a criação dos layouts de uma abertura ⚡
 
 O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões nem sites externos — e recria cada página/slide como uma comp do After Effects, com os textos o mais fiéis possível ao original: posição, alinhamento, tamanho, entrelinha, cor, rotação e fontes. As fontes do documento podem ser trocadas por outras, com preview, **antes ou depois** de criar as comps.
 
@@ -142,6 +144,8 @@ atalhos: `Ctrl/⌘ + O` abre um documento · `1` `2` `3` trocam de aba · `Ctrl/
     <td align="center"><img src="docs/img/16-claro-fontes.png" width="380"><br><sub>tema claro: fontes</sub></td>
   </tr>
 </table>
+
+**2.6** o botão **PT** ao lado do tema troca o idioma do painel: **português → English → español**. a troca é na hora, sem fechar o documento aberto, e fica guardada. na primeira vez, o painel segue o idioma do After Effects. veja [idiomas e traduções](#-idiomas-e-traduções) para corrigir textos ou acrescentar outro idioma.
 
 <br>
 
