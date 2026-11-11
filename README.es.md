@@ -627,6 +627,7 @@ abridor-cep/
   - `python3 tests/make_example_pptx.py` → genera `exemplo_creditos.pptx`.
   - `node tests/make_screenshots.js` → genera todas las capturas de `docs/img` (panel real en Chromium con AE simulado; el instalador, el menú y el proyecto son ilustraciones en `tests/illustrations.html`).
   - `node tests/make_demo.js` → graba la animación `docs/img/demo.gif` (requiere `ffmpeg`).
+  - capturas en otros idiomas: ejecuta `make_screenshots.js`, `make_demo.js`, `features_check.js <saída> --docs` y `tour_check.js <saída> --docs` con `ABR_LANG=en` o `ABR_LANG=es` → van a `docs/img/en/` y `docs/img/es/` (mismos nombres de archivo).
   - `python3 tests/make_micro_css.py` → genera `css/micro.css`, las microinteracciones de hover de cada ícono.
   - `node tests/micro_preview.js <saída>` → graba el catálogo de las microinteracciones y el panel en uso (GIF, requiere `ffmpeg`).
   - `node tests/make_banner.js` → genera el banner del instalador (con el logo) y escribe la cadena ExtendScript en el instalador.

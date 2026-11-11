@@ -974,7 +974,7 @@
 		box.id = 'fontPicker';
 		box.innerHTML = '<div class="picker-search">' + icon('search') + '<input type="text" spellcheck="false" placeholder="' + esc(T('app.picker.search')) + '"></div>' +
 			'<div class="picker-list"></div>' +
-			'<div class="picker-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navegar</span><span><kbd>Enter</kbd> escolher</span><span><kbd>Esc</kbd> fechar</span></div>';
+			'<div class="picker-foot"><span><kbd>↑</kbd><kbd>↓</kbd> ' + T('app.picker.navigate') + '</span><span><kbd>Enter</kbd> ' + T('app.picker.choose') + '</span><span><kbd>Esc</kbd> ' + T('app.picker.close') + '</span></div>';
 		document.body.appendChild(box);
 		field.classList.add('active');
 

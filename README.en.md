@@ -629,6 +629,7 @@ abridor-cep/
   - `python3 tests/make_example_pptx.py` → generates `exemplo_creditos.pptx`.
   - `node tests/make_screenshots.js` → generates all screenshots in `docs/img` (real panel in Chromium with a simulated AE; installer, menu and project are illustrations in `tests/illustrations.html`).
   - `node tests/make_demo.js` → records the `docs/img/demo.gif` animation (needs `ffmpeg`).
+  - screenshots in other languages: run `make_screenshots.js`, `make_demo.js`, `features_check.js <output> --docs` and `tour_check.js <output> --docs` with `ABR_LANG=en` or `ABR_LANG=es` → they go to `docs/img/en/` and `docs/img/es/` (same file names).
   - `python3 tests/make_micro_css.py` → generates `css/micro.css`, the hover micro-interactions of each icon.
   - `node tests/micro_preview.js <output>` → records the micro-interactions catalog and the panel in use (GIFs, needs `ffmpeg`).
   - `node tests/make_banner.js` → generates the installer banner (with the logo) and writes the ExtendScript string into the installer.

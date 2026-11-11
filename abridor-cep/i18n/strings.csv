@@ -147,6 +147,9 @@ app.picker.all,todas,all,todas
 app.picker.results.one,{n} resultado,{n} result,{n} resultado
 app.picker.results.other,{n} resultados,{n} results,{n} resultados
 app.picker.more,e mais {n} — continue digitando,and {n} more — keep typing,y {n} más — sigue escribiendo
+app.picker.navigate,navegar,navigate,navegar
+app.picker.choose,escolher,choose,elegir
+app.picker.close,fechar,close,cerrar
 app.noFontList,esta versão do After Effects não lista as fontes (necessário AE 2024+). digite os nomes PostScript.,this After Effects version doesn't list fonts (AE 2024+ required). type the PostScript names.,esta versión de After Effects no lista las fuentes (requiere AE 2024+). escribe los nombres PostScript.
 app.fontsFail,não foi possível ler as fontes do After Effects: {msg},couldn't read the After Effects fonts: {msg},no se pudieron leer las fuentes de After Effects: {msg}
 app.scanning,lendo fontes das camadas do projeto…,reading fonts from the project layers…,leyendo fuentes de las capas del proyecto…

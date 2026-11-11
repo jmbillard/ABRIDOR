@@ -89,7 +89,7 @@
 <!-- ======================================================= INSTALADOR -->
 <template id="inst">
 	<div class="win">
-		<div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>ABRIDOR v1.5.0 · <span data-t="inst.title">instalador</span></div>
+		<div class="titlebar"><span class="dots"><i></i><i></i><i></i></span><span>ABRIDOR v1.5.0 · <span data-t="inst.title">instalador</span></span></div>
 		<img class="banner" src="../docs/img/banner.png" alt="">
 		<div class="body">
 			<div data-step="0" data-t-paras="inst.welcome"></div>
@@ -252,12 +252,12 @@
 		var bar = stage.querySelector('.menubar');
 		var menus = stage.querySelectorAll('.menu');
 		var win = bar.querySelector('.top .sel');
-		menus[0].style.left = (win.offsetLeft - 6 - 6) + 'px';
 		var ext = menus[0].querySelector('div.sel');
-		menus[1].style.left = (menus[0].offsetLeft + menus[0].offsetWidth) + 'px';
-		menus[1].style.top = (menus[0].offsetTop + ext.offsetTop - 5) + 'px';
-		var right = menus[1].offsetLeft + menus[1].offsetWidth + 12;
-		if (right > bar.offsetWidth) bar.style.width = right + 'px';
+		// mesmas relações do original (menu Window em 268px, submenu sobreposto 12px)
+		var left = Math.min(win.offsetLeft - 6, bar.clientWidth - menus[0].offsetWidth - menus[1].offsetWidth + 12 - 14);
+		menus[0].style.left = left + 'px';
+		menus[1].style.left = (left + menus[0].offsetWidth - 12) + 'px';
+		menus[1].style.top = (menus[0].offsetTop + ext.offsetTop + 2) + 'px';
 	}
 
 	function render() {
