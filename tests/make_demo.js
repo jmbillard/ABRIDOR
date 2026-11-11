@@ -1,6 +1,6 @@
 // Grava um vídeo curto das animações do painel e converte em GIF (docs/img/demo.gif).
-// uso: node tests/make_demo.js
-const { chromium } = require('./pw');
+// uso: node tests/make_demo.js   (ABR_LANG=en|es → docs/img/en|es/demo.gif)
+const { chromium, DOCS_IMG } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -77,7 +77,8 @@ fam('Liberation Sans', [['Regular', 'LiberationSans'], ['Bold', 'LiberationSans-
 
 	const video = fs.readdirSync(TMP).find((f) => f.endsWith('.webm'));
 	const src = path.join(TMP, video);
-	const out = path.join(ROOT, 'docs/img/demo.gif');
+	fs.mkdirSync(DOCS_IMG, { recursive: true });
+	const out = path.join(DOCS_IMG, 'demo.gif');
 	const pal = path.join(TMP, 'pal.png');
 	execSync(`ffmpeg -y -loglevel error -i "${src}" -vf "fps=9,scale=340:-1:flags=lanczos,palettegen=max_colors=96:stats_mode=diff" "${pal}"`);
 	execSync(`ffmpeg -y -loglevel error -i "${src}" -i "${pal}" -lavfi "fps=9,scale=340:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=none:diff_mode=rectangle" "${out}"`);

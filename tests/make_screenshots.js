@@ -1,11 +1,11 @@
 // Gera os prints do README (docs/img) com o painel real rodando no Chromium e o After Effects simulado.
-// uso: node tests/make_screenshots.js
-const { chromium } = require('./pw');
+// uso: node tests/make_screenshots.js   (ABR_LANG=en|es → docs/img/en|es)
+const { chromium, LANG, DOCS_IMG, I18N_HELPERS } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'docs/img');
+const OUT = DOCS_IMG;
 const PDF = path.join(ROOT, 'test files/Template Dramaturgia Curta_Aumenta que é rock_150824.pdf');
 const PPTX = path.join(ROOT, 'test files/exemplo_creditos.pptx');
 fs.mkdirSync(OUT, { recursive: true });
@@ -85,7 +85,7 @@ async function openDoc(page, file) {
 	await page.evaluate((f) => { window.__nextFile = f; }, file);
 	await page.evaluate(() => { document.getElementById('status').textContent = ''; });
 	await page.evaluate(() => { if (document.body.classList.contains('is-empty')) document.getElementById('dropZone').click(); else document.getElementById('docChip').click(); });
-	await page.waitForFunction(() => /carregado|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
+	await page.waitForFunction(() => __has('status', 'app.loaded', 'app.docError'), null, { timeout: 120000 });
 	await page.waitForTimeout(900);
 }
 
@@ -100,6 +100,7 @@ async function tab(page, t) {
 	const page = await ctx.newPage();
 	page.on('pageerror', (e) => console.log('[pageerror]', e.message));
 
+	await page.addInitScript(I18N_HELPERS);
 	await page.addInitScript(({ b64, FONTS }) => {
 		const delay = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
 		window.__written = {};
@@ -118,7 +119,7 @@ async function tab(page, t) {
 				if (fn === 'abridor_getFonts') return JSON.stringify({ fonts: FONTS });
 				if (fn === 'abridor_buildPage') {
 					const n = args[1];
-					const log = n === 1 ? ['estilos mistos simplificados (AE sem characterRange): "direção ANA BEATRIZ LIMA"'] : [];
+					const log = n === 1 ? [ABR.t('host.mixed_simplified', { layer: 'direção ANA BEATRIZ LIMA' })] : [];
 					return delay(window.__buildDelay || 300, JSON.stringify({ ok: true, texts: 2, log }));
 				}
 				if (fn === 'abridor_finish') return delay(200, JSON.stringify({ ok: true, comps: 5, master: 'O SOM DO MAR MASTER' }));
@@ -145,7 +146,7 @@ async function tab(page, t) {
 	const settle = (ms) => page.waitForTimeout(ms || 500);
 
 	await page.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
-	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+	await page.waitForFunction(() => __has('status', 'app.ready'));
 	await settle(700);
 
 	// 10 · painel vazio
@@ -289,7 +290,7 @@ async function tab(page, t) {
 	await page.click('.font[data-key="Gotham Black"] .font-head');
 	await page.click('#previewBtn');
 	await settle(400);
-	await page.fill('#sampleText', 'Créditos 2026 — ÁÉÍÓÚ 0123');
+	await page.fill('#sampleText', (LANG === 'en' ? 'Credits' : 'Créditos') + ' 2026 — ÁÉÍÓÚ 0123');
 	await page.dispatchEvent('#sampleText', 'input');
 	await page.evaluate(() => document.getElementById('fontList').scrollTop = 0);
 	await settle(700);
@@ -308,7 +309,7 @@ async function tab(page, t) {
 	await page.click('#btnBuild');
 	await page.waitForTimeout(400);
 	if (await page.$('#preWrap [data-act=go]')) await page.click('#preWrap [data-act=go]');
-	await page.waitForFunction(() => /criando 3\//.test(document.getElementById('ctaText').textContent), null, { timeout: 60000 });
+	await page.waitForFunction(() => document.getElementById('ctaText').textContent.indexOf(ABR.t('app.creatingProgress', { i: 3, n: '' })) >= 0, null, { timeout: 60000 });
 	await settle(250);
 	await shot(page, '40-criando.png', [{ sel: '#btnBuild', n: 1, side: 'top', pad: 2 }], { clip: await footerClip() });
 	await page.waitForFunction(() => document.getElementById('btnBuild').classList.contains('done'), null, { timeout: 60000 });
@@ -330,17 +331,17 @@ async function tab(page, t) {
 
 	// 50 · trocar fontes depois (sem documento aberto)
 	await page.reload();
-	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+	await page.waitForFunction(() => __has('status', 'app.ready'));
 	await tab(page, 'fonts');
 	await settle(400);
 	await shot(page, '50-fontes-vazio.png', [{ sel: '#emptyScan', n: 1, side: 'right', pad: 2 }], { clip: { x: 0, y: 0, width: 460, height: 420 } });
 	await page.click('#emptyScan');
-	await page.waitForFunction(() => /fontes encontradas/.test(document.getElementById('status').textContent));
+	await page.waitForFunction(() => __has('status', 'app.scanFound.other'));
 	await hideToast();
 	await pick('Calibri Bold', 'Liberation Sans', 'LiberationSans-Bold');
 	await page.click('#scopeSeg button[data-value="all"]');
 	await page.click('#btnApplyFonts');
-	await page.waitForFunction(() => /camadas atualizadas/.test(document.getElementById('status').textContent));
+	await page.waitForFunction(() => __has('status', 'app.applied'));
 	await settle(650);
 	await shot(page, '51-trocar-depois.png', [
 		{ sel: '.font[data-key="Calibri Bold"] .font-head', n: 1, side: 'right', pad: 2 },
@@ -353,6 +354,7 @@ async function tab(page, t) {
 		const lctx = await browser.newContext({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2, colorScheme: 'light' });
 		const lp = await lctx.newPage();
 		lp.on('pageerror', (e) => console.log('[pageerror]', e.message));
+		await lp.addInitScript(I18N_HELPERS);
 		await lp.addInitScript(({ b64, FONTS, PPTX }) => {
 			window.__nextFile = PPTX;
 			window.ABR_MOCK = {
@@ -364,9 +366,9 @@ async function tab(page, t) {
 			try { localStorage.clear(); localStorage.setItem('abridor.tourDone', '1'); } catch (e) { }
 		}, { b64, FONTS, PPTX });
 		await lp.goto('file://' + path.join(ROOT, 'abridor-cep/index.html'));
-		await lp.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+		await lp.waitForFunction(() => __has('status', 'app.ready'));
 		await lp.click('#dropZone');
-		await lp.waitForFunction(() => /carregado/.test(document.getElementById('status').textContent));
+		await lp.waitForFunction(() => __has('status', 'app.loaded'));
 		await lp.evaluate(() => ABR.ui.hideToast());
 		await lp.waitForTimeout(900);
 		await lp.mouse.move(1, 700);
@@ -393,7 +395,7 @@ async function tab(page, t) {
 		await lctx.close();
 		// monta a faixa com os três estados do botão
 		const sp = await (await browser.newContext({ deviceScaleFactor: 1 })).newPage();
-		const labels = ['automático', 'claro', 'escuro'];
+		const labels = { pt: ['automático', 'claro', 'escuro'], en: ['automatic', 'light', 'dark'], es: ['automático', 'claro', 'oscuro'] }[LANG] || ['auto', 'light', 'dark'];
 		await sp.setContent('<body style="margin:0;background:transparent;font:600 22px Inter,sans-serif;color:#8b949e"><div id="s" style="display:inline-flex;gap:28px;padding:14px">' +
 			modes.map((m, i) => '<figure style="margin:0;text-align:center"><img src="data:image/png;base64,' + m.toString('base64') + '" style="width:96px;border-radius:14px;display:block;box-shadow:0 2px 10px rgba(0,0,0,.15)"><figcaption style="margin-top:8px">' + labels[i] + '</figcaption></figure>').join('') + '</div></body>');
 		await (await sp.$('#s')).screenshot({ path: path.join(OUT, '17-tema-botao.png'), omitBackground: true });
@@ -403,7 +405,12 @@ async function tab(page, t) {
 
 	// 60 · detecção dos textos (página do PDF, em tamanho grande, com rótulos)
 	await openDoc(page, PDF);
-	const det = await page.evaluate(async () => {
+	const DET = {
+		pt: { left: 'esquerda', center: 'centro', right: 'direita', one: ' linha', other: ' linhas' },
+		en: { left: 'left', center: 'center', right: 'right', one: ' line', other: ' lines' },
+		es: { left: 'izquierda', center: 'centro', right: 'derecha', one: ' línea', other: ' líneas' }
+	}[LANG] || { left: 'left', center: 'center', right: 'right', one: ' line', other: ' lines' };
+	const det = await page.evaluate(async (L) => {
 		const d = ABR.state.doc;
 		const out = [];
 		for (const idx of [8, 2]) {
@@ -420,8 +427,8 @@ async function tab(page, t) {
 			g.font = '600 15px Inter, sans-serif';
 			pg.texts.forEach((t) => {
 				const r = t.paragraphs[0].runs[0];
-				const al = { left: 'esquerda', center: 'centro', right: 'direita' }[t.align] || t.align;
-				const label = r.fontKey + ' · ' + Math.round(r.size * s * 10) / 10 + ' px · ' + al + ' · ' + t.paragraphs.length + (t.paragraphs.length > 1 ? ' linhas' : ' linha');
+				const al = L[t.align] || t.align;
+				const label = r.fontKey + ' · ' + Math.round(r.size * s * 10) / 10 + ' px · ' + al + ' · ' + t.paragraphs.length + (t.paragraphs.length > 1 ? L.other : L.one);
 				const x = t.align === 'right' ? (t.x + t.w) * s - g.measureText(label).width - 12 : t.x * s;
 				const y = Math.max(22, t.y * s - 10);
 				const w = g.measureText(label).width + 12;
@@ -433,7 +440,7 @@ async function tab(page, t) {
 			out.push(c.toDataURL('image/png'));
 		}
 		return out;
-	});
+	}, DET);
 	fs.writeFileSync(path.join(OUT, '60-deteccao-pdf.png'), Buffer.from(det[0].split(',')[1], 'base64'));
 	fs.writeFileSync(path.join(OUT, '61-deteccao-pdf.png'), Buffer.from(det[1].split(',')[1], 'base64'));
 	console.log('✓ 60/61-deteccao-pdf.png');
@@ -454,7 +461,7 @@ async function tab(page, t) {
 	const ip = await ill.newPage();
 	const illus = 'file://' + path.join(__dirname, 'illustrations.html');
 	for (const [hash, name] of [['inst-0', '01-instalador-boas-vindas.png'], ['inst-1', '02-instalador-checagem.png'], ['inst-2', '03-instalador-acao.png'], ['inst-3', '04-instalador-concluido.png'], ['menu', '05-menu-extensoes.png'], ['projeto', '70-projeto.png']]) {
-		await ip.goto(illus + '#' + hash);
+		await ip.goto(illus + '?lang=' + LANG + '#' + hash);
 		await ip.waitForTimeout(300);
 		const el = await ip.$('#stage');
 		await el.screenshot({ path: path.join(OUT, name), omitBackground: true });

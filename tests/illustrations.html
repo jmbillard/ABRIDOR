@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <title>ABRIDOR · ilustrações</title>
 <!-- Recriações (HTML) de telas do After Effects usadas no README: instalador ScriptUI, menu e projeto.
-     Abra com #inst-0, #inst-1, #inst-2, #inst-3, #menu ou #projeto. -->
+     Abra com #inst-0, #inst-1, #inst-2, #inst-3, #menu ou #projeto; ?lang=en|es troca o idioma
+     (instalador: textos inst.* de abridor-cep/i18n/strings.csv; menu/projeto: nomes do After Effects no idioma). -->
 <style>
 	* { box-sizing: border-box; }
 	body { margin: 0; background: transparent; font: 12px/1.45 "Segoe UI", Inter, Arial, sans-serif; color: #c8c8c8; }
@@ -88,42 +89,39 @@
 <!-- ======================================================= INSTALADOR -->
 <template id="inst">
 	<div class="win">
-		<div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>ABRIDOR v1.5.0 · instalador</div>
+		<div class="titlebar"><span class="dots"><i></i><i></i><i></i></span>ABRIDOR v1.5.0 · <span data-t="inst.title">instalador</span></div>
 		<img class="banner" src="../docs/img/banner.png" alt="">
 		<div class="body">
-			<div data-step="0">
-				<p>olá! vamos instalar o ABRIDOR no After Effects.</p>
-				<p>a extensão será copiada para este computador: depois de instalada ela não depende mais desta pasta. para atualizar, rode o instalador da versão nova.</p>
-			</div>
+			<div data-step="0" data-t-paras="inst.welcome"></div>
 			<div data-step="1">
-				<p>conferindo o que o ABRIDOR precisa:</p>
-				<div class="check"><span class="dot ok">●</span>After Effects 2020 ou mais novo</div>
-				<div class="check"><span class="dot warn">●</span>After Effects 2024 (lista e preview de fontes)</div>
-				<div class="check"><span class="dot ok">●</span>acesso à rede e escrita de arquivos</div>
-				<div class="check"><span class="dot ok">●</span>pasta "abridor-cep" ao lado do instalador</div>
-				<p style="margin-top:10px">antes do After Effects 2024 o painel não lista as fontes instaladas: os nomes PostScript são digitados à mão.</p>
-				<div class="link">› verificar de novo</div>
+				<p data-t="inst.checking"></p>
+				<div class="check"><span class="dot ok">●</span><span data-t="inst.check_ae"></span></div>
+				<div class="check"><span class="dot warn">●</span><span data-t="inst.check_fonts"></span></div>
+				<div class="check"><span class="dot ok">●</span><span data-t="inst.check_write"></span></div>
+				<div class="check"><span class="dot ok">●</span><span data-t="inst.check_folder"></span></div>
+				<p style="margin-top:10px" data-t="inst.check_fonts_help"></p>
+				<div class="link" data-t="inst.recheck"></div>
 			</div>
 			<div data-step="2">
-				<p>olá! a extensão será copiada para este computador: depois de instalada ela não depende mais desta pasta. para atualizar, rode o instalador da versão nova.</p>
-				<p class="ok">✓ tudo certo com este computador!</p>
-				<p>o que você quer fazer?</p>
+				<p data-t="inst.welcome_short"></p>
+				<p class="ok">✓ <span data-t="inst.all_ok"></span></p>
+				<p data-t="inst.action_question"></p>
 				<div class="radios">
-					<span class="radio on"><i></i>instalar</span>
-					<span class="radio off"><i></i>remover</span>
+					<span class="radio on"><i></i><span data-t="inst.install"></span></span>
+					<span class="radio off"><i></i><span data-t="inst.remove"></span></span>
 				</div>
-				<div class="path">origem: \\servidor\grafismo\ABRIDOR\abridor-cep</div>
-				<div class="path">destino: C:\Users\editor\AppData\Roaming\Adobe\CEP\extensions\com.abridor.panel</div>
+				<div class="path" data-t="inst.source" data-v-path="\\servidor\grafismo\ABRIDOR\abridor-cep"></div>
+				<div class="path" data-t="inst.destination" data-v-path="C:\Users\editor\AppData\Roaming\Adobe\CEP\extensions\com.abridor.panel"></div>
 			</div>
 			<div data-step="3">
-				<p>ABRIDOR v1.5.0 instalado! (21 arquivos)</p>
-				<p>reinicie o After Effects e abra o painel em:<br>Window &gt; Extensions &gt; ABRIDOR</p>
+				<p data-t="inst.installed_ok" data-v-v=" v1.5.0" data-v-n="21"></p>
+				<p data-t="inst.restart_open"></p>
 			</div>
 		</div>
-		<div class="progress" data-step="3"><div class="lab">pronto!</div><div class="bar"><b style="width:100%"></b></div></div>
+		<div class="progress" data-step="3"><div class="lab" data-t="inst.done"></div><div class="bar"><b style="width:100%"></b></div></div>
 		<div class="buttons">
-			<div><span class="btn" data-hide="3">cancelar</span></div>
-			<div><span class="btn" data-show="1">anterior</span><span class="btn default" id="nextBtn">começar</span></div>
+			<div><span class="btn" data-hide="3" data-t="inst.cancel"></span></div>
+			<div><span class="btn" data-show="1" data-t="inst.back"></span><span class="btn default" id="nextBtn"></span></div>
 		</div>
 	</div>
 </template>
@@ -181,7 +179,7 @@
 				<div class="tl-head"><span>#</span><span></span><span>🔒</span><span>Layer Name</span><span>Comment</span></div>
 				<div class="tl-row"><span class="num">1</span><span class="lbl" style="background:#d34"></span><span class="lock"></span><span class="name"><span class="T">T</span> O SOM DO MAR</span><span class="comment">ABRIDOR {"v":1,"k":"Gotham Black","sz":144…</span></div>
 				<div class="tl-row"><span class="num">2</span><span class="lbl" style="background:#d34"></span><span class="lock"></span><span class="name"><span class="T">T</span> série original · episódio 1</span><span class="comment">ABRIDOR {"v":1,"k":"Inter Light","sz":48…</span></div>
-				<div class="tl-row guide"><span class="num">3</span><span class="lbl" style="background:#777"></span><span class="lock">🔒</span><span class="name">▣ REF - O SOM DO MAR 01 (guia, 50%)</span><span class="comment"></span></div>
+				<div class="tl-row guide"><span class="num">3</span><span class="lbl" style="background:#777"></span><span class="lock">🔒</span><span class="name">▣ REF - O SOM DO MAR 01 (<span data-l="guia">guia</span>, 50%)</span><span class="comment"></span></div>
 			</div>
 			<div class="panel timeline">
 				<div class="ptitle"><b>O SOM DO MAR MASTER</b></div>
@@ -200,7 +198,68 @@
 	</div>
 </template>
 
+<script src="../abridor-cep/js/i18n.js"></script>
 <script>
+	// idioma: ?lang=pt|en|es (padrão pt). Textos do instalador vêm de abridor-cep/i18n/strings.csv.
+	var LANG = (/[?&]lang=(\w\w)/.exec(location.search) || [])[1] || 'pt';
+	(function () {
+		try {
+			var x = new XMLHttpRequest();
+			x.open('GET', '../abridor-cep/i18n/strings.csv', false);
+			x.overrideMimeType('text/plain; charset=utf-8');
+			x.send(null);
+			if (x.responseText) ABR.i18n.load(x.responseText);
+		} catch (e) { }
+		ABR.i18n.setLang(LANG);
+	})();
+
+	// menus e painéis do After Effects no idioma (o AE em português mostra os nomes em inglês)
+	var AE = {
+		es: {
+			'File': 'Archivo', 'Edit': 'Edición', 'Composition': 'Composición', 'Layer': 'Capa', 'Effect': 'Efecto', 'Animation': 'Animación',
+			'View': 'Ver', 'Window': 'Ventana', 'Help': 'Ayuda', 'Workspace': 'Espacio de trabajo', 'Align': 'Alinear', 'Character': 'Carácter',
+			'Effects & Presets': 'Efectos y ajustes preestablecidos', 'Paragraph': 'Párrafo', 'Properties': 'Propiedades', 'Extensions': 'Extensiones',
+			'Project': 'Proyecto', 'Folder': 'Carpeta', 'PNG file': 'Archivo PNG', 'Layer Name': 'Nombre de capa', 'Comment': 'Comentario'
+		}
+	};
+	// legendas explicativas da ilustração
+	var LABELS = { guia: { pt: 'guia', en: 'guide', es: 'guía' } };
+
+	function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+	function translate(root) {
+		root.querySelectorAll('[data-t]').forEach(function (el) {
+			var vars = {};
+			Object.keys(el.dataset).forEach(function (k) { if (/^v[A-Z]/.test(k)) vars[k.charAt(1).toLowerCase() + k.slice(2)] = el.dataset[k]; });
+			el.innerHTML = esc(ABR.t(el.dataset.t, vars)).replace(/\n/g, '<br>');
+		});
+		root.querySelectorAll('[data-t-paras]').forEach(function (el) {
+			el.innerHTML = ABR.t(el.dataset.tParas).split(/\n\n/).map(function (p) { return '<p>' + esc(p).replace(/\n/g, '<br>') + '</p>'; }).join('');
+		});
+		root.querySelectorAll('[data-l]').forEach(function (el) { el.textContent = (LABELS[el.dataset.l] || {})[LANG] || el.textContent; });
+		var dict = AE[LANG];
+		if (!dict) return false;
+		var walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n;
+		while ((n = walk.nextNode())) {
+			var k = n.nodeValue.trim();
+			if (dict[k]) n.nodeValue = n.nodeValue.replace(k, dict[k]);
+		}
+		return true;
+	}
+
+	// com os nomes traduzidos, o submenu acompanha a largura do menu
+	function placeMenus(stage) {
+		var bar = stage.querySelector('.menubar');
+		var menus = stage.querySelectorAll('.menu');
+		var win = bar.querySelector('.top .sel');
+		menus[0].style.left = (win.offsetLeft - 6 - 6) + 'px';
+		var ext = menus[0].querySelector('div.sel');
+		menus[1].style.left = (menus[0].offsetLeft + menus[0].offsetWidth) + 'px';
+		menus[1].style.top = (menus[0].offsetTop + ext.offsetTop - 5) + 'px';
+		var right = menus[1].offsetLeft + menus[1].offsetWidth + 12;
+		if (right > bar.offsetWidth) bar.style.width = right + 'px';
+	}
+
 	function render() {
 		var h = (location.hash || '#inst-0').slice(1);
 		var stage = document.getElementById('stage');
@@ -208,12 +267,14 @@
 		var m = h.match(/^inst-(\d)$/);
 		var tpl = document.getElementById(m ? 'inst' : h);
 		stage.appendChild(tpl.content.cloneNode(true));
+		var changed = translate(stage);
+		if (h === 'menu' && changed) placeMenus(stage);
 		if (!m) return;
 		var step = m[1];
 		stage.querySelectorAll('[data-step]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.step !== step); });
 		stage.querySelectorAll('[data-hide]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.hide === step); });
 		stage.querySelectorAll('[data-show]').forEach(function (el) { el.classList.toggle('hidden', el.dataset.show.split(' ').indexOf(step) < 0); });
-		document.getElementById('nextBtn').textContent = ['começar', 'próximo', 'instalar', 'concluir'][step];
+		document.getElementById('nextBtn').textContent = ABR.t(['inst.start', 'inst.next', 'inst.install', 'inst.finish'][step]);
 	}
 	window.addEventListener('hashchange', render);
 	render();

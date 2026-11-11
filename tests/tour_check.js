@@ -1,9 +1,9 @@
 // Verifica o tour guiado no painel real (AE simulado) e grava os prints.
-// uso: node tests/tour_check.js <saída> [--docs]
-const { chromium } = require('./pw');
+// uso: node tests/tour_check.js <saída> [--docs]   (--docs grava em docs/img, ou docs/img/<idioma> com ABR_LANG)
+const { chromium, DOCS_IMG, I18N_HELPERS } = require('./pw');
 const fs = require('fs'), path = require('path');
-const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2] || 'out');
 const DOCS = process.argv[3] === '--docs';
+const ROOT = path.resolve(__dirname, '..'), OUT = DOCS ? DOCS_IMG : path.resolve(process.argv[2] || 'out');
 fs.mkdirSync(OUT, { recursive: true });
 const PPTX = path.join(ROOT, 'test files/exemplo_creditos.pptx');
 const FONTS = [];
@@ -17,13 +17,15 @@ const check = (c, m) => console.log((c ? '✓ ' : '✗ ') + m);
 	const p = await b.newPage({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2, colorScheme: 'dark' });
 	p.on('pageerror', (e) => console.log('ERR', e.message));
 	const b64 = fs.readFileSync(PPTX).toString('base64');
+	await p.addInitScript(I18N_HELPERS);
 	await p.addInitScript(({ b64, PPTX, FONTS }) => {
 		window.ABR_MOCK = { openFile: () => PPTX, readBinary: () => { const bin = atob(b64); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }, writeText() { }, writeDataURL() { }, callHost: (fn) => fn === 'abridor_getFonts' ? JSON.stringify({ fonts: FONTS }) : JSON.stringify({ ok: true }) };
 		if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', '1'); localStorage.clear(); }
 	}, { b64, PPTX, FONTS });
 	const go = async () => { await p.goto('file://' + path.join(ROOT, 'abridor-cep/index.html')); await p.waitForTimeout(600); };
-	const open = async () => { await p.evaluate(() => document.getElementById(document.body.classList.contains('is-empty') ? 'dropZone' : 'docChip').click()); await p.waitForFunction(() => /carregado/.test(document.getElementById('status').textContent)); };
+	const open = async () => { await p.evaluate(() => document.getElementById(document.body.classList.contains('is-empty') ? 'dropZone' : 'docChip').click()); await p.waitForFunction(() => __has('status', 'app.loaded')); };
 	const shot = (name) => p.screenshot({ path: path.join(OUT, name) });
+	const T = (k) => p.evaluate((k) => ABR.t(k), k);
 	const stepTitle = () => p.evaluate(() => { const h = document.querySelector('.tour-card:not(.tour-out) h4'); return h ? h.textContent : null; });
 
 	await go();
@@ -45,9 +47,9 @@ const check = (c, m) => console.log((c ? '✓ ' : '✗ ') + m);
 	check(await p.evaluate(() => localStorage.getItem('abridor.tourDone')) === '1', 'tour marcado como visto');
 	// ← volta
 	await p.click('#helpBtn'); await p.waitForTimeout(600);
-	check(!(await p.$('.tour-welcome')) && (await stepTitle()) === 'escolha as páginas', 'botão ? começa direto no passo 1');
+	check(!(await p.$('.tour-welcome')) && (await stepTitle()) === (await T('tour.pages.title')), 'botão ? começa direto no passo 1');
 	await p.keyboard.press('ArrowRight'); await p.waitForTimeout(500); await p.keyboard.press('ArrowLeft'); await p.waitForTimeout(500);
-	check((await stepTitle()) === 'escolha as páginas', '← volta um passo');
+	check((await stepTitle()) === (await T('tour.pages.title')), '← volta um passo');
 	// cliques fora do balão não atingem o painel
 	const before = await p.evaluate(() => ABR.state.selected.join());
 	await p.mouse.click(120, 260); await p.waitForTimeout(200);
@@ -61,9 +63,9 @@ const check = (c, m) => console.log((c ? '✓ ' : '✗ ') + m);
 	await p.evaluate(() => localStorage.removeItem('abridor.recents'));
 	await go();
 	await p.click('#helpBtn'); await p.waitForTimeout(600);
-	check((await stepTitle()) === 'comece por aqui', '? sem documento aponta para a área de abrir');
+	check((await stepTitle()) === (await T('tour.start.title')), '? sem documento aponta para a área de abrir');
 	await p.keyboard.press('Enter'); await p.waitForTimeout(400);
 	await open(); await p.waitForTimeout(1500);
-	check((await stepTitle()) === 'escolha as páginas', 'ao abrir o documento, o tour continua');
+	check((await stepTitle()) === (await T('tour.pages.title')), 'ao abrir o documento, o tour continua');
 	await b.close();
 })();

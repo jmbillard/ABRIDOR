@@ -1004,7 +1004,7 @@
 				list.forEach(function (f) { html += itemHTML(f, items.length, q, noteFn && noteFn(f)); items.push(f); });
 			};
 			if (equiv) sec(T('app.picker.suggest'), [equiv], function () { return T('app.picker.metric', { family: src.family }); });
-			sec('recentes', recents.filter(function (f) { return f !== equiv; }));
+			sec(T('app.recent'), recents.filter(function (f) { return f !== equiv; }));
 			var rest = families.filter(function (f) { return match(f) && f !== equiv && recents.indexOf(f) < 0; });
 			if (q) rest.sort(function (a, b) { return (a.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.toLowerCase().indexOf(q) === 0 ? 0 : 1) || a.localeCompare(b); });
 			var shown = rest.slice(0, 150);

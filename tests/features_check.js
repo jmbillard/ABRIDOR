@@ -1,8 +1,9 @@
 // Exercita os recursos de "uso mais intuitivo" no painel real (AE simulado) e grava prints.
-// uso: node tests/features_check.js <saída>
-const { chromium } = require('./pw');
+// uso: node tests/features_check.js <saída> [--docs]   (--docs grava em docs/img, ou docs/img/<idioma> com ABR_LANG)
+const { chromium, DOCS_IMG, I18N_HELPERS } = require('./pw');
 const fs = require('fs'), path = require('path');
-const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2] || 'out');
+const DOCS = process.argv[3] === '--docs';
+const ROOT = path.resolve(__dirname, '..'), OUT = DOCS ? DOCS_IMG : path.resolve(process.argv[2] || 'out');
 fs.mkdirSync(OUT, { recursive: true });
 const PPTX = path.join(ROOT, 'test files/exemplo_creditos.pptx');
 const FONTS = [];
@@ -18,6 +19,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	const p = await b.newPage({ viewport: { width: 460, height: 860 }, deviceScaleFactor: 2, colorScheme: 'dark' });
 	p.on('pageerror', (e) => console.log('ERR', e.message));
 	const b64 = fs.readFileSync(PPTX).toString('base64');
+	await p.addInitScript(I18N_HELPERS);
 	await p.addInitScript(({ b64, PPTX, FONTS }) => {
 		const delay = (ms, v) => new Promise((r) => setTimeout(() => r(v), ms));
 		window.__calls = [];
@@ -49,9 +51,9 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	await p.addStyleTag({ content: '.tip{display:none!important}' });
 	await p.waitForTimeout(700);
 	// com --docs, grava com os nomes usados no README
-	const DOCS = { 'f8-recentes.png': '19-recentes.png', 'f1-aviso.png': '43-aviso-fontes.png', 'f6-intervalo.png': '15-intervalo-shift.png',
+	const DOCNAMES = { 'f8-recentes.png': '19-recentes.png', 'f1-aviso.png': '43-aviso-fontes.png', 'f6-intervalo.png': '15-intervalo-shift.png',
 		'f1-folha.png': '44-antes-de-criar.png', 'f2-seletor.png': '33-seletor-fontes.png', 'f3-familia.png': '34-familia.png', 'f7-concluido.png': '45-concluido-acoes.png' };
-	const shot = (n, clip) => p.screenshot({ path: path.join(OUT, process.argv[3] === '--docs' ? DOCS[n] : n), clip });
+	const shot = (n, clip) => p.screenshot({ path: path.join(OUT, DOCS ? DOCNAMES[n] : n), clip });
 
 	// 8 · recentes
 	check(await p.$$eval('.recent-item', (e) => e.length) === 3, 'recentes: 3 itens na tela vazia');
@@ -59,7 +61,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	await p.hover('.recent-item:nth-of-type(1)'); await p.waitForTimeout(300);
 	await p.setViewportSize({ width: 460, height: 700 }); await shot('f8-recentes.png'); await p.setViewportSize({ width: 460, height: 860 });
 	await p.click('.recent-item:not(.missing) >> nth=0');
-	await p.waitForFunction(() => /carregado/.test(document.getElementById('status').textContent));
+	await p.waitForFunction(() => __has('status', 'app.loaded'));
 	await p.evaluate(() => ABR.ui.hideToast());
 	await p.waitForTimeout(800);
 	check(await p.$eval('#docName', (e) => e.textContent) === 'exemplo_creditos.pptx', 'recentes: clique reabre o documento');
@@ -94,7 +96,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	// 2 · seletor
 	await p.click('.font[data-key="Calibri"] .font-head'); await p.waitForTimeout(500);
 	await p.click('.font[data-key="Calibri"] .picker-field.family'); await p.waitForTimeout(300);
-	check(await p.$eval('#fontPicker .picker-sec', (e) => e.textContent) === 'sugestão', 'seletor: sugestão de fonte com as mesmas medidas (' + (await p.$eval('#fontPicker .picker-item .ps', (e) => e.textContent)) + ')');
+	check(await p.$eval('#fontPicker .picker-sec', (e) => e.textContent === ABR.t('app.picker.suggest')), 'seletor: sugestão de fonte com as mesmas medidas (' + (await p.$eval('#fontPicker .picker-item .ps', (e) => e.textContent)) + ')');
 	await p.keyboard.type('ca', { delay: 60 }); await p.waitForTimeout(300);
 	await shot('f2-seletor.png');
 	await p.keyboard.press('Escape'); await p.waitForTimeout(300);
@@ -114,7 +116,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	// recentes da busca no seletor
 	await p.click('.font[data-key="Gotham Black"] .font-head'); await p.waitForTimeout(400);
 	await p.click('.font[data-key="Gotham Black"] .picker-field.family'); await p.waitForTimeout(200);
-	check((await p.$$eval('#fontPicker .picker-sec', (e) => e.map((x) => x.textContent))).indexOf('recentes') >= 0, 'seletor: Carlito aparece em "recentes"');
+	check(await p.$$eval('#fontPicker .picker-sec', (e) => e.map((x) => x.textContent).indexOf(ABR.t('app.recent')) >= 0), 'seletor: Carlito aparece em "recentes"');
 	await p.keyboard.type('inter'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
 	check(await p.evaluate(() => ABR.state.map['Gotham Black'].ps) === 'Inter-Black', 'seletor: Gotham Black → Inter Black (peso mantido)');
 	check(await p.$eval('#preChip', (e) => e.classList.contains('hidden')), 'aviso no rodapé some quando não falta fonte');
@@ -122,7 +124,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	// 7 · concluído com ações
 	await p.click('#btnBuild'); await p.waitForTimeout(700);
 	check(await p.$$eval('#preWrap .check-item', (e) => e.length) === 2, 'folha sem o item de fontes depois de associar');
-	check(await p.$eval('#preWrap [data-act=go]', (e) => e.textContent) === 'atualizar os textos', 'botão da folha: "atualizar os textos"');
+	check(await p.$eval('#preWrap [data-act=go]', (e) => e.textContent === ABR.t('app.pre.updateTexts')), 'botão da folha: "atualizar os textos"');
 	await p.click('#preWrap [data-act=go]');
 	await p.waitForFunction(() => document.getElementById('btnBuild').classList.contains('done'), null, { timeout: 30000 });
 	await p.waitForTimeout(500);

@@ -19,3 +19,17 @@ chromium.launch = async (o) => {
 };
 
 module.exports = Object.assign({}, pw, { chromium, LOCALE });
+
+// idioma de 2 letras e pasta dos prints do README: docs/img (pt) ou docs/img/<idioma>
+const LANG = LOCALE.toLowerCase().slice(0, 2);
+const DOCS_IMG = require('path').resolve(__dirname, '..', 'docs/img', LANG === 'pt' ? '' : LANG);
+
+// para usar dentro de page.evaluate/waitForFunction: o texto da chave vira regex ({x} = qualquer coisa)
+const I18N_HELPERS = () => {
+	window.__rx = (key, vars) => new RegExp(ABR.t(key, vars).replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\{\w+\}/g, '.*?'));
+	window.__has = (id, ...keys) => { if (!window.ABR || !ABR.t) return false; const s = document.getElementById(id).textContent; return keys.some((k) => window.__rx(k).test(s)); };
+};
+
+module.exports.LANG = LANG;
+module.exports.DOCS_IMG = DOCS_IMG;
+module.exports.I18N_HELPERS = I18N_HELPERS;
