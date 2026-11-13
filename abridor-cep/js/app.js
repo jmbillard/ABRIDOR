@@ -8,7 +8,7 @@
 	var UI = ABR.ui;
 	var icon = UI.icon;
 	var T = ABR.t, TN = ABR.tn;
-	var VERSION = '1.5.1';
+	var VERSION = '1.5.2';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -609,7 +609,14 @@
 				continue;
 			}
 			var f = ABR.fonts.autoMatch(state.fonts[k]);
-			state.map[k] = { ps: f ? f.ps : (cur && cur.ps && !force ? cur.ps : ''), scale: cur ? cur.scale : 100, manual: false };
+			// não instalada, mas existe a equivalente de mesmas medidas (Calibri → Carlito, Arial → Liberation Sans…)
+			var eq = null;
+			if (!f) {
+				eq = EQUIV[ABR.fonts.norm(state.fonts[k].family)];
+				f = eq ? styleFor(state.fonts[k], eq) : null;
+				if (!f) eq = null;
+			}
+			state.map[k] = { ps: f ? f.ps : (cur && cur.ps && !force ? cur.ps : ''), scale: cur ? cur.scale : 100, manual: false, equiv: eq ? state.fonts[k].family : '' };
 		}
 	}
 
@@ -855,7 +862,7 @@
 			var dst = row.querySelector('.dst');
 			dst.textContent = f ? f.family + ' ' + f.style : (m.ps ? m.ps : T('app.noFont'));
 			dst.title = f ? f.family + ' ' + f.style + '\nPostScript: ' + f.ps : (m.ps ? T('app.notInstalled') + '\n' + m.ps : T('app.noFont.tip', { font: S.fallbackFont }));
-			row.querySelector('.dot').title = T('app.dot.' + st);
+			row.querySelector('.dot').title = st === 'ok' && m.equiv ? T('app.dot.equiv', { family: m.equiv }) : T('app.dot.' + st);
 			var sample = $('sampleText').value || sampleOf(src) || src.key;
 			preview.textContent = sample;
 			preview.style.fontSize = Math.round(S.previewSize * (m.scale || 100) / 100) + 'px';

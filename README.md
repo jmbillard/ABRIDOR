@@ -85,7 +85,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 ## 2 · abrir o painel
 
-**2.1** no After Effects, abra `Window` > `Extensions` > `ABRIDOR`. o painel pode ser encaixado em qualquer lugar da área de trabalho, como os outros painéis.
+**2.1** no After Effects, abra `Window` > `Extensions` > `ABRIDOR`. o painel pode ser encaixado em qualquer lugar da área de trabalho, como os outros painéis. ele se ajusta ao espaço: estreito, mostra o essencial em uma coluna; largo, a aba **comps** passa para duas colunas.
 
 <p align="center">
   <img src="docs/img/05-menu-extensoes.png" width="620"><br>
@@ -331,7 +331,7 @@ exemplo: *Gotham Black* não está instalada → trocada por **Inter Black**:
 4. **escala** → `−` / `+` de 5 %. aqui `95 %`: a fonte nova é um pouco mais larga.
 5. o texto na fonte **original** (se estiver instalada), para comparar.
 
-as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
+as *Calibri* não estão instaladas, mas o painel já as associou sozinho à **Carlito**, que tem as **mesmas medidas** (o texto ocupa o mesmo espaço). isso vale para os pares conhecidos — *Calibri → Carlito*, *Cambria → Caladea*, *Arial / Helvetica → Liberation Sans*, *Times New Roman → Liberation Serif*, *Courier New → Liberation Mono* — quando a equivalente está instalada. a dica da bolinha avisa que é uma equivalente; para usar outra fonte, é só trocar.
 
   </td>
   </tr>

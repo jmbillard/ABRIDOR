@@ -85,7 +85,7 @@
 
 ## 2 · abrir el panel
 
-**2.1** en After Effects, abre `Ventana` > `Extensiones` > `ABRIDOR` (`Window` > `Extensions` > `ABRIDOR`). el panel se puede acoplar en cualquier lugar del espacio de trabajo, como los demás paneles.
+**2.1** en After Effects, abre `Ventana` > `Extensiones` > `ABRIDOR` (`Window` > `Extensions` > `ABRIDOR`). el panel se puede acoplar en cualquier lugar del espacio de trabajo, como los demás paneles. se ajusta al espacio: angosto, muestra lo esencial en una columna; ancho, la pestaña **comps** pasa a dos columnas.
 
 <p align="center">
   <img src="docs/img/es/05-menu-extensoes.png" width="620"><br>
@@ -331,7 +331,7 @@ ejemplo: *Gotham Black* no está instalada → se cambió por **Inter Black**:
 4. **escala** → `−` / `+` de 5 %. aquí `95 %`: la fuente nueva es un poco más ancha.
 5. el texto en la fuente **original** (si está instalada), para comparar.
 
-las *Calibri* se asociaron a **Carlito**, que tiene las mismas medidas.
+las *Calibri* no están instaladas, pero el panel ya las asoció por sí solo a **Carlito**, que tiene las **mismas medidas** (el texto ocupa el mismo espacio). esto vale para los pares conocidos — *Calibri → Carlito*, *Cambria → Caladea*, *Arial / Helvetica → Liberation Sans*, *Times New Roman → Liberation Serif*, *Courier New → Liberation Mono* — cuando la equivalente está instalada. el tooltip del punto avisa que es una equivalente; para usar otra fuente, basta cambiarla.
 
   </td>
   </tr>

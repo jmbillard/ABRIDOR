@@ -102,8 +102,9 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	await p.keyboard.press('Escape'); await p.waitForTimeout(300);
 	check(!(await p.$('#fontPicker')), 'seletor: Esc fecha');
 	await p.click('.font[data-key="Calibri"] .picker-field.family'); await p.waitForTimeout(200);
-	await p.keyboard.type('carl'); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
-	check(await p.evaluate(() => ABR.state.map['Calibri'].ps) === 'Carlito', 'seletor: Enter escolhe Carlito');
+	check(await p.evaluate(() => ABR.state.map['Calibri'].ps === 'Carlito' && !ABR.state.map['Calibri'].manual), 'equivalente: Calibri já veio associada à Carlito');
+	await p.keyboard.type('liber'); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
+	check(await p.evaluate(() => ABR.state.map['Calibri'].ps) === 'LiberationSans', 'seletor: Enter escolhe Liberation Sans');
 
 	// 3 · família inteira
 	check(!!(await p.$('.font[data-key="Calibri"] .family-hint')), 'família: oferece ' + (await p.$eval('.family-hint ul', (e) => e.textContent)));
@@ -111,7 +112,7 @@ const check = (cond, msg) => console.log((cond ? '✓ ' : '✗ ') + msg);
 	const hb = await (await p.$('.font[data-key="Calibri"]')).boundingBox();
 	await shot('f3-familia.png', { x: 0, y: Math.max(0, hb.y - 20), width: 460, height: Math.min(460, 860 - hb.y + 20) });
 	await p.click('.family-hint .yes'); await p.waitForTimeout(400);
-	check(await p.evaluate(() => ABR.state.map['Calibri Bold'].ps) === 'Carlito-Bold', 'família: Calibri Bold → Carlito Bold aplicado');
+	check(await p.evaluate(() => ABR.state.map['Calibri Bold'].ps) === 'LiberationSans-Bold', 'família: Calibri Bold → Liberation Sans Bold aplicado');
 
 	// recentes da busca no seletor
 	await p.click('.font[data-key="Gotham Black"] .font-head'); await p.waitForTimeout(400);

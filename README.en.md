@@ -85,7 +85,7 @@
 
 ## 2 · open the panel
 
-**2.1** in After Effects, open `Window` > `Extensions` > `ABRIDOR`. the panel can be docked anywhere in the workspace, like the other panels.
+**2.1** in After Effects, open `Window` > `Extensions` > `ABRIDOR`. the panel can be docked anywhere in the workspace, like the other panels. it adapts to the space: when narrow, it shows the essentials in one column; when wide, the **comps** tab switches to two columns.
 
 <p align="center">
   <img src="docs/img/en/05-menu-extensoes.png" width="620"><br>
@@ -331,7 +331,7 @@ example: *Gotham Black* isn't installed → swapped for **Inter Black**:
 4. **size scale** → `−` / `+` in 5 % steps. here `95 %`: the new font is a little wider.
 5. the text in the **original** font (if it's installed), for comparison.
 
-the *Calibri* fonts were matched to **Carlito**, which has the same metrics.
+the *Calibri* fonts aren't installed, but the panel matched them by itself to **Carlito**, which has the **same metrics** (the text takes up the same space). this applies to the known pairs — *Calibri → Carlito*, *Cambria → Caladea*, *Arial / Helvetica → Liberation Sans*, *Times New Roman → Liberation Serif*, *Courier New → Liberation Mono* — when the equivalent is installed. the dot's tooltip says it's an equivalent; to use another font, just change it.
 
   </td>
   </tr>
