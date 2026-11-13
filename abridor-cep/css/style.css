@@ -214,7 +214,7 @@ body.is-empty .doc-chip { opacity: 0; transform: translateX(12px); pointer-event
 
 .doc-text b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.doc-text small { color: var(--muted); font-size: 10.5px; white-space: nowrap; }
+.doc-text small { color: var(--muted); font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .doc-swap { color: var(--muted); margin-right: 4px; }
 
@@ -1643,3 +1643,43 @@ input[type=search]::-webkit-search-cancel-button, input[type=search]::-webkit-se
 .lang-btn span { font-size: 9.5px; font-weight: 700; letter-spacing: .6px; line-height: 1; padding: 3px 4px; border-radius: 5px; border: 1.5px solid currentColor; transition: transform .35s var(--spring); }
 .lang-btn:hover span { animation: lang-flip .5s var(--spring); transform: none; }
 @keyframes lang-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(90deg) scale(.9); } 100% { transform: rotateX(0); } }
+
+/* ------------------------------------------------------------------ painel estreito */
+.summary { flex-wrap: wrap; row-gap: 4px; }
+#summary { flex: 1 0 auto; flex-wrap: nowrap; white-space: nowrap; }
+.summary .pre-chip { margin-left: auto; }
+.pre-chip { white-space: nowrap; }
+
+@media (max-width: 400px) {
+	.top { gap: 6px; padding-left: 10px; padding-right: 10px; }
+	.top .icon-btn { width: 26px; }
+	.doc-chip { gap: 7px; }
+	.doc-chip .doc-swap { display: none; }
+	.doc-chip .doc-text { padding-right: 8px; }
+	.doc-type { width: 40px; font-size: 9px; }
+	/* campo de intervalo / busca aberto: o resto da barra dá espaço */
+	.bar.expanded .iconbar, .bar.expanded .sel-count > span { display: none; }
+	.bar.expanded .range.open .clear-field input { width: 120px; }
+	.tab { padding-left: 6px; padding-right: 6px; }
+}
+
+.pre-sheet { max-height: calc(100vh - 16px); overflow-y: auto; }
+
+@media (max-width: 320px) {
+	.tab > .ico { display: none; }
+	.choice { grid-template-columns: 1fr; }
+	.choice button { flex-direction: row; flex-wrap: wrap; justify-content: flex-start; text-align: left; padding: 8px 10px; column-gap: 8px; }
+	.choice button small { flex-basis: 100%; padding-left: 26px; margin-top: -2px; }
+	.doc-type { width: 34px; }
+}
+
+/* painel baixo: menos respiro para sobrar área útil */
+@media (max-height: 420px) {
+	.top { padding-top: 6px; padding-bottom: 4px; min-height: 40px; }
+	footer { padding-top: 6px; padding-bottom: 8px; }
+	.summary { margin-bottom: 5px; }
+	.cta { height: 36px; }
+	.drop { padding-top: 14px; padding-bottom: 14px; }
+	.drop-art { transform: scale(.7); margin: -14px 0; }
+}
+.pre-sheet .sheet-actions { position: sticky; bottom: -14px; margin: 0 -14px -14px; padding: 10px 14px 14px; background: var(--surface); border-radius: 0 0 18px 18px; }

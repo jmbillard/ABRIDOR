@@ -624,6 +624,7 @@ abridor-cep/
   - `node tests/features_check.js <output>` → checks in the panel the before-creating check, the font picker, the family swap, shift+click, the end actions and the recent files (with `--docs`, saves the README screenshots).
   - `MODES=new,texts,side,replace node tests/host_mock.js …` → runs the creation modes in sequence in the After Effects mock.
   - `node tests/installer_mock.js <temp folder>` → runs the installer with simulated File/Folder/ScriptUI (installs and removes).
+  - `node tests/ux_walk.js <output>` → real-use walkthrough (first run with the tour, a real PDF, narrow panel; `W=` and `H=` change the size); `node tests/ux_sizes.js <output>` → panel at extreme sizes; `node tests/ux_edge.js <output>` → errors and invalid input (corrupted file, After Effects failure, field limits, reopening the panel).
   - `python3 tests/make_test_pptx.py <file.pptx>` → generates a PPTX with assorted cases.
 - README screenshots:
   - `python3 tests/make_example_pptx.py` → generates `exemplo_creditos.pptx`.

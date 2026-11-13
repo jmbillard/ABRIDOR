@@ -272,20 +272,31 @@
 			coolTimer = setTimeout(function () { warm = false; }, 500);
 		}
 
-		document.addEventListener('mouseover', function (e) {
-			var el = findTarget(e.target);
-			if (el === cur) return;
+		// depois de um clique ou tecla, a dica só volta quando o mouse se mexer de verdade
+		var still = false, hoverEl = null;
+		function over(target) {
+			var el = findTarget(target);
+			hoverEl = el;
+			if (still || el === cur) return;
 			if (!el) { hide(); return; }
 			textOf(el);
 			clearTimeout(showTimer);
 			if (cur) { show(el); return; }
 			showTimer = setTimeout(function () { show(el); }, warm ? 40 : 480);
-		});
+		}
+		document.addEventListener('mouseover', function (e) { over(e.target); });
+		document.addEventListener('mousemove', function (e) {
+			if (!still) return;
+			still = false;
+			// mesmo elemento de antes do clique: só mostra de novo depois de sair e voltar
+			if (findTarget(e.target) !== hoverEl) over(e.target);
+		}, true);
 		document.addEventListener('mouseout', function (e) {
 			if (!e.relatedTarget || !findTarget(e.relatedTarget)) hide();
 		});
+		var keyNav = false; // só o foco vindo do Tab mostra a dica
 		['mousedown', 'wheel', 'keydown', 'dragstart'].forEach(function (ev) {
-			document.addEventListener(ev, function () { hide(); warm = false; }, true);
+			document.addEventListener(ev, function (e) { hide(); warm = false; still = ev !== 'wheel'; keyNav = ev === 'keydown' && e.key === 'Tab'; }, true);
 		});
 		global.addEventListener('blur', hide);
 		global.addEventListener('scroll', hide, true);
@@ -293,7 +304,7 @@
 		// teclado: foco mostra a dica dos botões
 		document.addEventListener('focusin', function (e) {
 			var el = findTarget(e.target);
-			if (el && e.target.matches && e.target.matches(':focus-visible')) show(el);
+			if (el && keyNav && e.target.matches && e.target.matches(':focus-visible') && !/^(input|textarea|select)$/i.test(e.target.tagName)) show(el);
 		});
 		document.addEventListener('focusout', hide);
 

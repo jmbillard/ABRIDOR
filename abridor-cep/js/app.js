@@ -8,7 +8,7 @@
 	var UI = ABR.ui;
 	var icon = UI.icon;
 	var T = ABR.t, TN = ABR.tn;
-	var VERSION = '1.5.0';
+	var VERSION = '1.5.1';
 	var THUMB_W = 320;
 	var TABS = ['pages', 'comps', 'fonts'];
 
@@ -90,7 +90,7 @@
 
 	// ------------------------------------------------------ comps -----------
 	function compSize() {
-		if (S.res === 'custom') return [Math.max(16, parseInt(S.w, 10) || 1920), Math.max(16, parseInt(S.h, 10) || 1080)];
+		if (S.res === 'custom') return [Math.min(30000, Math.max(16, parseInt(S.w, 10) || 1920)), Math.min(30000, Math.max(16, parseInt(S.h, 10) || 1080))];
 		var p = S.res.split('x');
 		return [parseInt(p[0], 10), parseInt(p[1], 10)];
 	}
@@ -113,8 +113,16 @@
 	function timecode(sec, fps) {
 		var fr = Math.round(sec * fps);
 		var base = Math.round(fps);
-		var f = fr % base, s = Math.floor(fr / base);
-		return pad(Math.floor(s / 3600), 2) + ':' + pad(Math.floor(s / 60) % 60, 2) + ':' + pad(s % 60, 2) + (Math.abs(fps - base) > 0.001 ? ';' : ':') + pad(f, 2) +
+		// 29,97 e 59,94 usam drop-frame, como o After Effects: pula 2 (ou 4) números de frame por minuto, menos a cada 10 minutos
+		var drop = Math.abs(fps - base) > 0.001 && (base === 30 || base === 60) ? base / 15 : 0;
+		var n = fr;
+		if (drop) {
+			var per10 = base * 600 - 9 * drop, perMin = base * 60 - drop;
+			var tens = Math.floor(n / per10), rest = n % per10;
+			n += 9 * drop * tens + (rest > drop ? drop * Math.floor((rest - drop) / perMin) : 0);
+		}
+		var f = n % base, s = Math.floor(n / base);
+		return pad(Math.floor(s / 3600), 2) + ':' + pad(Math.floor(s / 60) % 60, 2) + ':' + pad(s % 60, 2) + (drop ? ';' : ':') + pad(f, 2) +
 			'  (' + fr + ' fr)';
 	}
 
@@ -243,6 +251,8 @@
 	}
 
 	function setDocument(p, bytes, real) {
+		// se a leitura falhar, o documento que já estava aberto continua valendo
+		state.prev = state.doc ? { path: state.path, realPath: state.realPath, bytes: state.bytes, name: state.name, extImages: state.extImages, prefix: $('prefix').value } : null;
 		state.path = p;
 		state.realPath = real;
 		state.anchor = null;
@@ -353,9 +363,26 @@
 			if (tourAfter && ABR.tour) ABR.tour.documentReady();
 		}).catch(function (e) {
 			console.error(e);
-			if (!state.doc) { document.body.classList.add('is-empty'); $('grid').innerHTML = ''; }
-			else renderGrid();
-			status(T('app.docError', { msg: e.message }), 'error');
+			if (!state.doc) { document.body.classList.add('is-empty'); $('grid').innerHTML = ''; state.bytes = null; }
+			else {
+				var pv = fresh && state.prev;
+				if (pv) {
+					state.path = pv.path; state.realPath = pv.realPath; state.bytes = pv.bytes; state.name = pv.name; state.extImages = pv.extImages;
+					$('prefix').value = pv.prefix;
+					$('docName').textContent = ABR.fs.basename(pv.path);
+					$('docType').textContent = state.doc.type.toUpperCase();
+					$('docType').classList.toggle('pptx', state.doc.type === 'pptx');
+					var nT = state.doc.pages.reduce(function (n, pg) { return n + pg.texts.length; }, 0);
+					$('docMeta').textContent = TN('app.pages', state.doc.pages.length) + ' · ' + TN('app.texts', nT);
+				}
+				renderGrid();
+			}
+			// erros conhecidos das bibliotecas viram uma frase que dá para entender
+			var msg = String(e && e.message || e);
+			var kind = isPdf ? 'PDF' : 'PPTX';
+			if (/password/i.test(msg) || (e && e.name === 'PasswordException')) status(T('app.pdfPassword'), 'error');
+			else if (/central directory|zip file|Invalid PDF|InvalidPDF|Missing PDF|corrupt/i.test(msg) || (e && /InvalidPDF|MissingPDF/.test(e.name || ''))) status(T('app.badFile', { type: kind }), 'error');
+			else status(T('app.docError', { msg: msg }), 'error');
 		}).then(function () {
 			$('dropZone').classList.remove('loading');
 			setBusy(false);
@@ -476,7 +503,7 @@
 			btn.classList.remove('editing');
 			if (cancel) return;
 			var v = parseFloat(String(input.value).replace(',', '.'));
-			state.durations[i] = v > 0 ? v : null;
+			state.durations[i] = v > 0 ? Math.min(3600, Math.max(0.1, v)) : null;
 			btn.classList.toggle('custom', !!state.durations[i]);
 			label.textContent = fmtSec(pageDuration(i)) + 's';
 			updateCompsInfo();
@@ -490,8 +517,9 @@
 			setTimeout(function () { input.focus(); input.select(); }, 30);
 		};
 		input.onkeydown = function (e) {
-			if (e.key === 'Enter') commit();
-			if (e.key === 'Escape') commit(true);
+			if (e.key === 'Enter') { commit(); input.blur(); }
+			if (e.key === 'Escape') { commit(true); input.blur(); }
+			e.stopPropagation();
 		};
 		input.onblur = function () { commit(); };
 	}
@@ -855,6 +883,15 @@
 			}
 			row.classList.toggle('open', open);
 			UI.collapse(edit, open);
+			// o editor abre para baixo: se ficou escondido atrás do rodapé, a lista rola até ele
+			if (open) setTimeout(function () {
+				if (!row.isConnected || !row.classList.contains('open')) return;
+				var list = $('fontList').getBoundingClientRect(), r = row.getBoundingClientRect();
+				if (r.bottom <= list.bottom) return;
+				var need = r.bottom - list.bottom + 8;
+				// linha maior que a área visível: vale mais mostrar o editor do que o topo da linha
+				$('fontList').scrollBy({ top: r.height > list.height ? need : Math.min(need, r.top - list.top), behavior: 'smooth' });
+			}, 340);
 		}
 		row._close = function () { toggle(false); };
 
@@ -1017,6 +1054,7 @@
 			listEl.innerHTML = html;
 			hl = Math.max(0, items.indexOf(current) >= 0 && !q ? items.indexOf(current) : 0);
 			highlight(false);
+			if (box.isConnected) place();
 		}
 
 		function highlight(scroll) {
@@ -1027,11 +1065,17 @@
 
 		function place() {
 			var r = field.getBoundingClientRect();
+			var list = box.querySelector('.picker-list');
+			// em painel baixo a lista encolhe para caber, do lado com mais espaço
+			list.style.maxHeight = '';
+			var chrome = box.offsetHeight - list.offsetHeight;
+			var below = window.innerHeight - r.bottom - 14;
+			var aboveRoom = r.top - 14;
+			var above = below < Math.min(box.offsetHeight, 220) && aboveRoom > below;
+			list.style.maxHeight = Math.max(64, Math.min(260, (above ? aboveRoom : below) - chrome)) + 'px';
 			var h = box.offsetHeight;
-			var below = window.innerHeight - r.bottom - 8;
-			var above = below < h && r.top - 8 > below;
 			box.classList.toggle('above', above);
-			box.style.top = (above ? Math.max(6, r.top - h - 6) : r.bottom + 6) + 'px';
+			box.style.top = Math.max(6, above ? r.top - h - 6 : Math.min(r.bottom + 6, window.innerHeight - h - 6)) + 'px';
 		}
 
 		function pick(f) {
@@ -1553,18 +1597,23 @@
 			applied = input.value;
 			onEnter();
 		}
+		// a barra sabe quando o campo está aberto (em painéis estreitos ela esconde o resto)
+		function setOpen(open) {
+			field.classList.toggle('open', open);
+			field.parentNode.classList.toggle('expanded', open);
+		}
 		btn.onclick = function () {
 			var open = !field.classList.contains('open');
-			field.classList.toggle('open', open);
+			setOpen(open);
 			if (open) setTimeout(function () { input.focus(); }, 60);
 			else { input.blur(); }
 		};
 		input.onkeydown = function (e) {
 			if (e.key === 'Enter' && onEnter) { applied = input.value; onEnter(); }
-			if (e.key === 'Escape') { field.classList.remove('open'); input.blur(); }
+			if (e.key === 'Escape') { setOpen(false); input.blur(); }
 		};
 		input.addEventListener('input', function () { if (!input.value) applied = null; });
-		input.onblur = function () { commit(); if (!input.value) field.classList.remove('open'); };
+		input.onblur = function () { commit(); if (!input.value) setOpen(false); };
 	}
 
 	function bind() {
@@ -1593,7 +1642,7 @@
 
 		// documento
 		$('dropZone').onclick = pickDocument;
-		$('dropZone').onkeydown = function (e) { if (e.key === 'Enter' || e.key === ' ') pickDocument(); };
+		$('dropZone').onkeydown = function (e) { if ((e.key === 'Enter' || e.key === ' ') && !e.ctrlKey && !e.metaKey) pickDocument(); };
 		$('docChip').onclick = pickDocument;
 		$('filePicker').onchange = function () { if (this.files[0]) loadFile(this.files[0]); this.value = ''; };
 
@@ -1648,12 +1697,20 @@
 		$('compW').value = S.w; $('compH').value = S.h;
 		$('compW').oninput = function () { S.w = this.value; saveSettings(); updateCompsInfo(); };
 		$('compH').oninput = function () { S.h = this.value; saveSettings(); updateCompsInfo(); };
+		// ao sair do campo o valor volta para dentro do que o After Effects aceita (16 a 30000 px)
+		var fixSize = function () {
+			var sz = compSize();
+			S.w = sz[0]; S.h = sz[1];
+			$('compW').value = S.w; $('compH').value = S.h;
+			saveSettings(); updateCompsInfo();
+		};
+		$('compW').onchange = $('compH').onchange = fixSize;
 
 		var fps = UI.seg($('fpsSeg'), function (v) { S.fps = v; saveSettings(); updateCompsInfo(); });
 		fps.set(S.fps, true);
 
 		function setDuration(v) {
-			S.duration = Math.max(0.5, Math.round(v * 100) / 100);
+			S.duration = Math.min(3600, Math.max(0.5, Math.round(v * 100) / 100));
 			saveSettings();
 			updateCompsInfo();
 		}

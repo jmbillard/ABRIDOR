@@ -622,6 +622,7 @@ abridor-cep/
   - `node tests/features_check.js <saída>` → verifica en el panel la revisión antes de crear, el selector de fuentes, el cambio de familia, shift+clic, las acciones del final y los recientes (con `--docs`, guarda las capturas del README).
   - `MODES=new,texts,side,replace node tests/host_mock.js …` → ejecuta los modos de creación en secuencia en el mock de After Effects.
   - `node tests/installer_mock.js <pasta temporária>` → ejecuta el instalador con File/Folder/ScriptUI simulados (instala y elimina).
+  - `node tests/ux_walk.js <saída>` → recorrido de uso real (primera vez con el tour, un PDF real, panel angosto; `W=` y `H=` cambian el tamaño); `node tests/ux_sizes.js <saída>` → panel en tamaños extremos; `node tests/ux_edge.js <saída>` → errores y entradas no válidas (archivo dañado, fallo de After Effects, límites de los campos, reabrir el panel).
   - `python3 tests/make_test_pptx.py <arquivo.pptx>` → genera un PPTX con casos variados.
 - capturas del README:
   - `python3 tests/make_example_pptx.py` → genera `exemplo_creditos.pptx`.
