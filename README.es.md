@@ -305,7 +305,7 @@ el pie resume todo: cantidad de comps, duración total, formato y frame rate.
     <td width="400"><img src="docs/img/es/30-fontes.png" width="380"></td>
     <td>
 
-1. **3 fuentes sin asociar** (el documento usa *Gotham Black* y *Calibri*, que no están instaladas).
+1. **1 fuente sin asociar** (el documento usa *Gotham Black*, que no está instalada; las *Calibri* ya vinieron asociadas a **Carlito**).
 2. 🔴 **sin fuente** → si sigue así, la capa usa la **fuente de reserva**. las que faltan quedan arriba de la lista.
 3. 🟢 **automático** → *Inter Bold* de PowerPoint se encontró y se asoció sola. 🔵 = **manual**, elegida por ti.
 4. **vista previa** con el texto del propio documento, en la fuente de destino.

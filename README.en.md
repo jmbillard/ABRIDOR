@@ -305,7 +305,7 @@ the footer sums it all up: number of comps, total duration, format and frame rat
     <td width="400"><img src="docs/img/en/30-fontes.png" width="380"></td>
     <td>
 
-1. **3 unmatched fonts** (the document uses *Gotham Black* and *Calibri*, which aren't installed).
+1. **1 unmatched font** (the document uses *Gotham Black*, which isn't installed; the *Calibri* fonts came already matched to **Carlito**).
 2. 🔴 **no font** → if it stays like this, the layer uses the **fallback font**. the missing ones stay at the top of the list.
 3. 🟢 **automatic** → PowerPoint's *Inter Bold* was found and matched on its own. 🔵 = chosen by you.
 4. **preview** with the document's own text, in the destination font.

@@ -305,7 +305,7 @@ o rodapé resume tudo: quantidade de comps, duração total, formato e frame rat
     <td width="400"><img src="docs/img/30-fontes.png" width="380"></td>
     <td>
 
-1. **3 fontes sem associação** (o documento usa *Gotham Black* e *Calibri*, que não estão instaladas).
+1. **1 fonte sem associação** (o documento usa *Gotham Black*, que não está instalada; as *Calibri* já vieram associadas à **Carlito**).
 2. 🔴 **sem fonte** → se continuar assim, a camada usa a **fonte reserva**. as que faltam ficam no topo da lista.
 3. 🟢 **automático** → *Inter Bold* do PowerPoint foi encontrada e associada sozinha. 🔵 = escolhida por você.
 4. **prévia** com o texto do próprio documento, na fonte de destino.
