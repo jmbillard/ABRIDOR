@@ -1,6 +1,8 @@
 # 🧾 ABRIDOR
 
-🗨️ **pt-BR** ⚡ Extensão do After Effects para agilizar a criação dos layouts de uma abertura ⚡
+🗨️ **português** · [English](README.en.md) · [español](README.es.md)
+
+⚡ Extensão do After Effects para agilizar a criação dos layouts de uma abertura ⚡
 
 O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões nem sites externos — e recria cada página/slide como uma comp do After Effects, com os textos o mais fiéis possível ao original: posição, alinhamento, tamanho, entrelinha, cor, rotação e fontes. As fontes do documento podem ser trocadas por outras, com preview, **antes ou depois** de criar as comps.
 
@@ -23,6 +25,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 8. [trocar as fontes depois](#8--trocar-as-fontes-depois)
 9. [dicas e problemas comuns](#-dicas-e-problemas-comuns)
 10. [como os textos são recriados](#-como-os-textos-são-recriados)
+11. [idiomas e traduções](#-idiomas-e-traduções)
 
 > 📂 **arquivos:**\
 > • **INSTALAR O ABRIDOR.jsx** → instalador (roda dentro do After Effects).\
@@ -40,24 +43,29 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 > ✅ **requisitos:** After Effects **2020 (17.0)** ou mais novo. recomendado o **2024 (24.3)** ou mais novo — veja a [tabela de versões](#-versões-do-after-effects).
 
-**1.1** no After Effects, abra `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx** direto da pasta do ABRIDOR (a pasta que tem a `abridor-cep` dentro). o instalador abre com as boas-vindas — clique em **começar**.
+**1.1** no After Effects, abra `File` > `Scripts` > `Run Script File...` e escolha o **INSTALAR O ABRIDOR.jsx** direto da pasta do ABRIDOR (a pasta que tem a `abridor-cep` dentro).
 
-**1.2** o instalador confere o que é necessário. bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**.
+**1.2** o instalador confere sozinho o que é necessário. **se estiver tudo certo**, ele já abre com as boas-vindas, o aviso *✓ tudo certo!* e o botão **instalar** (ou **atualizar** / **reinstalar**, se já houver uma versão no computador; **remover** desinstala). a tela mostra de onde a extensão vai ser copiada e para onde.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/img/01-instalador-boas-vindas.png" width="380"><br><sub>1.1 · boas-vindas</sub></td>
-    <td align="center"><img src="docs/img/02-instalador-checagem.png" width="380"><br><sub>1.2 · checagem</sub></td>
+    <td align="center"><img src="docs/img/03-instalador-acao.png" width="380"><br><sub>1.2 · tudo certo: é só instalar</sub></td>
   </tr>
 </table>
 
-**1.3** escolha **instalar** (ou **atualizar** / **reinstalar**, se já houver uma versão no computador; **remover** desinstala). a tela mostra de onde a extensão vai ser copiada e para onde.
+**1.3** se algo precisar de atenção, o instalador abre com as boas-vindas — clique em **começar** — e mostra a checagem: bolinha 🟢 = ok, 🟡 = funciona com limitações, 🔴 = precisa resolver. se a escrita de arquivos estiver bloqueada, use o link **› abrir preferências de scripts e expressões**, marque *Allow Scripts to Write Files and Access Network* e clique em **› verificar de novo**. depois, **próximo** leva à mesma escolha de instalar / atualizar.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/img/01-instalador-boas-vindas.png" width="380"><br><sub>1.3 · boas-vindas</sub></td>
+    <td align="center"><img src="docs/img/02-instalador-checagem.png" width="380"><br><sub>1.3 · checagem</sub></td>
+  </tr>
+</table>
 
 **1.4** pronto! **reinicie o After Effects**.
 
 <table>
   <tr>
-    <td align="center"><img src="docs/img/03-instalador-acao.png" width="380"><br><sub>1.3 · ação</sub></td>
     <td align="center"><img src="docs/img/04-instalador-concluido.png" width="380"><br><sub>1.4 · concluído</sub></td>
   </tr>
 </table>
@@ -77,7 +85,7 @@ O **ABRIDOR** lê arquivos **PPTX** e **PDF** diretamente — sem conversões ne
 
 ## 2 · abrir o painel
 
-**2.1** no After Effects, abra `Window` > `Extensions` > `ABRIDOR`. o painel pode ser encaixado em qualquer lugar da área de trabalho, como os outros painéis.
+**2.1** no After Effects, abra `Window` > `Extensions` > `ABRIDOR`. o painel pode ser encaixado em qualquer lugar da área de trabalho, como os outros painéis. ele se ajusta ao espaço: estreito, mostra o essencial em uma coluna; largo, a aba **comps** passa para duas colunas.
 
 <p align="center">
   <img src="docs/img/05-menu-extensoes.png" width="620"><br>
@@ -136,6 +144,8 @@ atalhos: `Ctrl/⌘ + O` abre um documento · `1` `2` `3` trocam de aba · `Ctrl/
     <td align="center"><img src="docs/img/16-claro-fontes.png" width="380"><br><sub>tema claro: fontes</sub></td>
   </tr>
 </table>
+
+**2.6** o botão **PT** ao lado do tema troca o idioma do painel: **português → English → español**. a troca é na hora, sem fechar o documento aberto, e fica guardada. na primeira vez, o painel segue o idioma do After Effects. veja [idiomas e traduções](#-idiomas-e-traduções) para corrigir textos ou acrescentar outro idioma.
 
 <br>
 
@@ -295,7 +305,7 @@ o rodapé resume tudo: quantidade de comps, duração total, formato e frame rat
     <td width="400"><img src="docs/img/30-fontes.png" width="380"></td>
     <td>
 
-1. **3 fontes sem associação** (o documento usa *Gotham Black* e *Calibri*, que não estão instaladas).
+1. **1 fonte sem associação** (o documento usa *Gotham Black*, que não está instalada; as *Calibri* já vieram associadas à **Carlito**).
 2. 🔴 **sem fonte** → se continuar assim, a camada usa a **fonte reserva**. as que faltam ficam no topo da lista.
 3. 🟢 **automático** → *Inter Bold* do PowerPoint foi encontrada e associada sozinha. 🔵 = escolhida por você.
 4. **prévia** com o texto do próprio documento, na fonte de destino.
@@ -321,7 +331,7 @@ exemplo: *Gotham Black* não está instalada → trocada por **Inter Black**:
 4. **escala** → `−` / `+` de 5 %. aqui `95 %`: a fonte nova é um pouco mais larga.
 5. o texto na fonte **original** (se estiver instalada), para comparar.
 
-as *Calibri* foram associadas à **Carlito**, que tem as mesmas medidas.
+as *Calibri* não estão instaladas, mas o painel já as associou sozinho à **Carlito**, que tem as **mesmas medidas** (o texto ocupa o mesmo espaço). isso vale para os pares conhecidos — *Calibri → Carlito*, *Cambria → Caladea*, *Arial / Helvetica → Liberation Sans*, *Times New Roman → Liberation Serif*, *Courier New → Liberation Mono* — quando a equivalente está instalada. a dica da bolinha avisa que é uma equivalente; para usar outra fonte, é só trocar.
 
   </td>
   </tr>
@@ -508,7 +518,7 @@ o texto está como **imagem** ou foi convertido em **curvas** no PDF. não há c
 
 **quero uma referência idêntica ao PowerPoint.**\
 a referência de PPTX é um render aproximado (fundo, imagens, formas e textos). para ficar idêntica:
-1. no PowerPoint, `Arquivo` > `Exportar` > `PNG` (todos os slides);
+1. no PowerPoint, `Arquivo` > `Exportar` > `Alterar Tipo de Arquivo` > `PNG` (todos os slides);
 2. no ABRIDOR, aba **páginas** > **imagens externas…** e escolha a pasta dos PNGs. as imagens são associadas pela ordem numérica dos arquivos (`Slide1.png`, `Slide2.png`, …) e as páginas ganham a etiqueta **IMG**. o **×** volta para a referência interna.
 
 ou salve o PPTX como PDF e use o PDF.
@@ -520,7 +530,7 @@ a fonte substituta é mais larga que a original. ajuste a **escala** da fonte na
 aba **comps** > **textos** > *uma camada por linha*. o documento é relido na hora.
 
 **PPTX: o texto está menor que no PowerPoint.**\
-o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática*), e o ABRIDOR copia essa redução. para usar o tamanho original, marque **ignorar a redução automática de texto do PowerPoint** na aba **comps**.
+o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática*), e o ABRIDOR copia essa redução. para usar o tamanho original, desligue **redução automática** (*manter o encolhimento de texto do PowerPoint*) em **ajustes finos**, na aba **comps**.
 
 ### 📋 versões do After Effects
 
@@ -552,6 +562,37 @@ o PowerPoint reduz o texto quando ele não cabe na caixa (*redução automática
 
 <br>
 
+## 🌐 idiomas e traduções
+
+o painel, as mensagens do After Effects e o instalador estão em **português**, **English** e **español**.
+
+- **no painel:** o botão **PT / EN / ES** no topo troca o idioma na hora, sem perder o documento aberto. a escolha fica guardada. na primeira vez, o painel usa o idioma do After Effects (se não for nenhum dos três, usa o inglês).
+- **no instalador:** segue o idioma do After Effects.
+
+todos os textos ficam num arquivo só: **`abridor-cep/i18n/strings.csv`** — uma linha por texto, uma coluna por idioma. dá para abrir no Excel, no Google Sheets ou num editor de texto:
+
+```
+key,pt,en,es
+app.cta.createAll,criar comps,create comps,crear comps
+app.pages.one,{n} página,{n} page,{n} página
+app.pages.other,{n} páginas,{n} pages,{n} páginas
+```
+
+- **corrigir uma tradução:** edite a célula na pasta do ABRIDOR e rode o instalador de novo (ou edite direto o `strings.csv` da extensão instalada) e reabra o painel.
+- **novo idioma:** acrescente uma coluna com o código de 2 letras (ex.: `fr`) e preencha. ela já aparece no botão de idioma e no instalador. célula vazia usa o português.
+- `{nome}` é trocado por um valor (número de páginas, nome da fonte…) — mantenha igual em todas as colunas.
+- chaves terminadas em `.one` / `.other` são singular e plural.
+- `\n` é quebra de linha; linhas começando com `#` são comentários.
+- o separador pode ser vírgula ou ponto e vírgula (o Excel em português costuma salvar com `;`). salve sempre em **UTF-8**.
+
+> ⚠️ *obs:* os prefixos indicam onde o texto aparece: `panel.*` e `app.*` no painel, `tour.*` no tour guiado, `err.*` / `parser.*` em erros e nomes de página, `host.*` nos avisos e no histórico de desfazer do After Effects, `inst.*` no instalador.
+
+<br>
+
+---
+
+<br>
+
 ## 🛠 desenvolvimento
 
 ```
@@ -560,6 +601,7 @@ abridor-cep/
 ├── index.html            → interface
 ├── css/style.css
 ├── js/
+│   ├── i18n.js           → traduções (lê i18n/strings.csv)
 │   ├── cep.js            → ponte com o AE (evalScript) e sistema de arquivos (Node)
 │   ├── ui.js             → ícones, animações de expandir/recolher, segmentados, toasts
 │   ├── pptx-parser.js    → leitura do PPTX (zip + XML)
@@ -573,17 +615,20 @@ abridor-cep/
 
 - depuração: com o painel aberto no AE, acesse `http://localhost:8099` no Chrome (arquivo `.debug`).
 - testes fora do After Effects (Node + Playwright):
+  - todos os testes de painel aceitam `ABR_LANG=en` ou `ABR_LANG=es` (padrão `pt-BR`), ex.: `ABR_LANG=en node tests/run_panel.js …`. o `tests/pw.js` prepara o Playwright (idioma e acesso ao CSV).
   - `node tests/run_panel.js <arquivo.pptx|pdf> <saída>` → abre o painel no Chromium com o AE simulado, extrai e gera o job.
   - `node tests/host_mock.js <saída>/job.json <saída>/host` → executa o `host.jsx` contra um mock do After Effects e desenha as camadas sobre a referência.
   - `node tests/tour_check.js <saída>` → verifica o tour guiado: primeira vez, passos, teclado, botão **?** e tour sem documento (com `--docs`, grava os prints do README).
   - `node tests/features_check.js <saída>` → verifica no painel a checagem antes de criar, o seletor de fontes, a troca da família, o shift+clique, as ações no fim e os recentes (com `--docs`, grava os prints do README).
   - `MODES=new,texts,side,replace node tests/host_mock.js …` → roda os modos de criação em sequência no mock do After Effects.
   - `node tests/installer_mock.js <pasta temporária>` → executa o instalador com File/Folder/ScriptUI simulados (instala e remove).
+  - `node tests/ux_walk.js <saída>` → passeio de uso real (1ª vez com tour, PDF de verdade, painel estreito; `W=` e `H=` mudam o tamanho); `node tests/ux_sizes.js <saída>` → painel em tamanhos extremos; `node tests/ux_edge.js <saída>` → erros e entradas inválidas (arquivo corrompido, falha no After Effects, limites dos campos, reabrir o painel).
   - `python3 tests/make_test_pptx.py <arquivo.pptx>` → gera um PPTX com casos variados.
 - prints do README:
   - `python3 tests/make_example_pptx.py` → gera o `exemplo_creditos.pptx`.
   - `node tests/make_screenshots.js` → gera todos os prints de `docs/img` (painel real no Chromium com o AE simulado; instalador, menu e projeto são ilustrações em `tests/illustrations.html`).
   - `node tests/make_demo.js` → grava a animação `docs/img/demo.gif` (precisa do `ffmpeg`).
+  - prints em outros idiomas: rode `make_screenshots.js`, `make_demo.js`, `features_check.js <saída> --docs` e `tour_check.js <saída> --docs` com `ABR_LANG=en` ou `ABR_LANG=es` → vão para `docs/img/en/` e `docs/img/es/` (mesmos nomes de arquivo).
   - `python3 tests/make_micro_css.py` → gera `css/micro.css`, as micro-interações de hover de cada ícone.
   - `node tests/micro_preview.js <saída>` → grava o catálogo das micro-interações e o painel em uso (GIFs, precisa do `ffmpeg`).
   - `node tests/make_banner.js` → gera o banner do instalador (com o logo) e grava a string ExtendScript no instalador.

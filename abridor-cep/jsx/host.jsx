@@ -57,9 +57,71 @@ function abr_parse(str) {
 	return eval('(' + str + ')');
 }
 
+// --------------------------------------------------------- tradu\u00e7\u00f5es --
+// textos em portugu\u00eas (usados enquanto o painel n\u00e3o manda os do idioma atual;
+// as chaves s\u00e3o as "host.*" de i18n/strings.csv, sem o prefixo)
+var ABR_STR_PT = {
+	'file_not_found': 'arquivo n\u00e3o encontrado: {path}',
+	'at_line': '{msg} (linha {line})',
+	'font_unavailable': 'fonte "{font}" indispon\u00edvel ({key}) \u2192 {used}',
+	'ranges_unsupported': 'estilos por trecho n\u00e3o suportados nesta vers\u00e3o do AE (camada "{layer}")',
+	'mixed_simplified': 'estilos mistos simplificados (AE sem characterRange): "{layer}"',
+	'text_error': 'erro no texto {n}: {msg}',
+	'kept_new_layer': '"{layer}": {msg} (mantida a camada nova)',
+	'no_match': '"{layer}" n\u00e3o tem mais texto correspondente no documento (mantida)',
+	'ref_missing': 'imagem de refer\u00eancia n\u00e3o encontrada: {path}',
+	'ref_error': 'erro na imagem de refer\u00eancia: {msg}',
+	'item_not_found': 'item n\u00e3o encontrado no projeto',
+	'split_keyframes': '"{layer}" tem keyframes ou express\u00e3o no texto: n\u00e3o foi dividida',
+	'layer_locked': '"{layer}" est\u00e1 travada',
+	'layer_error': '"{layer}": {msg}',
+	'from_selected': 'camadas selecionadas',
+	'from_comps.one': '{n} comp',
+	'from_comps.other': '{n} comps',
+	'undo_prepare': 'ABRIDOR - preparar',
+	'undo_master': 'ABRIDOR - master',
+	'undo_fonts': 'ABRIDOR - trocar fontes',
+	'undo_split': 'ABRIDOR - dividir em linhas'
+};
+var ABR_STR = $.global.ABR_STR || {};
+
+// chamado pelo painel na abertura: { chave: texto } no idioma atual (objeto ou string JSON)
+function abridor_setStrings(json) {
+	try {
+		var o = typeof json === 'string' ? abr_parse(json) : json;
+		ABR_STR = {};
+		if (o) for (var k in o) if (o.hasOwnProperty(k) && typeof o[k] === 'string' && o[k] !== '') ABR_STR[k] = o[k];
+		$.global.ABR_STR = ABR_STR;
+		return abr_stringify({ ok: true });
+	} catch (e) {
+		return abr_error(e);
+	}
+}
+
+function abr_t(key, vars) {
+	var s = ABR_STR.hasOwnProperty(key) ? ABR_STR[key] : (ABR_STR_PT.hasOwnProperty(key) ? ABR_STR_PT[key] : key);
+	if (!vars) return s;
+	return String(s).replace(/\{(\w+)\}/g, function (m, k) {
+		return vars.hasOwnProperty(k) && vars[k] !== null && vars[k] !== undefined ? String(vars[k]) : m;
+	});
+}
+
+// plural: chave.one / chave.other com {n}
+function abr_tn(key, n, vars) {
+	var v = { n: n };
+	if (vars) for (var k in vars) if (vars.hasOwnProperty(k)) v[k] = vars[k];
+	return abr_t(key + (n === 1 ? '.one' : '.other'), v);
+}
+
+// mensagem de um erro, com a linha quando houver
+function abr_errMsg(e) {
+	var msg = e && e.message ? e.message : String(e);
+	return e && e.line ? abr_t('at_line', { msg: msg, line: e.line }) : msg;
+}
+
 function abr_readJSON(path) {
 	var f = new File(path);
-	if (!f.exists) throw new Error('arquivo n\u00e3o encontrado: ' + path);
+	if (!f.exists) throw new Error(abr_t('file_not_found', { path: path }));
 	f.encoding = 'UTF-8';
 	f.open('r');
 	var s = f.read();
@@ -68,7 +130,7 @@ function abr_readJSON(path) {
 }
 
 function abr_error(e) {
-	return abr_stringify({ error: (e && e.message ? e.message : String(e)) + (e && e.line ? ' (linha ' + e.line + ')' : '') });
+	return abr_stringify({ error: abr_errMsg(e) });
 }
 
 // ------------------------------------------------------------- projeto --
@@ -266,7 +328,7 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 	var wanted = abr_fontFor(dom, fontMap, fallback).ps;
 	td = prop.value;
 	if (td.font !== wanted) {
-		log.push('fonte "' + wanted + '" indispon\u00edvel (' + dom.fontKey + ') \u2192 ' + td.font);
+		log.push(abr_t('font_unavailable', { font: wanted, key: dom.fontKey, used: td.font }));
 	}
 
 	// estilos por trecho (AE 24.3+: TextDocument.characterRange)
@@ -303,9 +365,9 @@ function abr_createText(comp, t, s, ox, oy, fontMap, fallback, log) {
 			}
 			prop.setValue(td);
 		});
-		if (!rangesOK) log.push('estilos por trecho n\u00e3o suportados nesta vers\u00e3o do AE (camada "' + abr_layerName(flat.text) + '")');
+		if (!rangesOK) log.push(abr_t('ranges_unsupported', { layer: abr_layerName(flat.text) }));
 	} else if (multi) {
-		log.push('estilos mistos simplificados (AE sem characterRange): "' + abr_layerName(flat.text) + '"');
+		log.push(abr_t('mixed_simplified', { layer: abr_layerName(flat.text) }));
 	}
 
 	// ----- posição
@@ -455,7 +517,7 @@ function abridor_begin(jobPath) {
 	try {
 		var job = abr_readJSON(jobPath);
 		var mode = job.settings.mode || 'new';
-		app.beginUndoGroup('ABRIDOR - preparar');
+		app.beginUndoGroup(abr_t('undo_prepare'));
 		try {
 			if (!app.project) app.newProject();
 			var root = abr_rootFolder(true);
@@ -525,7 +587,7 @@ function abr_buildTexts(comp, page, S, s, ox, oy, fontMap, log) {
 				made.push(layers[j]);
 			}
 		} catch (e) {
-			log.push('erro no texto ' + (i + 1) + ': ' + e.message + (e.line ? ' (linha ' + e.line + ')' : ''));
+			log.push(abr_t('text_error', { n: i + 1, msg: abr_errMsg(e) }));
 		}
 	}
 	return made;
@@ -590,7 +652,7 @@ function abr_updateTexts(comp, made, log) {
 			nl.remove();
 			updated++;
 		} catch (e) {
-			log.push('"' + ol.name + '": ' + e.message + ' (mantida a camada nova)');
+			log.push(abr_t('kept_new_layer', { layer: ol.name, msg: e.message }));
 			added++;
 		}
 	}
@@ -598,7 +660,7 @@ function abr_updateTexts(comp, made, log) {
 	for (i = 0; i < olds.length; i++) {
 		if (!olds[i].used) {
 			left++;
-			log.push('"' + olds[i].l.name + '" n\u00e3o tem mais texto correspondente no documento (mantida)');
+			log.push(abr_t('no_match', { layer: olds[i].l.name }));
 		}
 	}
 	return { updated: updated, added: added, left: left };
@@ -607,7 +669,7 @@ function abr_updateTexts(comp, made, log) {
 function abr_addReference(comp, page, S, st, log) {
 	try {
 		var file = new File(page.refImage);
-		if (!file.exists) { log.push('imagem de refer\u00eancia n\u00e3o encontrada: ' + page.refImage); return; }
+		if (!file.exists) { log.push(abr_t('ref_missing', { path: page.refImage })); return; }
 		var footage = app.project.importFile(new ImportOptions(file));
 		var refs = abr_itemById(st.refs);
 		if (refs) footage.parentFolder = refs;
@@ -622,7 +684,7 @@ function abr_addReference(comp, page, S, st, log) {
 		ref.label = 0;
 		ref.locked = true;
 	} catch (e2) {
-		log.push('erro na imagem de refer\u00eancia: ' + e2.message);
+		log.push(abr_t('ref_error', { msg: e2.message }));
 	}
 }
 
@@ -690,7 +752,7 @@ function abridor_finish(jobPath) {
 		if (!comps.length) return abr_stringify({ ok: true, comps: 0 });
 
 		var master = null, reused = false;
-		app.beginUndoGroup('ABRIDOR - master');
+		app.beginUndoGroup(abr_t('undo_master'));
 		try {
 			if (S.master) {
 				// no modo "só os textos" a master existente é mantida
@@ -735,7 +797,7 @@ function abridor_finish(jobPath) {
 function abridor_reveal(id) {
 	try {
 		var item = abr_itemById(parseInt(id, 10));
-		if (!item) return abr_stringify({ error: 'item n\u00e3o encontrado no projeto' });
+		if (!item) return abr_stringify({ error: abr_t('item_not_found') });
 		if (item instanceof CompItem) {
 			item.openInViewer();
 		} else {
@@ -808,7 +870,7 @@ function abridor_applyFonts(mapPath, scope) {
 		var comps = abr_compsInScope(scope);
 		var layers = 0, failed = [];
 
-		app.beginUndoGroup('ABRIDOR - trocar fontes');
+		app.beginUndoGroup(abr_t('undo_fonts'));
 		try {
 			abr_storeMap(map);
 			for (var c = 0; c < comps.length; c++) {
@@ -1159,7 +1221,7 @@ function abr_linePositions(layer, td, text, lines, isBox, meta) {
 function abr_splitLayer(layer, log) {
 	var prop = abr_textProp(layer);
 	if (prop.numKeys > 0 || prop.expressionEnabled) {
-		log.push('"' + layer.name + '" tem keyframes ou express\u00e3o no texto: n\u00e3o foi dividida');
+		log.push(abr_t('split_keyframes', { layer: layer.name }));
 		return { created: 0 };
 	}
 	var td = prop.value;
@@ -1275,7 +1337,7 @@ function abridor_splitLines() {
 			var sel = active.selectedLayers;
 			for (i = 0; i < sel.length; i++) if (sel[i] instanceof TextLayer) targets.push(sel[i]);
 		}
-		var from = 'camadas selecionadas';
+		var from = abr_t('from_selected');
 		if (!targets.length) {
 			var comps = abr_compsInScope('selected');
 			for (i = 0; i < comps.length; i++) {
@@ -1283,21 +1345,21 @@ function abridor_splitLines() {
 					if (comps[i].layer(j) instanceof TextLayer) targets.push(comps[i].layer(j));
 				}
 			}
-			from = comps.length + ' comp' + (comps.length === 1 ? '' : 's');
+			from = abr_tn('from_comps', comps.length);
 		}
 		if (!targets.length) return abr_stringify({ ok: true, layers: 0, lines: 0, from: '' });
 
 		var log = [], lines = 0, done = 0;
-		app.beginUndoGroup('ABRIDOR - dividir em linhas');
+		app.beginUndoGroup(abr_t('undo_split'));
 		try {
 			for (i = 0; i < targets.length; i++) {
 				var lk = targets[i].locked;
-				if (lk) { log.push('"' + targets[i].name + '" est\u00e1 travada'); continue; }
+				if (lk) { log.push(abr_t('layer_locked', { layer: targets[i].name })); continue; }
 				try {
 					var res = abr_splitLayer(targets[i], log);
 					if (res.created) { done++; lines += res.created; }
 				} catch (e) {
-					log.push('"' + targets[i].name + '": ' + e.message);
+					log.push(abr_t('layer_error', { layer: targets[i].name, msg: e.message }));
 				}
 			}
 		} finally {

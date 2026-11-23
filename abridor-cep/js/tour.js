@@ -13,6 +13,7 @@
 	var icon = UI.icon;
 	var KEY = 'abridor.tourDone';
 
+	var t = ABR.t, tn = ABR.tn;
 	var T = ABR.tour = { active: false, pending: false };
 	var steps = [], cur = 0, spot = null, card = null, blocker = null, welcome = null;
 
@@ -26,32 +27,33 @@
 		var st = ABR.state;
 		var out = [];
 		if (!st.doc) {
-			out.push({ tab: 'pages', sel: '#dropZone', icon: 'open', title: 'comece por aqui',
-				text: 'abra um <b>PPTX</b> ou <b>PDF</b> (ou arraste o arquivo). o tour continua com o documento aberto.', last: true, pend: true });
+			out.push({ tab: 'pages', sel: '#dropZone', icon: 'open', title: t('tour.start.title'),
+				text: t('tour.start.text'), last: true, pend: true });
 			return out;
 		}
 		var n = st.doc.pages.length;
-		out.push({ tab: 'pages', sel: '#grid', icon: 'pages', title: 'escolha as páginas',
-			text: 'este documento tem <b>' + n + ' página' + (n === 1 ? '' : 's') + '</b>. cada miniatura vira uma comp: <b>clique</b> para tirar as que não precisa. com <kbd>shift</kbd>, marca um intervalo.' });
+		out.push({ tab: 'pages', sel: '#grid', icon: 'pages', title: t('tour.pages.title'),
+			text: t('tour.pages.text', { pages: tn('tour.pages.count', n) }) });
 		var firstSel = st.selected.indexOf(true);
 		if (firstSel >= 0) {
-			out.push({ tab: 'pages', sel: '.page[data-i="' + firstSel + '"] .dur', pad: 5, icon: 'clock', title: 'duração por página', showDur: firstSel,
-				text: 'o relógio muda a duração <b>só desta página</b>. a duração padrão fica na aba comps.' });
+			out.push({ tab: 'pages', sel: '.page[data-i="' + firstSel + '"] .dur', pad: 5, icon: 'clock', title: t('tour.dur.title'), showDur: firstSel,
+				text: t('tour.dur.text') });
 		}
-		out.push({ tab: 'comps', sel: '#tab-comps .block', icon: 'comps', title: 'formato das comps',
-			text: 'resolução e frame rate. o padrão é <b>Full HD 29,97</b>; 4K está a um clique.' });
+		out.push({ tab: 'comps', sel: '#tab-comps .block', icon: 'comps', title: t('tour.comps.title'),
+			text: t('tour.comps.text') });
 		var missing = Array.prototype.map.call(document.querySelectorAll('#fontList .font-group.used .font.missing'), function (e) { return e.dataset.key; });
 		if (missing.length) {
-			var names = missing.slice(0, 3).join(', ') + (missing.length > 3 ? ' e mais ' + (missing.length - 3) : '');
+			var names = missing.slice(0, 3).join(', ');
+			if (missing.length > 3) names = t('tour.missing.more', { names: names, n: missing.length - 3 });
 			out.push({ tab: 'fonts', sel: '#fontList .font-group.used .font.missing', all: true, icon: 'fonts',
-				title: missing.length + ' fonte' + (missing.length === 1 ? '' : 's') + ' não instalada' + (missing.length === 1 ? '' : 's'),
-				text: '<b>' + esc(names) + '</b> ' + (missing.length === 1 ? 'não está' : 'não estão') + ' neste computador. clique numa fonte para escolher a substituta.' });
+				title: tn('tour.missing.title', missing.length),
+				text: tn('tour.missing.text', missing.length, { names: esc(names) }) });
 		} else if ($('#fontList .font')) {
-			out.push({ tab: 'fonts', sel: '#fontList .font-group.used .font', icon: 'fonts', title: 'fontes encontradas',
-				text: 'todas as fontes do documento foram associadas. clique numa fonte para trocar por outra.' });
+			out.push({ tab: 'fonts', sel: '#fontList .font-group.used .font', icon: 'fonts', title: t('tour.fontsOk.title'),
+				text: t('tour.fontsOk.text') });
 		}
-		out.push({ tab: ABR.state.tab === 'pages' ? 'pages' : 'fonts', keepTab: true, sel: '#btnBuild', pad: 4, radius: 16, icon: 'sparkle', title: 'tudo pronto',
-			text: 'crie as comps aqui. as fontes podem ser trocadas depois, mesmo com as comps prontas. para rever este tour, use o <b>?</b> lá em cima.', last: true });
+		out.push({ tab: ABR.state.tab === 'pages' ? 'pages' : 'fonts', keepTab: true, sel: '#btnBuild', pad: 4, radius: 16, icon: 'sparkle', title: t('tour.done.title'),
+			text: t('tour.done.text'), last: true });
 		return out;
 	}
 
@@ -101,11 +103,11 @@
 		}
 		var total = steps.length;
 		card.innerHTML = '<i class="t-arrow"></i>' +
-			'<div class="tour-top"><span class="tour-step">' + (total > 1 ? 'passo ' + (cur + 1) + ' de ' + total : 'tour') + '</span><button class="tour-skip">' + (s.pend ? 'fechar' : 'pular tour') + '</button></div>' +
+			'<div class="tour-top"><span class="tour-step">' + (total > 1 ? t('tour.step', { n: cur + 1, total: total }) : t('tour.tour')) + '</span><button class="tour-skip">' + (s.pend ? t('tour.close') : t('tour.skip')) + '</button></div>' +
 			'<h4>' + icon(s.icon) + s.title + '</h4><p>' + s.text + '</p>' +
 			'<div class="tour-foot"><div class="tour-dots">' + (total > 1 ? steps.map(function (x, k) { return '<i class="' + (k === cur ? 'on' : '') + '"></i>'; }).join('') : '') + '</div>' +
-			(cur ? '<button class="back">voltar</button>' : '') +
-			'<button class="next">' + (s.pend ? 'entendi' : (s.last ? 'concluir' : 'próximo ' + icon('arrow'))) + '</button></div>';
+			(cur ? '<button class="back">' + t('tour.back') + '</button>' : '') +
+			'<button class="next">' + (s.pend ? t('tour.gotIt') : (s.last ? t('tour.finish') : t('tour.next') + ' ' + icon('arrow'))) + '</button></div>';
 		card.style.animation = 'none';
 		void card.offsetWidth;
 		card.style.animation = '';
@@ -189,15 +191,29 @@
 		if (!withWelcome || !ABR.state.doc) { begin(); return; }
 		welcome = document.createElement('div');
 		welcome.className = 'tour-welcome';
-		var logo = $('#logoMark svg');
-		welcome.innerHTML = '<div class="tour-card"><div class="w-logo">' + (logo ? logo.outerHTML : '') + '</div>' +
-			'<h4>bem-vindo ao ABRIDOR</h4><p>em <b>' + steps.length + ' passos rápidos</b> você vê onde fica cada coisa, usando o documento que acabou de abrir.</p>' +
-			'<div class="tour-foot"><button class="back">agora não</button><button class="next">começar o tour ' + icon('arrow') + '</button></div></div>';
+		renderWelcome();
 		document.body.appendChild(welcome);
-		welcome.querySelector('.next').onclick = begin;
-		welcome.querySelector('.back').onclick = function () { finish(true); };
 		setTimeout(function () { var b = welcome && welcome.querySelector('.next'); if (b) b.focus(); }, 60);
 	};
+
+	function renderWelcome() {
+		var logo = $('#logoMark svg');
+		welcome.innerHTML = '<div class="tour-card"><div class="w-logo">' + (logo ? logo.outerHTML : '') + '</div>' +
+			'<h4>' + t('tour.welcome.title') + '</h4><p>' + t('tour.welcome.text', { steps: tn('tour.welcome.steps', steps.length) }) + '</p>' +
+			'<div class="tour-foot"><button class="back">' + t('tour.welcome.later') + '</button><button class="next">' + t('tour.welcome.start') + ' ' + icon('arrow') + '</button></div></div>';
+		welcome.querySelector('.next').onclick = begin;
+		welcome.querySelector('.back').onclick = function () { finish(true); };
+	}
+
+	// idioma trocado com o tour aberto: remonta os textos no passo atual
+	if (ABR.i18n) ABR.i18n.onChange(function () {
+		if (!T.active) return;
+		var fresh = buildSteps();
+		if (fresh.length === steps.length) steps = fresh;
+		else steps.forEach(function (s, k) { var f = fresh[k]; if (f && f.sel === s.sel) { s.title = f.title; s.text = f.text; } });
+		if (welcome) renderWelcome();
+		else if (card) render();
+	});
 
 	// chamado quando um documento termina de carregar
 	T.documentReady = function () {

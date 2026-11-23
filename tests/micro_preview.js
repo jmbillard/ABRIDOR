@@ -1,6 +1,6 @@
 // Prévia das micro-interações: prancha com os ícones do painel (GIF) e gravação do painel real.
 // uso: node tests/micro_preview.js <saída>
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs'), path = require('path'), { execSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..'), OUT = path.resolve(process.argv[2] || 'out');
 fs.mkdirSync(OUT, { recursive: true });

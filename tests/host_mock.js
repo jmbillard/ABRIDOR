@@ -251,7 +251,7 @@ console.log('exemplo ranges:', JSON.stringify(last.text.property('ADBE Text Docu
 
 // converte os SVGs em PNG para conferência
 (async () => {
-	const { chromium } = require('playwright');
+	const { chromium } = require('./pw');
 	const b = await chromium.launch({ args: ['--allow-file-access-from-files'] });
 	const pg = await b.newPage({ viewport: { width: comps[0].width, height: comps[0].height } });
 	for (let i = 0; i < comps.length; i++) {

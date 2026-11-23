@@ -380,7 +380,7 @@
 				thumb.getContext('2d').drawImage(canvas, 0, 0, tw, th);
 
 				return {
-					index: index, number: index + 1, name: 'Página ' + (index + 1),
+					index: index, number: index + 1, name: ABR.t('parser.pageName', { n: index + 1 }),
 					width: W, height: H, hidden: false,
 					texts: texts,
 					thumb: thumb.toDataURL('image/jpeg', 0.85)

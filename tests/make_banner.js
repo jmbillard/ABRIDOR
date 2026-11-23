@@ -1,6 +1,6 @@
 // Gera o banner (PNG 360x84) do instalador com o logo e grava a string ExtendScript em "INSTALAR O ABRIDOR.jsx".
 // uso: node tests/make_banner.js
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');

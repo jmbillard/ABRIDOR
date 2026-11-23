@@ -1,6 +1,6 @@
 // Testa o painel fora do After Effects (Chromium + mock do host/fs).
 // uso: node tests/run_panel.js <arquivo.pptx|pdf> <pasta de saída>
-const { chromium } = require('playwright');
+const { chromium } = require('./pw');
 const fs = require('fs');
 const path = require('path');
 
@@ -53,9 +53,9 @@ fam('DejaVu Sans', [['Book', 'DejaVuSans'], ['Bold', 'DejaVuSans-Bold']]);
 	}, { b64, docPath, FONTS });
 
 	await page.goto('file://' + path.resolve(__dirname, '../abridor-cep/index.html'));
-	await page.waitForFunction(() => /pronto/.test(document.getElementById('status').textContent));
+	await page.waitForFunction(() => /pronto|ready|listo/.test(document.getElementById('status').textContent));
 	await page.click('#dropZone');
-	await page.waitForFunction(() => /carregado|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
+	await page.waitForFunction(() => /carregado|loaded|cargado|erro|error/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
 	console.log('status:', await page.textContent('#status'));
 	await page.waitForTimeout(500);
 	await page.screenshot({ path: path.join(outDir, '1-paginas.png') });
@@ -83,7 +83,7 @@ fam('DejaVu Sans', [['Book', 'DejaVuSans'], ['Bold', 'DejaVuSans-Bold']]);
 	await page.click('#btnBuild');
 	await page.waitForTimeout(400);
 	if (await page.$('#preWrap [data-act=go]')) await page.click('#preWrap [data-act=go]');
-	await page.waitForFunction(() => /comps criadas|erro/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
+	await page.waitForFunction(() => /comps criadas|comps? created|comps? creadas|erro|error/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
 	console.log('status:', await page.textContent('#status'));
 	const written = await page.evaluate(() => window.__written);
 	const calls = await page.evaluate(() => window.__hostCalls.map(c => c[0] + '(' + c[1].join(',') + ')'));

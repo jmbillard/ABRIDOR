@@ -40,7 +40,7 @@ function ctrl(type, text) {
 const calls = [];
 const ctx = {
 	$: { os: 'Windows', fileName: script }, File, Folder, decodeURI, encodeURI,
-	app: { version: '25.1.0', preferences: { getPrefAsLong: () => 1 }, executeCommand() { } },
+	app: { version: '25.1.0', isoLanguage: 'pt_BR', preferences: { getPrefAsLong: () => 1 }, executeCommand() { } },
 	system: { callSystem: c => { calls.push(c); return ''; } },
 	Window: function (t, title) { win = ctrl('window', title); return win; }
 };
@@ -49,14 +49,33 @@ const run = () => vm.runInContext(fs.readFileSync(script, 'utf8').replace(/^﻿/
 const next = () => { const b = Object.values(buttons).find(b => ['começar', 'próximo', 'instalar', 'atualizar', 'reinstalar', 'remover', 'concluir'].includes(b.text) && b.type === 'button' && b.onClick && b !== buttons['cancelar'] && b !== buttons['anterior']); b.onClick(); };
 const result = () => win.children[1].children[3].children[0].text;
 
-run(); console.log('janela:', win.text);
-next(); next(); console.log('ação:', buttons['instalar'] ? 'instalar' : '?'); next();
+const nextText = () => Object.values(buttons).filter(b => b.type === 'button' && b !== buttons['cancelar'] && b !== buttons['anterior']).map(b => b.text).pop();
+
+// AE 23: a checagem mostra o aviso das fontes, então a página aparece
+ctx.app.version = '23.0.0'; buttons = {}; run(); next();
+console.log('AE 23, após começar:', nextText() === 'próximo' ? 'checagem (com aviso)' : nextText());
+
+// tudo certo: boas-vindas e instalar na mesma página
+ctx.app.version = '25.1.0'; buttons = {}; run(); console.log('janela:', win.text);
+console.log('AE 25, ao abrir:', nextText() === 'instalar' ? 'instalar (boas-vindas + ação juntas)' : nextText());
+next();
 console.log('resultado:', result().split('\n')[0]);
 const dest = path.join(userData, 'Adobe/CEP/extensions/com.abridor.panel');
 console.log('arquivos copiados:', fs.readdirSync(dest).join(', '), '| lib:', fs.readdirSync(path.join(dest, 'js/lib')).length);
 console.log('debug mode:', calls.filter(c => /PlayerDebugMode/.test(c)).length, 'comandos');
 
-buttons = {}; run(); next(); next();
+buttons = {}; run();
 console.log('2ª execução, opção:', buttons['reinstalar'] ? 'reinstalar' : buttons['atualizar'] ? 'atualizar' : '?');
 buttons['instalar'] = undefined; buttons['remover'].value = true; buttons['reinstalar'].value = false;
 next(); console.log('resultado:', result().split('\n')[0], '| existe:', fs.existsSync(dest));
+
+// outros idiomas (textos de i18n/strings.csv, chaves inst.*)
+['en_US', 'es_ES'].forEach((lang) => {
+	ctx.app.isoLanguage = lang; buttons = {}; run();
+	const btns = Object.values(buttons).filter(b => b.type === 'button').map(b => b.text);
+	const radios = Object.values(buttons).filter(b => b.type === 'radiobutton').map(b => b.text);
+	console.log(lang + ':', win.text, '| botões:', btns.join(' / '), '| opções:', radios.join(' / '));
+	const main = Object.values(buttons).filter(b => b.type === 'button').pop();
+	main.onClick(); console.log(lang + ' resultado:', result().split('\n')[0], '| botão:', main.text);
+});
+ctx.app.isoLanguage = 'pt_BR';
